@@ -1,8 +1,14 @@
 import React from 'react'
+import CEdit from './components/faculty/yearcoordinator/yearcodedit/counselloredit/edit/CEdit.jsx';
+import YEdit from './components/faculty/yearcoordinator/yearcodedit/studentedit/edit/CEdit.jsx'
+
 
 const App = () => {
   return (
-    <div className='w-[10%] h-[10%] text-9xl'>App</div>
+    <div>
+     {/* <CEdit />  */}
+    <YEdit />
+    </div>
   )
 }
 
