@@ -1,7 +1,7 @@
 import { useState } from "react";
 import loginimg from "../../assets/login.png";
 
-const FacultyLogin = () => {
+const StudentLogin = () => {
   const [isChecked, setIsChecked] = useState(false);
   const [role, setRole] = useState(""); // 👈 New state for role
 
@@ -114,4 +114,4 @@ const FacultyLogin = () => {
   );
 };
 
-export default FacultyLogin;
+export default StudentLogin;
