@@ -209,27 +209,7 @@ export default function SmartPortal() {
             ))}
           </tbody>
         </table>
-
-      </div>
-      <div>
-       <div style={{ display: "flex", flexDirection: "column" }}>
-          <label style={{ marginBottom: "1vh", fontWeight: "bold",  color: "rgba(146, 138, 138, 1)" }}>ENTER REG NO</label>
-          <input
-            type="text"
-            
-            style={{
-              padding: "2.5%",
-              borderRadius: "1.5vh",
-              width: "100%",
-              backgroundColor: "white",
-              fontSize: "2.5vh",
-            }}
-          />
-           {/* <BiSearchAlt />  */}
-
-        </div>
-        </div>
-
+      </div>    
     </div>
   );
 }

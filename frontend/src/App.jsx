@@ -1,8 +1,13 @@
 import React from 'react'
+import BonafideForm from './components/student/AppliBonafide'
+import SmartPortal from './components/faculty/office-assistant/OfficeAssistHistory'
 
 const App = () => {
   return (
-    <div className='w-[10%] h-[10%] text-9xl'>App</div>
+    <div>
+    {/* <BonafideForm/> */}
+    <SmartPortal/>
+    </div>
   )
 }
 
