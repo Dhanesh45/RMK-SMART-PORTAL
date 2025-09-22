@@ -1,15 +1,16 @@
-import React from 'react'
-import CEdit from './components/faculty/yearcoordinator/yearcodedit/counselloredit/edit/CEdit.jsx';
-import YEdit from './components/faculty/yearcoordinator/yearcodedit/studentedit/edit/CEdit.jsx'
-
+import React from "react";
+// import ODForm from "./components/student/ODform";  
+// import HodHistoryPage from "./components/faculty/hod/HodHistoryPage";  // ✅ Correct import
+import DayScholarsOutPass from "./components/student/DayScholarsOutPass";
 
 const App = () => {
   return (
     <div>
-     {/* <CEdit />  */}
-    <YEdit />
+     {/* { <ODForm />  */}
+     {/* <HodHistoryPage /> */}
+     <DayScholarsOutPass />
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
