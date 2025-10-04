@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState } from "react";
 
 const inputStyle = {
   width: "100%",
@@ -9,7 +9,7 @@ const inputStyle = {
 
 const approveBtn = {
   padding: "10px 40px",
-  backgroundColor: "rgba(14, 73, 71, 1)",
+  backgroundColor: "#1E2E4F",
   color: "white",
   fontWeight: "bold",
   borderRadius: "20px",
@@ -26,7 +26,7 @@ const Outpass = () => {
       <div
         style={{
           width: "80%",
-          height: "75%",
+          height: "80%",
           margin: "1% auto",
           backgroundColor: "white",
           borderRadius: "15px",
@@ -35,7 +35,15 @@ const Outpass = () => {
           overflowY: "auto",
         }}
       >
-        <div style={{ width:"100%",height:"7%",textAlign:"center",fontWeight:"bold",marginBottom:"1%" }}>
+        <div
+          style={{
+            width: "100%",
+            height: "7%",
+            textAlign: "center",
+            fontWeight: "bold",
+            marginBottom: "1%",
+          }}
+        >
           <h3>OUTPASS</h3>
         </div>
 
@@ -162,18 +170,16 @@ const Outpass = () => {
             <label>PARENT'S MOBILE NO</label>
             <input type="text" style={inputStyle} />
           </div>
-        </div>
-
-        {/* Buttons */}
-        <div
-          style={{
-           textAlign:"center",
-            marginTop: "2%",
-            
-            
-          }}
-        >
-          <button style={approveBtn}>SUBMIT</button>
+          {/* Buttons */}
+          <div
+            style={{
+              width: "100%",
+              paddingTop: "3.2%",
+              textAlign: "end",
+            }}
+          >
+            <button style={approveBtn}>SUBMIT</button>
+          </div>
         </div>
       </div>
     </div>
