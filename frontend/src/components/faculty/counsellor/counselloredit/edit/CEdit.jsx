@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./CEdit.css";
-import CView from "./view/CView.jsx";
+import CView from "../view/CView"
 
 const initialStudents = [
   { id: 1, name: "AKASH", regNo: "111723203001", email: "230329.it@rmkec.ac.in", year: "3", yearCoordinator: "Mr. Kumar", counsellor: "Mr. Ravi", gender: "Male", section: "A", branch: "IT" },
@@ -94,6 +94,7 @@ const CEdit = () => {
       )}
 
       {selectedStudent && (
+        
         <CView
           student={selectedStudent}
           onClose={() => setSelectedStudent(null)}
