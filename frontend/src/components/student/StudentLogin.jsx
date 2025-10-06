@@ -1,7 +1,7 @@
 import { useState } from "react";
 import loginimg from "../../assets/login.png";
 
-const OfficeStaffLogin = () => {
+const StudentLogin = () => {
   const [isChecked, setIsChecked] = useState(false);
   const [role, setRole] = useState(""); // 👈 New state for role
 
@@ -16,9 +16,9 @@ const OfficeStaffLogin = () => {
 
         {/* Form part */}
         <div className="form-scroll" style={{ width: "50%", height: "100%", padding: "2% 0%", overflowY: "auto" }}>
-          <h1 style={{ textAlign: "center", fontWeight: "800", fontSize: "6vh", color: "rgba(30, 46, 76, 1 )", paddingBottom: "3%" }}>OFFICE STAFF LOGIN</h1>
+          <h1 style={{ textAlign: "center", fontWeight: "800", fontSize: "6vh", color: "rgba(30, 46, 76, 1 )", paddingBottom: "3%" }}>FACULTY LOGIN</h1>
           <p style={{ textAlign: "center", fontSize: "3vh", paddingBottom: "1%", fontWeight: "600", color: "#1E2E4F" }}>
-            Welcome to office staff details Login to access your account
+            Welcome to faculty details Login to access your account
           </p>
 
           {/* input fields */}
@@ -30,7 +30,22 @@ const OfficeStaffLogin = () => {
               <input type="email" style={{ width: "97%", padding: "1.25%", borderRadius: "0.7vh", border: "1px solid rgba(30, 46, 76, 1 )", fontSize: "3vh", fontWeight: "500" }} />
             </div>
 
-           
+            {/* Role */}
+            <div style={{ paddingBottom: "4%" }}>
+              <p style={{ fontSize: "3vh", fontWeight: "600", paddingBottom: "0.8%", color: "rgba(30, 46, 76, 1 )" }}>ROLE</p>
+              <select
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                style={{ width: "97%", padding: "1.25%", borderRadius: "0.7vh", border: "1px solid rgba(30, 46, 76, 1 )", fontSize: "3vh", fontWeight: "500" }}
+              >
+                <option value="">Select Role</option>
+                <option value="Head of the Department">Head of the Department</option>
+                <option value="Year Coordinator">Year Coordinator</option>
+                <option value="Counsellor">Counsellor</option>
+                <option value="Office Assistant">Office Assistant</option>
+              </select>
+            </div>
+
             {/* Password */}
             <div style={{ paddingBottom: "1%" }}>
               <p style={{ fontSize: "3vh", fontWeight: "600", paddingBottom: "0.8%", color: "rgba(30, 46, 76, 1 )" }}>PASSWORD</p>
@@ -99,4 +114,4 @@ const OfficeStaffLogin = () => {
   );
 };
 
-export default OfficeStaffLogin;
+export default StudentLogin;
