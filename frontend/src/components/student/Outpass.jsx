@@ -1,234 +1,191 @@
-import React from 'react'
+import React, { useState } from "react";
+
+const inputStyle = {
+  width: "100%",
+  padding: "8px",
+  borderRadius: "5px",
+  border: "1px solid #ccc",
+};
+
+const approveBtn = {
+  padding: "10px 40px",
+  backgroundColor: "#1E2E4F",
+  color: "white",
+  fontWeight: "bold",
+  borderRadius: "20px",
+  border: "none",
+  cursor: "pointer",
+};
 
 const Outpass = () => {
+  const [permission, setPermission] = useState("");
+
   return (
-    <div style={{height:"100vh",width:"100%"}}>
-        <div style={{height:"10vh", width:"100vw"}}> nav bar</div>
-        <div
-  style={{
-    width: "100%",
-    height: "90vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    
-  }}
->
-  <form
-    style={{
-      width: "50%",
-      height: "85vh",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      backgroundColor: "#fff",
-      borderRadius: "2vh",
-      boxShadow: "0 0 2vh rgba(0,0,0,0.1)",
-      padding: "1.5%",
-    
-     
-    }}
-  >
-    <h2
-      style={{
-        fontSize: "3vh",
-        fontWeight: "bold",
-        marginBottom: "1%",
-        textAlign: "center",
-      }}
-    >
-      OUTPASS FORM
-    </h2>
+    <div style={{ height: "100vh", width: "100%" }}>
+      <div style={{ height: "10vh", width: "100vw" }}>nav bar</div>
 
-   
-      {/* Left Side */}
-      <div style={{ width: "90%",height:"70vh"}}>
-        <div style={{width:"100%",marginBottom:"3%",display:"flex",justifyContent:"space-between"}}>
-          <div style={{width:"48%",}}>
-        <label style={{ fontSize: "2vh",fontWeight:"500"}}>FROM DATE</label>
-        <input
-          type="date"
-          style={{
-            width: "100%",
-            padding: "3%",
-            fontSize: "2vh",
-            borderRadius: "1vh",
-            border: "1px solid black",
-          }}
-        />
-</div>
-<div style={{width:"48%",}}>
-        <label style={{ fontSize: "2vh",fontWeight:"500" }}>TO DATE</label>
-        <input
-          type="date"
-          style={{
-            width: "100%",
-            padding: "3%",
-            fontSize: "2vh",
-            borderRadius: "1vh",
-            border: "1px solid black",
-          }}
-        />
-        </div>
-</div>
-<div style={{width:"100%",marginBottom:"3%",display:"flex",justifyContent:"space-between"}}>
-  <div style={{width:"48%",}}>
-        <label style={{ fontSize: "2vh",fontWeight:"500" }}>NO OF DAYS</label>
-        <input
-          type="number"
-          style={{
-            width: "100%",
-            padding: "3%",
-            fontSize: "2vh",
-            borderRadius: "1vh",
-            border: "1px solid black",
-          }}
-        />
-        </div>
-         <div style={{width:"48%",}}>
-        <label style={{ fontSize: "2vh",fontWeight:"500" }}>ROOM NO</label>
-        <input
-          type="text"
-          style={{
-            width: "100%",
-            padding: "3%",
-            fontSize: "2vh",
-            borderRadius: "1vh",
-            border: "1px solid black",
-          }}
-        />
-        </div>
-</div>
-<div style={{width:"100%",marginBottom:"2%",display:"flex",justifyContent:"space-between"}}>
-   <div style={{width:"48%",}}>
-        <label style={{ fontSize: "2vh",fontWeight:"500" }}>PARENTS MOBILE NO</label>
-        <input
-          type="text"
-          style={{
-            width: "100%",
-            padding: "3%",
-            fontSize: "2vh",
-            borderRadius: "1vh",
-            border: "1px solid black",
-          }}
-        />
-        </div>
-         <div style={{width:"48%",}}>
-        <label style={{ fontSize: "2vh",fontWeight:"500" }}>NATIVE</label>
-        <input
-          type="text"
-          style={{
-            width: "100%",
-            padding: "3%",
-            fontSize: "2vh",
-            borderRadius: "1vh",
-            border: "1px solid black",
-          }}
-        />
-        </div>
-        </div>
-      
-
-      {/* Right Side */}
-     
-        <label style={{ fontSize: "2vh",fontWeight:"500" }}>NAME OF THE ACCOMPANING PERSON</label>
-        <input
-          type="text"
-          style={{
-            width: "100%",
-            padding: "1.5%",
-            marginBottom: "1%",
-            fontSize: "2vh",
-            borderRadius: "1vh",
-            border: "1px solid black",
-          }}
-        />
-
-        {/* Guardian / Parent */}
-        <div
-          style={{
-            display: "flex",
-            gap: "12%",
-            marginBottom: "2%",
-            fontSize: "2vh",
-            
-          }}
-        >
-          <label>
-            <input type="checkbox" /> <span style={{fontWeight:"450"}}>GUARDIAN</span>
-          </label>
-          <label>
-            <input type="checkbox" /> <span style={{fontWeight:"450"}}>PARENT</span>
-          </label>
-        </div>
-
-        <label style={{ fontSize: "2vh",fontWeight:"500" }}>REASON FOR LEAVE</label>
-        <input
-          type="text"
-          style={{
-            width: "100%",
-            padding: "1.5%",
-            marginBottom: "3%",
-            fontSize: "2vh",
-            borderRadius: "1vh",
-            border: "1px solid black",
-          }}
-        />
-<div style={{width:"100%",marginBottom:"3.8%",display:"flex",justifyContent:"space-between"}}>
-          <div style={{width:"48%",}}>
-        <label style={{ fontSize: "2vh",fontWeight:"500" }}>LEAVING DATE</label>
-        <input
-          type="date"
-          style={{
-            width: "100%",
-            padding: "3%",
-            fontSize: "2vh",
-            borderRadius: "1vh",
-            border: "1px solid black",
-          }}
-        />
-        </div>
- <div style={{width:"48%",}}>
-        <label style={{ fontSize: "2vh",fontWeight:"500" }}>LEAVING TIME</label>
-        <input
-          type="time"
-          style={{
-            width: "100%",
-            padding: "3%",
-            fontSize: "2vh",
-            borderRadius: "1vh",
-            border: "1px solid black",
-          }}
-        />
-        </div>
-        </div>
-     </div>
-    
-
-    {/* Submit Button */}
-    <div style={{ width: "100%", textAlign:"center",marginTop:"1%" }}>
-      <button
-        type="submit"
+      <div
         style={{
-          padding: "0.5% 5% 0.5% 5%",
-          fontSize: "2vh",
-          backgroundColor: "#1E2E4F",
-          fontWeight:"bold",
-          color: "white",
-          border: "none",
-          borderRadius: "5vh",
-          cursor: "pointer",
+          width: "80%",
+          height: "80%",
+          margin: "1% auto",
+          backgroundColor: "white",
+          borderRadius: "15px",
+          padding: "2%",
+          boxShadow: "0px 0px 15px rgba(0,0,0,0.1)",
+          overflowY: "auto",
         }}
       >
-        SUBMIT
-      </button>
+        <div
+          style={{
+            width: "100%",
+            height: "7%",
+            textAlign: "center",
+            fontWeight: "bold",
+            marginBottom: "1%",
+          }}
+        >
+          <h3>OUTPASS</h3>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "20px",
+          }}
+        >
+          {/* Row 1 */}
+          <div style={{ width: "95%" }}>
+            <label>NAME</label>
+            <input type="text" style={inputStyle} />
+          </div>
+          <div style={{ display: "flex", gap: "30px" }}>
+            <div style={{ flex: 1 }}>
+              <label>YEAR</label>
+              <input type="text" list="year-options" style={inputStyle} />
+              <datalist id="year-options">
+                <option value="1" />
+                <option value="2" />
+                <option value="3" />
+                <option value="4" />
+              </datalist>
+            </div>
+            <div style={{ flex: 1 }}>
+              <label>SECTION</label>
+              <input type="text" style={inputStyle} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label>GENDER</label>
+              <input type="text" list="gender-options" style={inputStyle} />
+              <datalist id="gender-options">
+                <option value="Male" />
+                <option value="Female" />
+                <option value="Prefer not to say" />
+              </datalist>
+            </div>
+          </div>
+
+          {/* Row 2 */}
+          <div style={{ width: "95%" }}>
+            <label>REGISTRATION NUMBER</label>
+            <input type="text" style={inputStyle} />
+          </div>
+          <div>
+            <label>COUNSELLOR</label>
+            <input type="text" list="counsellor-options" style={inputStyle} />
+            <datalist id="counsellor-options">
+              {Array.from({ length: 18 }, (_, i) => (
+                <option key={i} value={`Counsellor ${i + 1}`} />
+              ))}
+            </datalist>
+          </div>
+
+          {/* Row 3 */}
+          <div style={{ width: "95%" }}>
+            <label>EMAIL ADDRESS</label>
+            <input type="email" style={inputStyle} />
+          </div>
+          <div>
+            <label>YEAR COORDINATOR</label>
+            <input type="text" list="coordinator-options" style={inputStyle} />
+            <datalist id="coordinator-options">
+              <option value="Dr. Smith" />
+              <option value="Prof. Johnson" />
+              <option value="Ms. Lee" />
+            </datalist>
+          </div>
+
+          {/* Row 4 */}
+          <div style={{ width: "95%" }}>
+            <label>BRANCH</label>
+            <input type="text" style={inputStyle} />
+          </div>
+          <div style={{ display: "flex", gap: "30px" }}>
+            <div style={{ flex: 1 }}>
+              <label>NO.OF.DAYS</label>
+              <input type="text" style={inputStyle} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label>FROM DATE</label>
+              <input type="date" style={inputStyle} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label>TO DATE</label>
+              <input type="date" style={inputStyle} />
+            </div>
+          </div>
+
+          {/* Row 5 */}
+          <div style={{ width: "95%" }}>
+            <label>NAME OF THE PARENT</label>
+            <input type="text" style={inputStyle} />
+          </div>
+          <div style={{ display: "flex", gap: "30px" }}>
+            <div style={{ flex: 1 }}>
+              <label>ROOM NO</label>
+              <input type="text" style={inputStyle} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label>LEAVING DATE</label>
+              <input type="date" style={inputStyle} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label>LEAVING TIME</label>
+              <input type="time" style={inputStyle} />
+            </div>
+          </div>
+
+          {/* Row 6 */}
+          <div style={{ width: "95%" }}>
+            <label>NATIVE</label>
+            <input type="text" style={inputStyle} />
+          </div>
+          <div>
+            <label>REASON FOR LEAVE</label>
+            <input type="text" style={inputStyle} />
+          </div>
+
+          {/* Row 7 */}
+          <div style={{ width: "95%" }}>
+            <label>PARENT'S MOBILE NO</label>
+            <input type="text" style={inputStyle} />
+          </div>
+
+          {/* Buttons */}
+          <div
+            style={{
+              width: "100%",
+              paddingTop: "3.2%",
+              textAlign: "end",
+            }}
+          >
+            <button style={approveBtn}>SUBMIT</button>
+          </div>
+        </div>
+      </div>
     </div>
-  </form>
-</div>
+  );
+};
 
-    </div>
-  )
-}
-
-
-export default Outpass
+export default Outpass;

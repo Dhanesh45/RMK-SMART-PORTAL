@@ -1,10 +1,26 @@
-import React from "react";
+import React,{useState} from "react";
 
 const ODform = () => {
+
+  const [proof, setProof] = useState(null);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.type.startsWith("image/")) {
+      setProof({ type: "image", url: URL.createObjectURL(file), name: file.name });
+    } else if (file.type === "application/pdf") {
+      setProof({ type: "pdf", name: file.name });
+    } else {
+      setProof(null);
+    }
+  };
+
   return (
     <div
       style={{
-        height: "100vh", // outer div in vh
+        height: "100vh",
         width: "100%",
         display: "flex",
         flexDirection: "column",
@@ -18,96 +34,129 @@ const ODform = () => {
           height: "10%",
           width: "100%",
         }}
-      >Navbar</div>
+      >
+        Navbar
+      </div>
 
-      {/* Main Content */}
+      {/* Main Form Card */}
       <div
         style={{
           height: "85%",
           width: "80%",
-          margin: "0 auto",
+          margin: "2% auto",
           backgroundColor: "white",
           borderRadius: "2vh",
           padding: "3%",
           boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
           display: "flex",
           flexDirection: "column",
-          gap: "4%",
+          gap: "3%",
+          overflowY: "auto",
         }}
       >
-        {/* Title */}
         <h2
           style={{
             textAlign: "center",
             fontSize: "3vh",
-            fontWeight:"bold",
+            fontWeight: "bold",
             margin: 0,
           }}
         >
-          Students OD Form
+          STUDENTS OD FORM
         </h2>
 
-        {/* Fields Section */}
         <div
           style={{
             display: "flex",
             gap: "5%",
             flexWrap: "wrap",
-            height: "75%",
           }}
         >
           {/* Left Column */}
           <div style={{ flex: 1, minWidth: "45%" }}>
-            <label style={{ fontSize: "2vh" }}>Place of Competition</label>
+            <label style={{ fontSize: "2vh" }}>NAME OF THE STUDENT</label>
             <input
               type="text"
               style={{
                 width: "100%",
-                padding: "3%",
-                marginBottom: "4%",
+                padding: "2%",
+                marginBottom: "3%",
                 borderRadius: "1vh",
                 border: "1px solid #ccc",
               }}
             />
 
-            <label style={{ fontSize: "2vh" }}>
-              Number of days OD already availed
-            </label>
+            <label style={{ fontSize: "2vh" }}>DEPARTMENT</label>
             <input
-              type="number"
+              type="text"
               style={{
                 width: "100%",
-                padding: "3%",
-                marginBottom: "4%",
+                padding: "2%",
+                marginBottom: "3%",
                 borderRadius: "1vh",
                 border: "1px solid #ccc",
               }}
             />
 
-            {/* Purpose of OD (aligned with Comments by Counsellor) */}
-            <label style={{ fontSize: "2vh" }}>Purpose of OD</label>
+            <label style={{ fontSize: "2vh" }}>REGISTER NUMBER</label>
+            <input
+              type="text"
+              style={{
+                width: "100%",
+                padding: "2%",
+                marginBottom: "3%",
+                borderRadius: "1vh",
+                border: "1px solid #ccc",
+              }}
+            />
+
+            <label style={{ fontSize: "2vh" }}>PURPOSE OF OD</label>
             <select
               style={{
                 width: "100%",
-                padding: "3%",
-                marginBottom: "4%",
+                padding: "2%",
+                marginBottom: "3%",
                 borderRadius: "1vh",
                 border: "1px solid #ccc",
               }}
             >
-              <option value="">Select</option>
-              <option value="Competition">Competition</option>
-              <option value="Workshop">Workshop</option>
-              <option value="Others">Others</option>
+              <option value="">SELECT</option>
+              <option value="Competition">COMPETITION</option>
+              <option value="Workshop">WORKSHOP</option>
+              <option value="Others">OTHERS</option>
             </select>
 
-            {/* Number of Days (aligned with Comments by Year-Coordinator) */}
-            <label style={{ fontSize: "2vh" }}>Number of Days</label>
+            <label style={{ fontSize: "2vh" }}>NUMBER OF DAYS</label>
             <input
               type="number"
               style={{
                 width: "100%",
-                padding: "3%",
+                padding: "2%",
+                marginBottom: "3%",
+                borderRadius: "1vh",
+                border: "1px solid #ccc",
+              }}
+            />
+
+            <label style={{ fontSize: "2vh" }}>NAME OF THE COLLEGE</label>
+            <input
+              type="text"
+              style={{
+                width: "100%",
+                padding: "2%",
+                marginBottom: "3%",
+                borderRadius: "1vh",
+                border: "1px solid #ccc",
+              }}
+            />
+
+            <label style={{ fontSize: "2vh" }}>NAME OF THE EVENT</label>
+            <input
+              type="text"
+              style={{
+                width: "100%",
+                padding: "2%",
+                marginBottom: "3%",
                 borderRadius: "1vh",
                 border: "1px solid #ccc",
               }}
@@ -116,46 +165,47 @@ const ODform = () => {
 
           {/* Right Column */}
           <div style={{ flex: 1, minWidth: "45%" }}>
-            <label style={{ fontSize: "2vh" }}>Date of Competition</label>
+            <label style={{ fontSize: "2vh" }}>DATE OF COMPETITION</label>
             <input
               type="date"
               style={{
                 width: "100%",
-                padding: "3%",
-                marginBottom: "4%",
+                padding: "2%",
+                marginBottom: "3%",
                 borderRadius: "1vh",
                 border: "1px solid #ccc",
               }}
             />
 
-            {/* From & To Date */}
             <div
               style={{
                 display: "flex",
                 gap: "4%",
-                marginBottom: "4%",
+                marginBottom: "3%",
                 flexWrap: "wrap",
               }}
             >
               <div style={{ flex: 1, minWidth: "45%" }}>
-                <label style={{ fontSize: "2vh" }}>From Date</label>
+                <label style={{ fontSize: "2vh" }}>FROM DATE</label>
                 <input
                   type="date"
                   style={{
                     width: "100%",
-                    padding: "6%",
+                    padding: "4%",
+                    marginBottom: "2%",
                     borderRadius: "1vh",
                     border: "1px solid #ccc",
                   }}
                 />
               </div>
               <div style={{ flex: 1, minWidth: "45%" }}>
-                <label style={{ fontSize: "2vh" }}>To Date</label>
+                <label style={{ fontSize: "2vh" }}>TO DATE</label>
                 <input
                   type="date"
                   style={{
                     width: "100%",
-                    padding: "6%",
+                    padding: "4%",
+                    marginBottom: "2%",
                     borderRadius: "1vh",
                     border: "1px solid #ccc",
                   }}
@@ -163,32 +213,94 @@ const ODform = () => {
               </div>
             </div>
 
-            {/* Comments by Counsellor (aligned with Purpose of OD) */}
-            <label style={{ fontSize: "2vh" }}>Comments by Counsellor</label>
+            <label style={{ fontSize: "2vh" }}>PLACE OF COMPETITION</label>
             <input
               type="text"
               style={{
                 width: "100%",
-                padding: "3%",
-                marginBottom: "4%",
+                padding: "2%",
+                marginBottom: "3%",
                 borderRadius: "1vh",
                 border: "1px solid #ccc",
               }}
             />
 
-            {/* Comments by Year-Coordinator (aligned with Number of Days) */}
             <label style={{ fontSize: "2vh" }}>
-              Comments by Year-Coordinator
+              NUMBER OF DAYS OD ALREADY AVAILED (TILL DATE IN CURRENT SEMESTER)
             </label>
             <input
-              type="text"
+              type="number"
               style={{
                 width: "100%",
-                padding: "3%",
+                padding: "2%",
+                marginBottom: "3%",
                 borderRadius: "1vh",
                 border: "1px solid #ccc",
               }}
             />
+
+            <label style={{ fontSize: "2vh" }}>COMMENTS BY COUNSELLOR</label>
+            <input
+              type="text"
+              style={{
+                width: "100%",
+                padding: "2%",
+                marginBottom: "3%",
+                borderRadius: "1vh",
+                border: "1px solid #ccc",
+              }}
+            />
+
+          {/* Upload Proof */}
+          <label style={{ fontSize: "2vh", display: "block", marginBottom: "1%" }}>
+              UPLOAD PROOF (IMAGE/PDF)
+            </label>
+            <input
+              type="file"
+              id="proofUpload"
+              accept="image/*,.pdf"
+              onChange={handleFileChange}
+              style={{ display: "none" }}
+            />
+            <label
+              htmlFor="proofUpload"
+              style={{
+                display: "inline-block",
+                padding: "2% 4%",
+                backgroundColor: "#0d3b66",
+                color: "white",
+                borderRadius: "5vh",
+                cursor: "pointer",
+                fontWeight: "bold",
+                boxShadow: "0px 4px 8px rgba(0,0,0,0.2)",
+              }}
+            >
+              Upload Proof
+            </label>
+
+             {/* Inline Preview */}
+             {proof && (
+              <span>
+                {proof.type === "image" ? (
+                  <img
+                    src={proof.url}
+                    alt="Preview"
+                    style={{
+                      height: "10%",
+                      width: "auto",
+                      borderRadius: "2vh",
+                      border: "1px solid #ccc",
+                      verticalAlign: "middle",
+                    }}
+                  />
+                ) : (
+                  <span style={{ color: "green", fontWeight: "bold" }}>
+                    ✅ {proof.name}
+                  </span>
+                )}
+              </span>
+            )}
+
           </div>
         </div>
 

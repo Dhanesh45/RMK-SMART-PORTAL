@@ -12,10 +12,11 @@ const Navbar = () => {
 
         <div className='flex items-center gap-[3vw]'>
           <a href="#" className='text-[2vh] font-bold hover:text-gray-300'>HOME</a>
-          <a href="#" className='text-[2vh] font-bold hover:text-gray-300'>LOGIN HERE</a>
-          <a href="#" className='text-[2vh] font-bold hover:text-gray-300'>FEATURES</a>
+          <a href="#" className='text-[2vh] font-bold hover:text-gray-300'>OUTPASS</a>
+          <a href="#" className='text-[2vh] font-bold hover:text-gray-300'>ON DUTY</a>
+          <a href="#" className='text-[2vh] font-bold hover:text-gray-300'>APPLICATION</a>
           <button className='bg-[#D9E1F1] text-[#1E2E4F] font-bold text-[2vh] px-[1.7vw] py-[0.7vh] rounded-[2.3vh] hover:bg-[#7be0cb] transition-colors duration-300'>
-            LOGIN
+            LOGOUT
           </button>
         </div>
       </nav>
