@@ -3,13 +3,23 @@ import "./SEdit.css";
 import SView from "../view/SView";
 
 const initialStudents = [
-  { id: 1, name: "AKASH", regNo: "111723203001", email: "230329.it@rmkec.ac.in" },
-  { id: 2, name: "HARISH", regNo: "111723203002", email: "harish269005@gmail.com" },
+  {
+    id: 1,
+    name: "AKASH",
+    regNo: "111723203001",
+    email: "230329.it@rmkec.ac.in",
+  },
+  {
+    id: 2,
+    name: "HARISH",
+    regNo: "111723203002",
+    email: "harish269005@gmail.com",
+  },
   { id: 3, name: "ABISHEK", regNo: "111723203003", email: "abishek@gmail.com" },
   { id: 4, name: "ABINAYA", regNo: "111723203004", email: "abinaya@gmail.com" },
 ];
 
-const SEdit = ({ setSelectedView }) => {
+const SEdit = ({ selectedView, setSelectedView }) => {
   const [students, setStudents] = useState(initialStudents);
   const [search, setSearch] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -34,11 +44,14 @@ const SEdit = ({ setSelectedView }) => {
         <select
           onChange={(e) => setSelectedView(e.target.value)}
           className="input"
-          defaultValue="student"
+          Value={selectedView} // or "student" or "yearcode" depending on the file
         >
+           <option value="student">Student</option>
+          <option value="yearcode">Year Code</option>
           <option value="counsellor">Counsellor</option>
-          <option value="student">Student</option>
+         
         </select>
+
         <input
           type="text"
           placeholder="Reg No"
@@ -72,10 +85,16 @@ const SEdit = ({ setSelectedView }) => {
                     <td>{s.regNo}</td>
                     <td>{s.email}</td>
                     <td>
-                      <button className="delete-btn" onClick={() => handleDelete(s.id)}>
+                      <button
+                        className="delete-btn"
+                        onClick={() => handleDelete(s.id)}
+                      >
                         DELETE
                       </button>
-                      <button className="edit-btn" onClick={() => setSelectedStudent(s)}>
+                      <button
+                        className="edit-btn"
+                        onClick={() => setSelectedStudent(s)}
+                      >
                         EDIT
                       </button>
                     </td>

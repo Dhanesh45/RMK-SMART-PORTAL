@@ -1,0 +1,158 @@
+/* Overlay background */
+.yview-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(18, 40, 76, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Popup box */
+.yview-popup {
+  width: 50%;
+  background: #fff;
+  border-radius: 2%;
+  padding: 3%;
+  box-shadow: 0 0 2% rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Title */
+.yview-title {
+  text-align: center;
+  font-weight: 700;
+  color: #12284c;
+  margin-bottom: 3%;
+}
+
+/* Form elements */
+.yview-form label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 1%;
+  color: #12284c;
+}
+
+.yview-form input,
+.yview-form select {
+  width: 100%;
+  padding: 1.5%;
+  margin-bottom: 3%;
+  border: 0.1em solid #b7b7b7;
+  border-radius: 0.6em;
+  font-size: 95%;
+}
+
+/* Two-column layout for branch and student count */
+.yview-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 4%;
+}
+
+.yview-field {
+  width: 48%;
+}
+
+/* Email and verified icon */
+.yview-email {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.verified {
+  color: #1e90ff;
+  font-size: 90%;
+}
+
+/* Buttons */
+.yview-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 5%;
+  margin-top: 3%;
+}
+
+.discard-btn,
+.save-btn {
+  border: none;
+  padding: 1.5% 5%;
+  border-radius: 1.5em;
+  font-size: 95%;
+  cursor: pointer;
+}
+
+.discard-btn {
+  background: white;
+  color: #12284c;
+  border: 0.1em solid #12284c;
+}
+
+.save-btn {
+  background: #12284c;
+  color: white;
+}
+
+.discard-btn:hover {
+  background: #f2f2f2;
+}
+
+.save-btn:hover {
+  background: #183f74;
+}
+
+/* Fade animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .yview-popup {
+    width: 80%;
+    padding: 5%;
+  }
+
+  .yview-row {
+    flex-direction: column;
+  }
+
+  .yview-field {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .yview-popup {
+    width: 90%;
+    padding: 6%;
+  }
+
+  .yview-title {
+    font-size: 110%;
+  }
+
+  .yview-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .discard-btn,
+  .save-btn {
+    width: 100%;
+    margin-bottom: 3%;
+  }
+}

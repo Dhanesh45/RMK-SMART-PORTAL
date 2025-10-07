@@ -1,10 +1,11 @@
 .cedit-page {
   font-family: Arial, sans-serif;
-  background-color: #f9fafb;
+  background-color: #f0f0f0;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   width: 100%;
+  height: 100vh;
 }
 
 .nav-space {
@@ -14,36 +15,25 @@
 
 .search-container {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: flex-start;
+  height: 10%;
+  margin-left: 10%;
   width: 80%;
-  margin: 2% auto;
-  flex-wrap: wrap;
-  gap: 5%;
 }
 
 .input {
-  width: 25%;
-  height: 6vh;
-  border-radius: 1.5vh;
+  width: 20%;
+  border-radius: 8px;
+  padding-left: 1%;
   background-color: #ffffff;
+  height: 45px;
+  font-size: 2.3vh;
   border: 1px solid #ccc;
-  font-size: 2vh;
-  padding-left: 2%;
-}
-
-.search-container input {
-  width: 25%;
-  height: 6vh;
-  border-radius: 1.5vh;
-  background-color: #ffffff;
-  border: 1px solid #ccc;
-  font-size: 2vh;
-  padding-left: 2%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .title {
-  font-size: 3.5vh;
+  font-size: 4vh;
   font-weight: bold;
   text-align: center;
   color: #182f53;
@@ -54,7 +44,7 @@
   text-align: center;
   color: #d32f2f;
   font-weight: bold;
-  font-size: 3vh;
+  font-size: 3.5vh;
   margin-top: 3%;
 }
 
@@ -66,51 +56,53 @@
 .table-wrapper {
   background-color: rgba(217, 217, 217, 1);
   width: 80%;
+  height: 100%;
   max-height: 70vh;
   overflow-y: auto;
-  border: 0.5vh solid rgba(217, 217, 217, 1);
-  border-radius: 1vh;
-  margin: 0 auto;
-  padding: 1%;
+  border: 8px solid rgba(217, 217, 217, 1);
+  border-radius: 10px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .student-table {
-  width: 100%;
+  height: 90%;
   border-collapse: collapse;
+  width: 98%;
+  margin: 1% auto;
 }
 
 .student-table th {
-  background-color: #ffffff;
+  background-color: white;
   position: sticky;
   top: 0;
   z-index: 1;
-  padding: 1vh;
+  padding: 0.75rem;
   font-weight: bold;
   color: #182f53;
   text-align: center;
-  border-bottom: 0.5vh solid rgba(217, 217, 217, 1);
-  font-size: 2vh;
+  border-bottom: 8px solid rgba(217, 217, 217, 1);
 }
 
 .student-table td {
-  background-color: #ffffff;
-  padding: 1vh;
+  background-color: white;
+  padding: 0.75rem;
   text-align: center;
-  border-bottom: 0.5vh solid rgba(217, 217, 217, 1);
-  font-size: 2vh;
+  border-bottom: 8px solid rgba(217, 217, 217, 1);
+  font-size: 2.2vh;
 }
 
 .delete-btn,
 .edit-btn {
-  padding: 1vh 2vh;
+  padding: 8px 14px;
   border: none;
-  border-radius: 1vh;
+  border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
-  font-size: 1.8vh;
+  font-size: 0.9rem;
   color: white;
-  transition: 0.3s ease;
-  margin: 0 0.5vh;
+  transition: background-color 0.3s ease;
+  margin: 0 5px;
 }
 
 .delete-btn {
@@ -123,36 +115,34 @@
 
 .delete-btn:hover {
   background-color: #d32f2f;
-  transform: scale(1.05);
 }
 
 .edit-btn:hover {
-  background-color: #23335c;
-  transform: scale(1.05);
+  background-color: #16223d;
 }
 
-/* Responsive Adjustments */
+/* Responsive fixes */
 @media (max-width: 768px) {
   .search-container {
     flex-direction: column;
     align-items: center;
     gap: 2vh;
+    width: 90%;
+    margin: 0 auto;
   }
 
-  .input,
-  .search-container input {
-    width: 70%;
-    font-size: 2vh;
+  .input {
+    width: 80%;
+    font-size: 2.5vh;
   }
 
   .student-table th,
   .student-table td {
-    font-size: 1.8vh;
+    font-size: 2vh;
+    padding: 0.5rem;
   }
 
-  .delete-btn,
-  .edit-btn {
-    font-size: 1.6vh;
-    padding: 0.8vh 1.5vh;
+  .title {
+    font-size: 3vh;
   }
 }

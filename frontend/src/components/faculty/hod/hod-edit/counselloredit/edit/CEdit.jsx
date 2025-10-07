@@ -3,14 +3,44 @@ import "./CEdit.css";
 import CView from "../view/CView";
 
 const initialCounsellors = [
-  { id: 1, name: "AKASH", email: "230329.it@rmkec.ac.in", branch: "IT", noOfStudents: 20 },
-  { id: 2, name: "HARISH", email: "harish269005@gmail.com", branch: "CSE", noOfStudents: 18 },
-  { id: 3, name: "MANOJ", email: "manoj@gmail.com", branch: "EEE", noOfStudents: 25 },
-  { id: 4, name: "RAJ", email: "raj@gmail.com", branch: "MECH", noOfStudents: 30 },
-  { id: 5, name: "PRIYA", email: "priya@gmail.com", branch: "CIVIL", noOfStudents: 22 },
+  {
+    id: 1,
+    name: "AKASH",
+    email: "230329.it@rmkec.ac.in",
+    branch: "IT",
+    noOfStudents: 20,
+  },
+  {
+    id: 2,
+    name: "HARISH",
+    email: "harish269005@gmail.com",
+    branch: "CSE",
+    noOfStudents: 18,
+  },
+  {
+    id: 3,
+    name: "MANOJ",
+    email: "manoj@gmail.com",
+    branch: "EEE",
+    noOfStudents: 25,
+  },
+  {
+    id: 4,
+    name: "RAJ",
+    email: "raj@gmail.com",
+    branch: "MECH",
+    noOfStudents: 30,
+  },
+  {
+    id: 5,
+    name: "PRIYA",
+    email: "priya@gmail.com",
+    branch: "CIVIL",
+    noOfStudents: 22,
+  },
 ];
 
-const CEdit = ({ setSelectedView }) => {
+const CEdit = ({ selectedView, setSelectedView }) => {
   const [counsellors, setCounsellors] = useState(initialCounsellors);
   const [search, setSearch] = useState("");
   const [selectedCounsellor, setSelectedCounsellor] = useState(null);
@@ -35,11 +65,14 @@ const CEdit = ({ setSelectedView }) => {
         <select
           onChange={(e) => setSelectedView(e.target.value)}
           className="input"
-          defaultValue="counsellor"
+          Value={selectedView}// or "student" or "yearcode" depending on the file
         >
-          <option value="counsellor">Counsellor</option>
           <option value="student">Student</option>
+          <option value="yearcode">Year Code</option>
+          <option value="counsellor">Counsellor</option>
+          
         </select>
+
         <input
           type="text"
           placeholder="Counsellor Name"
@@ -75,10 +108,16 @@ const CEdit = ({ setSelectedView }) => {
                     <td>{c.noOfStudents}</td>
                     <td>{c.email}</td>
                     <td>
-                      <button className="delete-btn" onClick={() => handleDelete(c.id)}>
+                      <button
+                        className="delete-btn"
+                        onClick={() => handleDelete(c.id)}
+                      >
                         DELETE
                       </button>
-                      <button className="edit-btn" onClick={() => setSelectedCounsellor(c)}>
+                      <button
+                        className="edit-btn"
+                        onClick={() => setSelectedCounsellor(c)}
+                      >
                         EDIT
                       </button>
                     </td>
