@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-// Main Approval List Component
+// Main Component
 const HodApprovalList = () => {
   const studentsData = [
     { sno: 1, reg: 111723203001, name: "Akash", couns: "Bonafide" },
@@ -9,19 +9,12 @@ const HodApprovalList = () => {
     { sno: 4, reg: 111723203005, name: "Mukesh", couns: "Fee Receipt" },
     { sno: 5, reg: 111723203006, name: "Arul", couns: "Fee Receipt" },
     { sno: 6, reg: 111723203007, name: "Nair", couns: "Bonafide" },
-    
-     { sno: 4, reg: 111723203005, name: "Mukesh", couns: "Fee Receipt" },
-    { sno: 5, reg: 111723203006, name: "Arul", couns: "Fee Receipt" },
-    { sno: 6, reg: 111723203007, name: "Nair", couns: "Bonafide" },
-     { sno: 4, reg: 111723203005, name: "Mukesh", couns: "Fee Receipt" },
-    { sno: 5, reg: 111723203006, name: "Arul", couns: "Fee Receipt" },
-    { sno: 6, reg: 111723203007, name: "Nair", couns: "Bonafide" },
+    { sno: 7, reg: 111723203008, name: "John", couns: "Bonafide" },
   ];
 
   const [filterType, setFilterType] = useState("");
   const [filterReg, setFilterReg] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [selectedReg, setSelectedReg] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
 
   const filteredStudents = studentsData.filter(
     (student) =>
@@ -29,18 +22,6 @@ const HodApprovalList = () => {
       (filterReg === "" ||
         student.reg.toString().includes(filterReg.toString()))
   );
-
-  // Modal Open Handler
-  const openModal = (reg) => {
-    setSelectedReg(reg);
-    setShowModal(true);
-  };
-
-  // Modal Close Handler
-  const closeModal = () => {
-    setShowModal(false);
-    setSelectedReg(null);
-  };
 
   return (
     <div
@@ -57,6 +38,13 @@ const HodApprovalList = () => {
         style={{
           height: "10vh",
           width: "100%",
+          backgroundColor: "#2c3e50",
+          color: "white",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontWeight: "bold",
+          fontSize: "1.5rem",
         }}
       >
         NAV BAR
@@ -84,7 +72,6 @@ const HodApprovalList = () => {
             marginBottom: "2%",
           }}
         >
-          {/* Type Filter */}
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
@@ -100,7 +87,6 @@ const HodApprovalList = () => {
             <option value="Fee Receipt">Fee Receipt</option>
           </select>
 
-          {/* Reg No Filter */}
           <input
             type="text"
             placeholder="Search Reg No"
@@ -115,30 +101,27 @@ const HodApprovalList = () => {
           />
         </div>
 
-        {/* Table Container */}
+        {/* Table */}
         <div
           style={{
-            width:"90%",
-          height:"65vh",            
-          backgroundColor: "#D9D9D9",
-          marginRight:"auto",
-          marginLeft:"auto",
-          
-          borderRadius: "20px",
-          overflowY: "auto",
-          boxShadow: "0 0 5px rgba(0,0,0,0.2)",
-          padding: "0px 10px 3px 10px",
-          borderTop: "8px solid #D9D9D9",
-
+            width: "90%",
+            height: "65vh",
+            backgroundColor: "#D9D9D9",
+            marginRight: "auto",
+            marginLeft: "auto",
+            borderRadius: "20px",
+            overflowY: "auto",
+            boxShadow: "0 0 5px rgba(0,0,0,0.2)",
+            padding: "0px 10px 3px 10px",
+            borderTop: "8px solid #D9D9D9",
           }}
         >
           <table
             style={{
-             width: "100%",
-              height:"100%",
+              width: "100%",
+              height: "100%",
               borderCollapse: "separate",
               borderSpacing: "0 8px",
-
             }}
           >
             <thead>
@@ -165,10 +148,7 @@ const HodApprovalList = () => {
                   <td style={cellStyle}>{student.reg}</td>
                   <td style={cellStyle}>{student.couns}</td>
                   <td style={cellStyle}>
-                    <button
-                      style={formBtn}
-                      onClick={() => openModal(student.reg)}
-                    >
+                    <button style={formBtn} onClick={() => setShowPopup(true)}>
                       VIEW FORM
                     </button>
                   </td>
@@ -180,80 +160,181 @@ const HodApprovalList = () => {
               ))}
             </tbody>
           </table>
-
-          {/* Bottom Buttons */}
-          
         </div>
+
+        {/* Bottom Button */}
         <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "flex-end",
+            width: "90%",
+            alignItems: "flex-end",
+            height: "10%",
+          }}
+        >
+          <button
             style={{
-              display: "flex",
-              flexDirection:"row",
-              justifyContent: "flex-end",
-              width:"90%",
-                alignItems:"flex-end",
-              height:"10%"
-              
+              backgroundColor: "#3b4b75",
+              color: "white",
+              border: "none",
+              padding: "0.75% 2% ",
+              borderRadius: "25px",
+              cursor: "pointer",
+              fontSize: "1.2rem",
+              fontWeight: "bold",
             }}
           >
-            {/* Request Access */}
-            
-
-            {/* Approve All */}
-            <button
-              style={{
-                backgroundColor: "#3b4b75",
-                color: "white",
-                border: "none",
-               padding:"0.75% 2% ",
-            
-              
-                borderRadius: "25px",
-                cursor: "pointer",
-                fontSize: "1.2rem",
-                fontWeight: "bold",
-              }}
-            >
-              Approve All
-            </button>
-          </div>
-
+            Approve All
+          </button>
+        </div>
       </div>
-      {/* FORM POPUP MODAL */}
-      {showModal && (
+
+      {/* Popup */}
+      {showPopup && (
         <div
           style={{
             position: "fixed",
-            left: 0,
             top: 0,
-            height: "100vh",
+            left: 0,
             width: "100vw",
-            background: "rgba(0,0,0,0.25)",
-            zIndex: 9999,
+            height: "100vh",
+            backgroundColor: "rgba(0,0,0,0.4)",
             display: "flex",
-            justifyContent: "center",
             alignItems: "center",
-            overflow: "hidden",
+            justifyContent: "center",
+            zIndex: 1000,
           }}
         >
-          <div style={{ position: "relative", width:"90%" }}>
-            {/* Close Button */}
+          <div
+            style={{
+              width: "82%",
+              height: "88vh",
+              backgroundColor: "white",
+              borderRadius: "2vh",
+              padding: "3%",
+              position: "relative",
+              boxShadow: "0 0 15px rgba(0,0,0,0.3)",
+            }}
+          >
             <button
-              onClick={closeModal}
               style={{
-                position:"absolute",
-                top: "3vh",
-                right: "1vw",
-                fontSize: "4vh",
-                color: "#000000ff",
-                background: "transparent",
+                position: "absolute",
+                top: "1%",
+                right: "2%",
                 border: "none",
+                background: "none",
+                fontSize: "3.5vh",
                 cursor: "pointer",
-                zIndex: 0,
+                fontWeight: "bold",
               }}
+              onClick={() => setShowPopup(false)}
             >
-              &#10005;
+              ×
             </button>
-            <BonafideForm />
+
+            {/* Popup Form Fields */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.5vh" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "2vh",
+                }}
+              >
+                {/* Left Column */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "1.4vh" }}>
+                  {[
+                    "Name",
+                    "Registration Number",
+                    "Email Address",
+                    "Branch",
+                    "Name of the Parent",
+                    "Native",
+                    "Parent's Mobile No",
+                  ].map((label) => (
+                    <div key={label} style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh" }}>
+                      <label style={labelStyle}>{label}</label>
+                      <input type="text" style={inputStyle} />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Right Column */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "1.6vh" }}>
+                  <div style={rowGroup}>
+                    {["Year", "Section", "Gender"].map((field) => (
+                      <div key={field} style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                        <label style={labelStyle}>{field}</label>
+                        <input type="text" style={inputStyle} />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh" }}>
+                    <label style={labelStyle}>Counsellor</label>
+                    <input type="text" style={inputStyle} />
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh" }}>
+                    <label style={labelStyle}>Year Coordinator</label>
+                    <input type="text" style={inputStyle} />
+                  </div>
+
+                  <div style={rowGroup}>
+                    {["No. of Days", "From Date", "To Date"].map((field, idx) => (
+                      <div key={field} style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                        <label style={labelStyle}>{field}</label>
+                        <input type={idx === 0 ? "text" : "date"} style={inputStyle} />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={rowGroup}>
+                    {["Room No", "Leaving Date", "Leaving Time"].map((field, idx) => (
+                      <div key={field} style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                        <label style={labelStyle}>{field}</label>
+                        <input type={idx === 0 ? "text" : idx === 1 ? "date" : "time"} style={inputStyle} />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh" }}>
+                    <label style={labelStyle}>Reason for Leave</label>
+                    <input type="text" style={inputStyle} />
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh", marginTop: "1%" }}>
+                    <label style={labelStyle}>Parent’s Permission</label>
+                    <input type="text" style={inputStyle} />
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        marginTop: "1vh",
+                        marginLeft: "1vh",
+                        gap: "0.8vh",
+                        fontSize: "1.6vh",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      <label>
+                        <input type="checkbox" /> Obtained Over Phone
+                      </label>
+                      <label>
+                        <input type="checkbox" /> Has Come in Person
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Remarks */}
+              <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh", marginTop: "1vh" }}>
+                <label style={labelStyle}>Remarks</label>
+                <input type="text" style={inputStyle} />
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -261,272 +342,21 @@ const HodApprovalList = () => {
   );
 };
 
-// Bonafide Form Component (unchanged style)
-const BonafideForm = () => {
-  return (
-    <div
-      
-    >
-     
-      {/* Form Container */}
-      <div
-        style={{
-          marginTop: "1%",
-          width: "100%",
-         
-          backgroundColor: "#fff",
-          borderRadius: "2vh",
-          padding: "1% 2%",
-          boxShadow: "0 0 1vh rgba(0,0,0,0.2)",
-          display: "flex",
-          flexDirection: "column",
-          maxHeight: "80vh",
-          overflowY: "auto",
-        }}
-      >
-        <h2
-          style={{
-            textAlign: "center",
-            marginBottom: "2%",
-            fontSize: "3.2vh",
-            fontWeight: "bolder",
-            color: "rgba(30, 46, 79, 1)",
-          }}
-        >
-          APPLICATION FORM FOR BONAFIDE CERTIFICATE
-        </h2>
-        {/* Form Fields */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "3% 5%",
-            fontSize: "2vh",
-          }}
-        >
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Reason for Bonafide Request</label>
-            <input type="text" style={{
-                padding: "2%",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-              }} />
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", width: "85.3%", }}>
-            <div style={fieldStyle}><label style={labelStyle}>Year</label>
-              <select style={{
-                padding: "15%",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-                width: "310%",
-              }} >
-                <option>Year</option>
-                <option>I Year</option>
-                <option>II Year</option>
-                <option>III Year</option>
-                <option>IV Year</option>
-              </select>
-            </div>
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Father’s/Guardian’s Name</label>
-              <input type="text" style={{
-                padding: "5%",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-                width: "142%",
-              }} />
-            </div>
-          </div>
-
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Name</label>
-            <input type="text" style={{
-                padding: "2%",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-              }} />
-          </div>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Register Number</label>
-            <input type="number" style={{
-                padding: "2%",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-              }} />
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "space-between",width:"78%" }}>
-            <div style={fieldStyle}>
-              <label style={labelStyle}>
-              Branch</label>
-              <input type="text" style={{
-                padding: "6%",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-                width: "143%",
-              }} />
-            </div>
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Section</label>
-              <select style={{
-                padding: "8%",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-                width: "177%",
-              }} >
-                <option>Select your section</option>
-                <option>A</option>
-                <option>B</option>
-                <option>C</option>
-                <option>D </option>
-                <option>E</option>
-              </select>
-            </div>
-          </div>
-
-          <div style={fieldStyle}>
-            <label style={labelStyle}>House No</label>
-            <input type="number" style={{
-                padding: "2%",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-              }} />
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", width: "82%" }}>
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Date of Birth</label>
-              <input type="date" style={{
-                padding: "10%",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-                width: "190%",
-              }} />
-            </div>
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Age</label>
-              <input type="number" style={{
-                padding: "7%",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-                width: "155%",
-              }} />
-            </div>
-          </div>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Street Name</label>
-            <input type="text" style={{
-                padding: "2%",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-              }} />
-          </div>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Enter Area</label>
-            <input type="text" style={{
-                padding: "2%",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-              }} />
-          </div>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Enter City</label>
-            <input type="text" style={{
-                padding: "2%",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-              }} />
-        
-          </div>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Enter State</label>
-            <input type="text" style={{
-                padding: "2%",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-              }} />
-          </div>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Enter Pincode</label>
-            <input type="Number" style={{
-                padding: "2%",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-              }} />
-          </div>
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Select Category</label>
-            <select style={{
-              padding: "2%",
-              borderRadius: "1vh",
-              border: "1px solid #999",
-              width: "100%",
-            }} >
-              <option>Select Category</option>
-              <option>GOVERMENT QUOTA</option>
-              <option>MANAGEMENT QUOTA</option>
-            </select>
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", }}>
-            <div style={fieldStyle}>
-              <label style={labelStyle}>
-              If Dayscholar, Boarding Place</label>
-              <input type="text" style={{
-                padding: "4%",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-                width: "110%",
-              }} />
-            </div>
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Select the Type of Bonafide</label>
-              <select style={{
-                padding: "4%",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-                width: "100%",
-              }} >
-                <option>Select the Type of Bonafide</option>
-                <option>WITH FEE STRUCTURE</option>
-                <option>WITHOUT FEE STRUCTURE</option>
-                <option>INPLANT TRAINING /PROJECT WORK</option>
-                <option>PAPER PRESENTATION </option>
-                <option>GENERAL</option>
-              </select>
-            </div>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent:"end",
-              padding:"2%",
-              width:"200%",
-              alignItems: "end",
-            }}
-          >
-            
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Style objects (unchanged)
+// Styles
 const headerStyle = {
-    backgroundColor: "white",
-  
+  backgroundColor: "white",
   position: "sticky",
-                  top: 0,
-                  
-                  zIndex: 1,
-                  padding: "0.75%",
+  top: 0,
+  zIndex: 1,
+  padding: "0.75%",
   textAlign: "center",
-
 };
+
 const cellStyle = {
   padding: "0.7%",
   textAlign: "center",
 };
+
 const approveBtn = {
   fontWeight: "bold",
   padding: "1% 2%",
@@ -535,7 +365,9 @@ const approveBtn = {
   border: "none",
   borderRadius: "1vh",
   marginRight: "5%",
+  cursor: "pointer",
 };
+
 const rejectBtn = {
   fontWeight: "bold",
   padding: "1% 2%",
@@ -543,7 +375,9 @@ const rejectBtn = {
   backgroundColor: "#d9534f",
   border: "none",
   borderRadius: "1vh",
+  cursor: "pointer",
 };
+
 const formBtn = {
   fontWeight: "bold",
   padding: "2% 4%",
@@ -553,17 +387,25 @@ const formBtn = {
   borderRadius: "3vh",
   cursor: "pointer",
 };
-const fieldStyle = {
-  display: "flex",
-  flexDirection: "column",
-  height: "10vh",
-  fontSize: "2.1vh",
-};
+
 const labelStyle = {
-  marginBottom: "0.9vh",
+  textTransform: "uppercase",
   fontWeight: "600",
-  fontSize: "2.5vh",
-  color: "rgba(0, 0, 0, 1)",
+  fontSize: "1.4vh",
+  marginBottom: "1%",
+};
+
+const inputStyle = {
+  padding: "1vh",
+  border: "1px solid #aaa",
+  borderRadius: "0.8vh",
+  fontSize: "1.7vh",
+};
+
+const rowGroup = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: "1.5vh",
 };
 
 export default HodApprovalList;
