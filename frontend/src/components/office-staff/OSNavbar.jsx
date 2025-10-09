@@ -3,7 +3,7 @@ import logo from "../../assets/logo.jpg" // Assuming you have a logo image named
 
 const OSNavbar = () => {
   return (
-    <div className='w-[100vw] h-[10vh] flex items-center justify-center bg-[#eeeeee]'>
+    <div className='w-[100vw] h-[10vh] flex items-center justify-center'>
       <nav className='h-[6.5vh] w-[96vw] bg-[#1E2E4F] text-white flex justify-between items-center rounded-[3.5vh] px-[1vw]'>
         <div className='flex items-center gap-[2vh]'>
           <img src={logo} alt="RMK Logo" className='w-[3vh] h-[3vh] rounded-full' />
