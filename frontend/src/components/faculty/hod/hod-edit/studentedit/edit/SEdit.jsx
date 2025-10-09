@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./SEdit.css";
-import SView from "../view/SView";
+import SView from "../../../../counsellor/counselloredit/view/SView";
 
 const initialStudents = [
   {
