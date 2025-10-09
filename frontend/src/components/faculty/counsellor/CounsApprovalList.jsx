@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 
 const CounsApprovalList = () => {
+  const [showPopup, setShowPopup] = useState(false);
+
   const students = [
     { sno: 1, nof: 20, name: "Nandhini" },
     { sno: 2, nof: 20, name: "Shobana" },
@@ -17,10 +19,9 @@ const CounsApprovalList = () => {
       style={{
         width: "100vw",
         height: "100vh",
-        overflow: "hidden", // ❌ no page scroll
+        overflow: "hidden",
         display: "flex",
         flexDirection: "column",
-      
       }}
     >
       {/* Navbar */}
@@ -34,56 +35,49 @@ const CounsApprovalList = () => {
           alignItems: "center",
           justifyContent: "center",
           fontWeight: "bold",
+          fontSize: "2.2vh",
         }}
       >
         NAV BAR
       </div>
 
-      {/* Content */}
+      {/* Main Content */}
       <div
         style={{
-          flex: 1, // take remaining height (90vh)
-          backgroundColor: "rgba(238, 238, 238, 0.5)",
+          flex: 1,
+          backgroundColor: "rgba(238,238,238,0.5)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          margintop: "3%",
         }}
       >
         <h1
           style={{
-            color: "rgba(14, 73, 71, 1)",
-            fontSize: "20px",
+            color: "rgba(14,73,71,1)",
+            fontSize: "2.2vh",
             fontWeight: "bolder",
-            textAlign: "center",
-            margin: "10px 0",
+            margin: "2vh 0",
           }}
         >
           COUNSELLOR APPROVAL LIST
         </h1>
 
-        {/* Table Container */}
         <div
           style={{
             width: "90%",
-            height: "75vh", // fixed height
-            border: "8px solid rgba(217, 217, 217,1)",
-            borderRadius: "10px",
-            backgroundColor: "rgba(217, 217, 217, 1)",
-           padding: "0% 0.5% 0% 0.5%"
-             // ✅ equal spacing on all sides
-    
-    //  flexDirection: "column",
-    // justifyContent: "space-between",
+            height: "75vh",
+            border: "8px solid rgba(217,217,217,1)",
+            borderRadius: "2vh",
+            backgroundColor: "rgba(217,217,217,1)",
+            padding: "0% 0.5% 0% 0.5%",
           }}
         >
           <table
             style={{
               width: "100%",
-              height: "100%", // table fits container
+              height: "100%",
               borderCollapse: "separate",
               borderSpacing: "0 8px",
-              
             }}
           >
             <thead>
@@ -92,10 +86,10 @@ const CounsApprovalList = () => {
                 <th style={headerStyle}>NAME</th>
                 <th style={headerStyle}>NO OF STUDENTS</th>
                 <th style={headerStyle}>REMARK</th>
+                <th style={headerStyle}>FORM DETAILS</th>
                 <th style={headerStyle}>VALIDATION</th>
               </tr>
             </thead>
-
             <tbody>
               {students.map((student) => (
                 <tr
@@ -121,51 +115,205 @@ const CounsApprovalList = () => {
                     />
                   </td>
                   <td style={cellStyle}>
+                    <button style={viewBtn} onClick={() => setShowPopup(true)}>
+                      VIEW FORM
+                    </button>
+                  </td>
+                  <td style={cellStyle}>
                     <button style={approveBtn}>APPROVE</button>
                     <button style={rejectBtn}>REJECT</button>
                   </td>
                 </tr>
               ))}
-
             </tbody>
           </table>
-                  <div style={{ textAlign: "end", marginTop: "2%" }}>
-          <button
-            style={{
-              backgroundColor: "#3b4b75",
-              color: "white",
-              border: "none",
-              padding: "1% 4%",
-              borderRadius: "50px",
-              cursor: "pointer",
-              fontSize: "1rem",
-              fontWeight: "bold",
-            }}
-          >
-            Approve All
-          </button>
-        </div>
 
+          {/* Approve All Button */}
+          <div style={{ textAlign: "end", marginTop: "2%" }}>
+            <button style={approveAllBtn}>Approve All</button>
+          </div>
         </div>
       </div>
+
+      {/* Popup */}
+      {showPopup && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            minHeight: "100vh", // Let it grow vertically
+            backgroundColor: "rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            overflow: "visible", // <-- Removed internal scrolling
+          }}
+        >
+          <div
+            style={{
+              width: "82%",
+              backgroundColor: "white",
+              borderRadius: "2vh",
+              padding: "3%",
+              position: "relative",
+              boxShadow: "0 0 15px rgba(0,0,0,0.3)",
+            }}
+          >
+            <button
+              style={{
+                position: "absolute",
+                top: "1%",
+                right: "2%",
+                border: "none",
+                background: "none",
+                fontSize: "3.5vh",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+              onClick={() => setShowPopup(false)}
+            >
+              ×
+            </button>
+
+            {/* Popup Form Content */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.5vh" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "2vh",
+                }}
+              >
+                {/* Left Column */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "1.4vh" }}>
+                  {[
+                    "Name",
+                    "Registration Number",
+                    "Email Address",
+                    "Branch",
+                    "Name of the Parent",
+                    "Native",
+                    "Parent's Mobile No",
+                  ].map((label) => (
+                    <div
+                      key={label}
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        fontSize: "1.6vh",
+                      }}
+                    >
+                      <label style={labelStyle}>{label}</label>
+                      <input type="text" style={inputStyle} />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Right Column */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "1.6vh" }}>
+                  <div style={rowGroup}>
+                    {["Year", "Section", "Gender"].map((field) => (
+                      <div
+                        key={field}
+                        style={{ flex: 1, display: "flex", flexDirection: "column" }}
+                      >
+                        <label style={labelStyle}>{field}</label>
+                        <input type="text" style={inputStyle} />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <label style={labelStyle}>Counsellor</label>
+                    <input type="text" style={inputStyle} />
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <label style={labelStyle}>Year Coordinator</label>
+                    <input type="text" style={inputStyle} />
+                  </div>
+
+                  <div style={rowGroup}>
+                    {["No. of Days", "From Date", "To Date"].map((field, idx) => (
+                      <div key={field} style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                        <label style={labelStyle}>{field}</label>
+                        <input type={idx === 0 ? "text" : "date"} style={inputStyle} />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={rowGroup}>
+                    {["Room No", "Leaving Date", "Leaving Time"].map((field, idx) => (
+                      <div key={field} style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+                        <label style={labelStyle}>{field}</label>
+                        <input
+                          type={idx === 0 ? "text" : idx === 1 ? "date" : "time"}
+                          style={inputStyle}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <label style={labelStyle}>Reason for Leave</label>
+                    <input type="text" style={inputStyle} />
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", marginTop: "1%" }}>
+                    <label style={labelStyle}>Parent’s Permission</label>
+                    <input type="text" style={inputStyle} />
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        marginTop: "1vh",
+                        marginLeft: "1vh",
+                        gap: "0.8vh",
+                        fontSize: "1.6vh",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      <label>
+                        <input type="checkbox" /> Obtained Over Phone
+                      </label>
+                      <label>
+                        <input type="checkbox" /> Has Come in Person
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Remarks - full width */}
+              <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh", marginTop: "1vh" }}>
+                <label style={labelStyle}>Remarks</label>
+                <input type="text" style={inputStyle} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-// Header style
+// Styles
 const headerStyle = {
   backgroundColor: "white",
   padding: "10px",
   textAlign: "center",
+  fontSize: "2vh",
+  fontWeight: "bold",
 };
 
-// Cell style
 const cellStyle = {
   padding: "9px",
   textAlign: "center",
 };
 
-// Buttons
 const approveBtn = {
   fontWeight: "bold",
   padding: "5px 10px",
@@ -174,6 +322,7 @@ const approveBtn = {
   border: "none",
   borderRadius: "5px",
   marginRight: "5%",
+  cursor: "pointer",
 };
 
 const rejectBtn = {
@@ -183,6 +332,48 @@ const rejectBtn = {
   backgroundColor: "#d9534f",
   border: "none",
   borderRadius: "5px",
+  cursor: "pointer",
+};
+
+const viewBtn = {
+  fontWeight: "bold",
+  padding: "5px 10px",
+  color: "white",
+  backgroundColor: "#3b4b75",
+  border: "none",
+  borderRadius: "20px",
+  cursor: "pointer",
+};
+
+const approveAllBtn = {
+  backgroundColor: "#3b4b75",
+  color: "white",
+  border: "none",
+  padding: "1% 4%",
+  borderRadius: "50px",
+  cursor: "pointer",
+  fontSize: "1rem",
+  fontWeight: "bold",
+};
+
+const labelStyle = {
+  textTransform: "uppercase",
+  fontWeight: "600",
+  fontSize: "1.4vh",
+  marginBottom: "1%",
+};
+
+const inputStyle = {
+  padding: "1vh",
+  border: "1px solid #aaa",
+  borderRadius: "0.8vh",
+  fontSize: "1.7vh",
+};
+
+const rowGroup = {
+  display: "flex",
+  justifyContent: "space-between",
+  gap: "1.5vh",
 };
 
 export default CounsApprovalList;
