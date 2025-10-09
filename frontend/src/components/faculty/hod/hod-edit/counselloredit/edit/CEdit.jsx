@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./CEdit.css";
-import CView from "../view/CView";
+import CView from "../../../../yearcoordinator/yearcodedit/counselloredit/view/CView";
 
 const initialCounsellors = [
   {

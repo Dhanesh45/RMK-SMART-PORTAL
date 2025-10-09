@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import "./CEdit.css";
-import CView from "../view/CView"
+import "./SEdit.css";
+import SView from "../view/SView"
 
 const initialStudents = [
   { id: 1, name: "AKASH", regNo: "111723203001", email: "230329.it@rmkec.ac.in", year: "3", yearCoordinator: "Mr. Kumar", counsellor: "Mr. Ravi", gender: "Male", section: "A", branch: "IT" },
@@ -25,7 +25,7 @@ const initialStudents = [
   { id: 20, name: "MANOJ", regNo: "111723203020", email: "manoj@gmail.com", year: "2", yearCoordinator: "Mrs. Priya", counsellor: "Ms. Devi", gender: "Male", section: "B", branch: "CSE" },
 ];
 
-const CEdit = () => {
+const SEdit = () => {
   const [students, setStudents] = useState(initialStudents);
   const [search, setSearch] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -95,7 +95,7 @@ const CEdit = () => {
 
       {selectedStudent && (
         
-        <CView
+        <SView
           student={selectedStudent}
           onClose={() => setSelectedStudent(null)}
           onSave={handleSave}
@@ -105,4 +105,4 @@ const CEdit = () => {
   );
 };
 
-export default CEdit;
+export default SEdit;

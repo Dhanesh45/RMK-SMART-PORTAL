@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import "./CView.css";
+import "./SView.css";
 
-const CView = ({ student, onClose, onSave }) => {
+const SView = ({ student, onClose, onSave }) => {
   const [formData, setFormData] = useState({ ...student });
 
   const handleChange = (e) => {
@@ -167,4 +167,4 @@ const CView = ({ student, onClose, onSave }) => {
   );
 };
 
-export default CView;
+export default SView;
