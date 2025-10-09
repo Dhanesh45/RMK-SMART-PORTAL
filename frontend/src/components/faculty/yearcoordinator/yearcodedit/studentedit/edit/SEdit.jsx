@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./SEdit.css";
-import SView from "../view/SView";
+import SView from "../../../../counsellor/counselloredit/view/SView";
 
 const initialStudents = [
   { id: 1, name: "AKASH", regNo: "111723203001", email: "230329.it@rmkec.ac.in" },
