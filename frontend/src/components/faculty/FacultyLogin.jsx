@@ -1,10 +1,22 @@
 import { useState } from "react";
 import loginimg from "../../assets/login.png";
+import { useNavigate } from "react-router-dom";
 
 const FacultyLogin = () => {
+  
   const [isChecked, setIsChecked] = useState(false);
   const [role, setRole] = useState(""); // 👈 New state for role
+  const navigate=useNavigate();
+   const handleLogin = ({}) => {
+     if (!role) {
+      alert("Please select a role");
+      return;
+    }
+     localStorage.setItem("facultyRole", role);
 
+    // 2️⃣ Navigate to FacultyMain page (or dashboard route)
+    navigate("/FacultyMain"); 
+  };
   return (
     <div style={{ width: "100%", height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", backgroundImage: 'linear-gradient(to bottom, rgba(49, 72, 122, 1), rgba(143, 179, 226, 1))' }}>
       <div style={{ width: "85%", height: "85%", backgroundColor: "white", borderRadius: "4vh", boxShadow: "2px 2px 5px  rgba(0, 0, 0, 0.5 )", display: "flex", overflow: "hidden" }}>
@@ -78,10 +90,8 @@ const FacultyLogin = () => {
             <div style={{ textAlign: "center" }}>
               <button
                 style={{ padding: "2% 30%", borderRadius: "4vh", fontSize: "3vh", fontWeight: "600", color: "white", backgroundColor: "rgba(30, 46, 76, 1 )" }}
-                onClick={() => {
-                  console.log("Selected Role:", role);
-                  navigate("/CounsellorDashboard");
-                }}
+                 onClick={handleLogin}
+              
               >
                 LOGIN
               </button>

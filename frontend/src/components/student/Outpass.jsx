@@ -21,9 +21,6 @@ const Outpass = () => {
   const [permission, setPermission] = useState("");
 
   return (
-    <div style={{ height: "100vh", width: "100%" }}>
-      <div style={{ height: "10vh", width: "100vw" }}>nav bar</div>
-
       <div
         style={{
           width: "80%",
@@ -41,6 +38,7 @@ const Outpass = () => {
             width: "100%",
             height: "7%",
             textAlign: "center",
+            fontSize: "3vh",
             fontWeight: "bold",
             marginBottom: "1%",
           }}
@@ -184,7 +182,7 @@ const Outpass = () => {
           </div>
         </div>
       </div>
-    </div>
+    
   );
 };
 

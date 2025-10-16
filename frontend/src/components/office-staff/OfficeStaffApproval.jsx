@@ -28,13 +28,7 @@ const OfficeStaffApproval = () => {
   };
 
   return (
-    <div style={{ height: "100vh", width: "100%", overflow: "hidden", boxSizing: "border-box" }}>
-      {/* Nav Bar */}
-      <div style={{ height: "10vh", width: "100%" }}>
-        Nav bar
-      </div>
-
-      {/* Content Wrapper */}
+    
       <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-start", marginTop: "1%" }}>
         <div
           style={{
@@ -135,7 +129,7 @@ const OfficeStaffApproval = () => {
           <OfficeStaffViewForm open={open} handleClose={handleClose} student={selectedStudent} />
         </div>
       </div>
-    </div>
+    
   );
 };
 

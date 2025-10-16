@@ -23,21 +23,7 @@ const YearApprovalList = () => {
         flexDirection: "column",
       }}
     >
-      {/* Navbar */}
-      <div
-        style={{
-          height: "10vh",
-          width: "100%",
-          background: "#2c3e50",
-          color: "white",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontWeight: "bold",
-        }}
-      >
-        NAV BAR
-      </div>
+      
 
       {/* Content */}
       <div

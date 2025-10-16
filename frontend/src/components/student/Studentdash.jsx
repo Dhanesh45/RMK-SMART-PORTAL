@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-
+import StuNavbar from "./StuNavbar"
 export default function Studentdash() {
   const currentStage = 4;
 
@@ -44,26 +44,6 @@ export default function Studentdash() {
   };
 
   return (
-    <div
-      style={{
-        height: "100vh",
-        width: "100%",
-        backgroundColor: "#EEEEEE",
-        boxSizing: "border-box",
-        overflow: "hidden",
-        fontFamily: "Arial, Helvetica, sans-serif",
-      }}
-    >
-      {/* NAVBAR */}
-      <div>
-        <div
-          style={{ height: "10vh", width: "100vw", border: "2px solid black" }}
-        >
-          nav bar
-        </div>
-      </div>
-
-      {/* MAIN SECTION */}
       <div
         style={{
           width: "96%",
@@ -454,7 +434,7 @@ export default function Studentdash() {
           </div>
         </div>
       </div>
-    </div>
+    
   );
 }
 

@@ -70,11 +70,7 @@ const OaHistoryPage = () => {
   
     return (
       <div style={{ width: "100%", Height: "100vh",boxSizing: "border-box", fontSize: "2vh", overflow: "hidden" }}>
-        {/* Top Navbar */}
-         <div style={{ height: "10vh", width: "100vw" }}>
-        <OaNavbar />
-       </div>
-  
+       
         {/* Filters */}
         <div style={{ display: "flex", gap: "2%", marginBottom: "2%" ,padding:"1%"}}>
           <div style={{ display: "flex", flexDirection: "column", flex: "1" }}>

@@ -28,7 +28,6 @@ const SEdit = ({ setSelectedView }) => {
 
   return (
     <div className="cedit-page">
-      <div className="nav-space"></div>
 
       <div className="search-container">
         <select

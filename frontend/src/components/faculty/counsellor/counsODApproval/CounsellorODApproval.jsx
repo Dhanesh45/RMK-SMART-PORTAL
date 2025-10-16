@@ -29,22 +29,7 @@ const CounsellorODApproval = () => {
         flexDirection: "column",
       }}
     >
-      {/* Navbar */}
-      <div
-        style={{
-          height: "10vh",
-          width: "100%",
-          background: "#2c3e50",
-          color: "white",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontWeight: "bold",
-          fontSize: "120%",
-        }}
-      >
-        NAV BAR
-      </div>
+     
 
       {/* Content Section */}
       <div

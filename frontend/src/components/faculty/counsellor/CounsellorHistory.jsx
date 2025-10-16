@@ -49,19 +49,12 @@ export default function CounsellorHistory() {
     <div
       style={{
         height: "100vh",
-        width: "100%",
+        width: "100%",  
         backgroundColor: "#EEEEEE",
         boxSizing: "border-box",
       }}
     >
-      {/* NAV BAR */}
-      <div>
-        <div
-          style={{ height: "10vh", width: "100vw", border: "2px solid black" }}
-        >
-          nav bar
-        </div>
-      </div>
+      
 
       {/* Search + Date Filters */}
       <div
