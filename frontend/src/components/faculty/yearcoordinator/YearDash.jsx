@@ -3,8 +3,8 @@ import YearCoordinatorDashboard from './YearCoordinatorDashboard'
 import YearApprovalList from "./YearApprovalList"
 import YearOdAppList from "./YearOdApproval/YearOdAppList"
 import YearCoordinatorEdit from './yearcodedit/Year/YearCoordinatorEdit'
-import YearHistory from './YearHistory'
 import YearNavbar from './YearNavbar'
+import YearCoordinatorHistory from './YearCoordinatorHistory'
 
 const YearDash = () => {
   const [activePage,setActivePage]=useState("HOME")
@@ -15,7 +15,7 @@ const YearDash = () => {
      {activePage === "OUTPASS" && <YearApprovalList />}
       {activePage === "ON DUTY" && <YearOdAppList />}
        {activePage === "EDIT" && <YearCoordinatorEdit />}
-       {activePage === "HISTORY" && <YearHistory />}
+       {activePage === "HISTORY" && <YearCoordinatorHistory />}
     </div>
   )
 }

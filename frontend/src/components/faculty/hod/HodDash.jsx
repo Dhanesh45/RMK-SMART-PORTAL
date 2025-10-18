@@ -6,6 +6,7 @@ import YEdit from "./hod-edit/yearcodedit/edit/YEdit"
 import HodHistoryPage from "./HodHistoryPage"
 import HodBonafideApproval from './HodBonafideApproval'
 import HodNavbar from './HodNavbar'
+import HodEdit from './hod-edit/hodEdit/hodedit'
 
 const HodDash = () => {
   const [activePage,setActivePage]=useState("HOME")
@@ -16,7 +17,7 @@ const HodDash = () => {
      {activePage === "OUTPASS LIST" && <HodApprovalList />}
       {activePage === "ON DUTY LIST" && <HodOdAppList />}
       {activePage === "APPLICATION LIST" && <HodBonafideApproval />}
-       {activePage === "EDIT" && <YEdit />}
+       {activePage === "EDIT" && <HodEdit />}
        {activePage === "HISTORY" && <HodHistoryPage />}
     </div>
   )
