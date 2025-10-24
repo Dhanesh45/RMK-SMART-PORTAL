@@ -46,8 +46,6 @@ const SEdit = () => {
 
   return (
     <div className="cedit-page">
-      <div className="nav-space"></div>
-
       <div className="search-container">
         <input
           type="text"

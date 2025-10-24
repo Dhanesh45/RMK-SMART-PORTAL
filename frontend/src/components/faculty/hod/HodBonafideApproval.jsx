@@ -1,18 +1,27 @@
 import React, { useState } from "react";
 
-const CounsApprovalList = () => {
+// Main Component
+const HodBonafideApproval = () => {
+  const studentsData = [
+    { sno: 1, reg: 111723203001, name: "Akash", couns: "Bonafide" },
+    { sno: 2, reg: 111723203003, name: "Leo", couns: "Fee Receipt" },
+    { sno: 3, reg: 111723203004, name: "Dhinesh", couns: "Bonafide" },
+    { sno: 4, reg: 111723203005, name: "Mukesh", couns: "Fee Receipt" },
+    { sno: 5, reg: 111723203006, name: "Arul", couns: "Fee Receipt" },
+    { sno: 6, reg: 111723203007, name: "Nair", couns: "Bonafide" },
+    { sno: 7, reg: 111723203008, name: "John", couns: "Bonafide" },
+  ];
+
+  const [filterType, setFilterType] = useState("");
+  const [filterReg, setFilterReg] = useState("");
   const [showPopup, setShowPopup] = useState(false);
 
-  const students = [
-    { sno: 1, nof: 20, name: "Nandhini" },
-    { sno: 2, nof: 20, name: "Shobana" },
-    { sno: 3, nof: 20, name: "Saravanan" },
-    { sno: 4, nof: 20, name: "Vijayaraj" },
-    { sno: 5, nof: 20, name: "Akila" },
-    { sno: 6, nof: 20, name: "Rajitha" },
-    { sno: 7, nof: 20, name: "Rekha" },
-    { sno: 8, nof: 20, name: "Kanniga" },
-  ];
+  const filteredStudents = studentsData.filter(
+    (student) =>
+      (filterType === "" || student.couns === filterType) &&
+      (filterReg === "" ||
+        student.reg.toString().includes(filterReg.toString()))
+  );
 
   return (
     <div
@@ -24,35 +33,72 @@ const CounsApprovalList = () => {
         flexDirection: "column",
       }}
     >
-      {/* Main Content */}
+      
+
+      {/* Content */}
       <div
         style={{
           flex: 1,
-          backgroundColor: "rgba(238,238,238,0.5)",
+          backgroundColor: "rgba(238, 238, 238, 0.5)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          paddingTop: "1%",
         }}
       >
-        <h1
-          style={{
-            color: "rgba(14,73,71,1)",
-            fontSize: "2.2vh",
-            fontWeight: "bolder",
-            margin: "2vh 0",
-          }}
-        >
-          COUNSELLOR APPROVAL LIST
-        </h1>
-
+        {/* Filter Section */}
         <div
           style={{
             width: "90%",
-            height: "75vh",
-            border: "8px solid rgba(217,217,217,1)",
-            borderRadius: "2vh",
-            backgroundColor: "rgba(217,217,217,1)",
-            padding: "0% 0.5% 0% 0.5%",
+            display: "flex",
+            justifyContent: "flex-end",
+            alignItems: "center",
+            gap: "10px",
+            marginBottom: "2%",
+          }}
+        >
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            style={{
+              padding: "1% 2%",
+              borderRadius: "1vh",
+              border: "1px solid #ccc",
+              fontSize: "2vh",
+            }}
+          >
+            <option value="">All Types</option>
+            <option value="Bonafide">Bonafide</option>
+            <option value="Fee Receipt">Fee Receipt</option>
+          </select>
+
+          <input
+            type="text"
+            placeholder="Search Reg No"
+            value={filterReg}
+            onChange={(e) => setFilterReg(e.target.value)}
+            style={{
+              padding: "1% 2%",
+              borderRadius: "1vh",
+              border: "1px solid #ccc",
+              fontSize: "2vh",
+            }}
+          />
+        </div>
+
+        {/* Table */}
+        <div
+          style={{
+            width: "90%",
+            height: "65vh",
+            backgroundColor: "#D9D9D9",
+            marginRight: "auto",
+            marginLeft: "auto",
+            borderRadius: "20px",
+            overflowY: "auto",
+            boxShadow: "0 0 5px rgba(0,0,0,0.2)",
+            padding: "0px 10px 3px 10px",
+            borderTop: "8px solid #D9D9D9",
           }}
         >
           <table
@@ -67,14 +113,14 @@ const CounsApprovalList = () => {
               <tr>
                 <th style={headerStyle}>S.NO</th>
                 <th style={headerStyle}>NAME</th>
-                <th style={headerStyle}>NO OF STUDENTS</th>
-                <th style={headerStyle}>REMARK</th>
+                <th style={headerStyle}>REG.NO</th>
+                <th style={headerStyle}>TYPE</th>
                 <th style={headerStyle}>FORM DETAILS</th>
                 <th style={headerStyle}>VALIDATION</th>
               </tr>
             </thead>
             <tbody>
-              {students.map((student) => (
+              {filteredStudents.map((student) => (
                 <tr
                   key={student.sno}
                   style={{
@@ -84,21 +130,10 @@ const CounsApprovalList = () => {
                 >
                   <td style={cellStyle}>{student.sno}</td>
                   <td style={cellStyle}>{student.name}</td>
-                  <td style={cellStyle}>{student.nof}</td>
+                  <td style={cellStyle}>{student.reg}</td>
+                  <td style={cellStyle}>{student.couns}</td>
                   <td style={cellStyle}>
-                    <input
-                      style={{
-                        padding: "5px",
-                        width: "90%",
-                        border: "1px solid black",
-                        borderRadius: "5px",
-                        textAlign: "center",
-                      }}
-                      placeholder="Enter remark"
-                    />
-                  </td>
-                  <td style={cellStyle}>
-                    <button style={viewBtn} onClick={() => setShowPopup(true)}>
+                    <button style={formBtn} onClick={() => setShowPopup(true)}>
                       VIEW FORM
                     </button>
                   </td>
@@ -110,11 +145,33 @@ const CounsApprovalList = () => {
               ))}
             </tbody>
           </table>
+        </div>
 
-          {/* Approve All Button */}
-          <div style={{ textAlign: "end", marginTop: "2%" }}>
-            <button style={approveAllBtn}>Approve All</button>
-          </div>
+        {/* Bottom Button */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "flex-end",
+            width: "90%",
+            alignItems: "flex-end",
+            height: "10%",
+          }}
+        >
+          <button
+            style={{
+              backgroundColor: "#3b4b75",
+              color: "white",
+              border: "none",
+              padding: "0.75% 2% ",
+              borderRadius: "25px",
+              cursor: "pointer",
+              fontSize: "1.2rem",
+              fontWeight: "bold",
+            }}
+          >
+            Approve All
+          </button>
         </div>
       </div>
 
@@ -126,18 +183,18 @@ const CounsApprovalList = () => {
             top: 0,
             left: 0,
             width: "100vw",
-            minHeight: "100vh", // Let it grow vertically
+            height: "100vh",
             backgroundColor: "rgba(0,0,0,0.4)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             zIndex: 1000,
-            overflow: "visible", // <-- Removed internal scrolling
           }}
         >
           <div
             style={{
               width: "82%",
+              height: "88vh",
               backgroundColor: "white",
               borderRadius: "2vh",
               padding: "3%",
@@ -161,7 +218,7 @@ const CounsApprovalList = () => {
               ×
             </button>
 
-            {/* Popup Form Content */}
+            {/* Popup Form Fields */}
             <div style={{ display: "flex", flexDirection: "column", gap: "1.5vh" }}>
               <div
                 style={{
@@ -181,14 +238,7 @@ const CounsApprovalList = () => {
                     "Native",
                     "Parent's Mobile No",
                   ].map((label) => (
-                    <div
-                      key={label}
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        fontSize: "1.6vh",
-                      }}
-                    >
+                    <div key={label} style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh" }}>
                       <label style={labelStyle}>{label}</label>
                       <input type="text" style={inputStyle} />
                     </div>
@@ -199,22 +249,19 @@ const CounsApprovalList = () => {
                 <div style={{ display: "flex", flexDirection: "column", gap: "1.6vh" }}>
                   <div style={rowGroup}>
                     {["Year", "Section", "Gender"].map((field) => (
-                      <div
-                        key={field}
-                        style={{ flex: 1, display: "flex", flexDirection: "column" }}
-                      >
+                      <div key={field} style={{ flex: 1, display: "flex", flexDirection: "column" }}>
                         <label style={labelStyle}>{field}</label>
                         <input type="text" style={inputStyle} />
                       </div>
                     ))}
                   </div>
 
-                  <div style={{ display: "flex", flexDirection: "column" }}>
+                  <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh" }}>
                     <label style={labelStyle}>Counsellor</label>
                     <input type="text" style={inputStyle} />
                   </div>
 
-                  <div style={{ display: "flex", flexDirection: "column" }}>
+                  <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh" }}>
                     <label style={labelStyle}>Year Coordinator</label>
                     <input type="text" style={inputStyle} />
                   </div>
@@ -232,20 +279,17 @@ const CounsApprovalList = () => {
                     {["Room No", "Leaving Date", "Leaving Time"].map((field, idx) => (
                       <div key={field} style={{ flex: 1, display: "flex", flexDirection: "column" }}>
                         <label style={labelStyle}>{field}</label>
-                        <input
-                          type={idx === 0 ? "text" : idx === 1 ? "date" : "time"}
-                          style={inputStyle}
-                        />
+                        <input type={idx === 0 ? "text" : idx === 1 ? "date" : "time"} style={inputStyle} />
                       </div>
                     ))}
                   </div>
 
-                  <div style={{ display: "flex", flexDirection: "column" }}>
+                  <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh" }}>
                     <label style={labelStyle}>Reason for Leave</label>
                     <input type="text" style={inputStyle} />
                   </div>
 
-                  <div style={{ display: "flex", flexDirection: "column", marginTop: "1%" }}>
+                  <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh", marginTop: "1%" }}>
                     <label style={labelStyle}>Parent’s Permission</label>
                     <input type="text" style={inputStyle} />
                     <div
@@ -270,7 +314,7 @@ const CounsApprovalList = () => {
                 </div>
               </div>
 
-              {/* Remarks - full width */}
+              {/* Remarks */}
               <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh", marginTop: "1vh" }}>
                 <label style={labelStyle}>Remarks</label>
                 <input type="text" style={inputStyle} />
@@ -286,57 +330,47 @@ const CounsApprovalList = () => {
 // Styles
 const headerStyle = {
   backgroundColor: "white",
-  padding: "10px",
+  position: "sticky",
+  top: 0,
+  zIndex: 1,
+  padding: "0.75%",
   textAlign: "center",
-  fontSize: "2vh",
-  fontWeight: "bold",
 };
 
 const cellStyle = {
-  padding: "9px",
+  padding: "0.7%",
   textAlign: "center",
 };
 
 const approveBtn = {
   fontWeight: "bold",
-  padding: "5px 10px",
+  padding: "1% 2%",
   color: "white",
   backgroundColor: "#3b4b75",
   border: "none",
-  borderRadius: "5px",
+  borderRadius: "1vh",
   marginRight: "5%",
   cursor: "pointer",
 };
 
 const rejectBtn = {
   fontWeight: "bold",
-  padding: "5px 10px",
+  padding: "1% 2%",
   color: "white",
   backgroundColor: "#d9534f",
   border: "none",
-  borderRadius: "5px",
+  borderRadius: "1vh",
   cursor: "pointer",
 };
 
-const viewBtn = {
+const formBtn = {
   fontWeight: "bold",
-  padding: "5px 10px",
+  padding: "2% 4%",
   color: "white",
   backgroundColor: "#3b4b75",
   border: "none",
-  borderRadius: "20px",
+  borderRadius: "3vh",
   cursor: "pointer",
-};
-
-const approveAllBtn = {
-  backgroundColor: "#3b4b75",
-  color: "white",
-  border: "none",
-  padding: "1% 4%",
-  borderRadius: "50px",
-  cursor: "pointer",
-  fontSize: "1rem",
-  fontWeight: "bold",
 };
 
 const labelStyle = {
@@ -359,4 +393,4 @@ const rowGroup = {
   gap: "1.5vh",
 };
 
-export default CounsApprovalList;
+export default HodBonafideApproval;

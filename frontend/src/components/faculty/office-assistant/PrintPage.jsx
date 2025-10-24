@@ -124,7 +124,6 @@ const PrintPage = () => {
 
   return (
     <div>
-    <OaNavbar />
     <Box
       sx={{
         height: "90vh",

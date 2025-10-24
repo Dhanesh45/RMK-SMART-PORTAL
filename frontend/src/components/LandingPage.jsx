@@ -3,6 +3,7 @@ import Navbar from './Navbar'; // Assuming Navbar.jsx is in the same directory
 import bubbleTopRight from '../assets/rightbubble.png'; // Adjust path as needed
 import bubbleBottomLeft from '../assets/leftbubble.png'; // Adjust path as needed
 import mainVectorImage from '../assets/landing.png'; // Adjust path as needed
+import {Link} from "react-router-dom"
 
 const LandingPage = () => {
   return (
@@ -35,10 +36,10 @@ const LandingPage = () => {
             of outpass, on-duty, and bonafide processes with
             transparency and accuracy.
           </p>
-          <button className="bg-[#1a233b] text-white text-[2.5vh] font-semibold px-[0.5vw] py-[1.5vh] rounded-[3.5vh] flex items-center justify-center w-[15vw] shadow-lg hover:bg-[#2e3a5a] transition-colors duration-300">
+          <Link to="/SelectRole"><button className="bg-[#1a233b] text-white text-[2.5vh] font-semibold px-[0.5vw] py-[1.5vh] rounded-[3.5vh] flex items-center justify-center w-[15vw] shadow-lg hover:bg-[#2e3a5a] transition-colors duration-300">
             GET STARTED
             <span className="ml-[1vw] text-[3vh] leading-none">&rarr;</span>
-          </button>
+          </button></Link>
         </div>
 
         {/* Right Section: Vector Image */}

@@ -1,18 +1,17 @@
+import React from "react";
+
 const BonafideForm = () => {
   return (
     <div
       style={{
         width: "100vw",
-        minHeight: "100vh",
-        backgroundColor: "rgba(235, 235, 234, 1)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
+        height:"80%",
+        display:"flex",
+        justifyContent:"center",
+        alignItems:"center"
       }}
     >
-      {/* Navbar Placeholder */}
-      <div style={{ height: "10vh", width: "100vw", border: "1px solid black" }}> nav bar</div>
-
+     
       {/* Form Container */}
       <div
         style={{

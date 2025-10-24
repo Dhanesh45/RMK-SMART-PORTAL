@@ -71,11 +71,7 @@ const OfficeStaffGenerate = () => {
   };
 
   return (
-    <div style={{ width: "100%", overflow: "hidden" }}>
-      {/* Nav Bar */}
-      <div style={{ height: "10vh", width: "100vw" }}>Nav bar</div>
-
-      {/* Main Container */}
+    
       <div
         style={{
           display: "flex",
@@ -216,7 +212,7 @@ const OfficeStaffGenerate = () => {
           />
         </div>
       </div>
-    </div>
+    
   );
 };
 

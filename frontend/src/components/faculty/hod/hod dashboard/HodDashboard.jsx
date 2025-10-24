@@ -3,15 +3,15 @@ import PieChart from "./PieChart";
 import BarChart from "./BarChart";
 const HodDashboard = () => {
   return (
-    <div style={{ height: "100vh", width: "100%" }}>
-      <div style={{ height: "10vh", width: "100vw"}}> nav bar</div>
+   
+      
       <div
         style={{
           width: "100%",
           height: "90vh",
           backgroundColor: "#EEEEEE",
           padding: "4% 3%",
-          border:"1px solid black"
+      
         }}
       >
         <div
@@ -112,7 +112,6 @@ const HodDashboard = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 

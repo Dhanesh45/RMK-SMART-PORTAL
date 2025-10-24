@@ -69,59 +69,7 @@ const HodHistoryPage = () => {
 
   return (
     <div style={{ width: "100%", Height: "100vh",padding:"1%" , boxSizing: "border-box", fontSize: "2vh", overflow: "hidden" }}>
-      {/* Top Navbar */}
-      <div
-        style={{
-          backgroundColor: "#1e2a47",
-          borderRadius: "2vh",
-          padding: "1% 2%",
-          color: "white",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "2%",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "5%" }}>
-          <div
-            style={{
-              backgroundColor: "#3a4b72",
-              color: "white",
-              fontWeight: "bold",
-              borderRadius: "50%",
-              width: "5vh",
-              height: "5vh",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "2vh"
-            }}
-          >
-            L
-          </div>
-          <span style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>RMK SMART PORTAL</span>
-        </div>
-        <div style={{ display: "flex", gap: "1vw", alignItems: "center" }}>
-          <span>HOME</span>
-          <span style={{ fontWeight: "bold", cursor: "pointer", whiteSpace: "nowrap"}}>LOGIN HERE</span>
-          <span>FEATURES</span>
-          <button
-            style={{
-              border: "0.3vh solid white",
-              borderRadius: "2vh",
-              padding: "2% 3%",
-              backgroundColor: "white",
-              color: "#1e2a47",
-              fontWeight: "bold",
-              cursor: "pointer",
-              fontSize: "2vh"
-
-            }}
-          >
-            Login
-          </button>
-        </div>
-      </div>
+      
 
       {/* Filters */}
       <div style={{ display: "flex", gap: "2%", marginBottom: "2%" }}>

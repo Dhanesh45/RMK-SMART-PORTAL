@@ -4,9 +4,7 @@ import ApplicationFormDetailsChart from "./ApplicationFormDetailsChart";
 import OdDetailsChart from "./OdDetailsChart";
 
 const OaDashboard = () => {
-  return (
-    <div style={{ height: "100vh", width: "100%" }}>
-      <div style={{ height: "10vh", width: "100vw" }}> nav bar</div>
+  return ( 
       <div
         style={{
           width: "100%",
@@ -128,7 +126,7 @@ const OaDashboard = () => {
           </div>
         </div>
       </div>
-    </div>
+    
   );
 };
 

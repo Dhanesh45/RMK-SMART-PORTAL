@@ -33,22 +33,7 @@ const HodApprovalList = () => {
         flexDirection: "column",
       }}
     >
-      {/* Navbar */}
-      <div
-        style={{
-          height: "10vh",
-          width: "100%",
-          backgroundColor: "#2c3e50",
-          color: "white",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontWeight: "bold",
-          fontSize: "1.5rem",
-        }}
-      >
-        NAV BAR
-      </div>
+      
 
       {/* Content */}
       <div
@@ -129,7 +114,7 @@ const HodApprovalList = () => {
                 <th style={headerStyle}>S.NO</th>
                 <th style={headerStyle}>NAME</th>
                 <th style={headerStyle}>REG.NO</th>
-                <th style={headerStyle}>TYPE</th>
+                {/* <th style={headerStyle}>TYPE</th> */}
                 <th style={headerStyle}>FORM DETAILS</th>
                 <th style={headerStyle}>VALIDATION</th>
               </tr>
@@ -146,7 +131,7 @@ const HodApprovalList = () => {
                   <td style={cellStyle}>{student.sno}</td>
                   <td style={cellStyle}>{student.name}</td>
                   <td style={cellStyle}>{student.reg}</td>
-                  <td style={cellStyle}>{student.couns}</td>
+                  {/* <td style={cellStyle}>{student.couns}</td> */}
                   <td style={cellStyle}>
                     <button style={formBtn} onClick={() => setShowPopup(true)}>
                       VIEW FORM

@@ -1,5 +1,6 @@
 import React from "react";
 import loginimg from "../../assets/login.png"
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
@@ -15,9 +16,11 @@ import {
   FormControlLabel,
   Checkbox,
 } from "@mui/material";
-
+ 
 const StudentRegistration = () => {
+  const navigate=useNavigate();
   return (
+   
     <Box
       sx={{
         height: "100vh",
@@ -198,6 +201,7 @@ const StudentRegistration = () => {
                 fontSize: "100%",
                 "&:hover": { backgroundColor: "#218838" },
               }}
+              onClick={()=>navigate("/StuDash")}
             >
               Submit
             </Button>

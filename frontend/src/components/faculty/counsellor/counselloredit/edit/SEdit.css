@@ -9,12 +9,6 @@
   
 }
 
-.nav-space {
-  height: 10vh;
-  width: 100vw;
-  
-}
-
 .search-container {
   display: flex;
   justify-content: flex-start;

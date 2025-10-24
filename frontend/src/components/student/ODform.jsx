@@ -18,30 +18,10 @@ const ODform = () => {
   };
 
   return (
-    <div
-      style={{
-        height: "100vh",
-        width: "100%",
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "#f4f4f4",
-        overflow: "hidden",
-      }}
-    >
-      {/* Navbar Placeholder */}
+    
       <div
         style={{
-          height: "10%",
-          width: "100%",
-        }}
-      >
-        Navbar
-      </div>
-
-      {/* Main Form Card */}
-      <div
-        style={{
-          height: "85%",
+          height: "80%",
           width: "80%",
           margin: "2% auto",
           backgroundColor: "white",
@@ -323,7 +303,7 @@ const ODform = () => {
           </button>
         </div>
       </div>
-    </div>
+  
   );
 };
 

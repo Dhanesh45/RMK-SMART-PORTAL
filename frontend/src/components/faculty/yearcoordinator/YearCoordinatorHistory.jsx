@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function CounsellorHistory() {
+export default function YearCoordinatorHistory() {
   const [search, setSearch] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");

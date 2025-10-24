@@ -47,8 +47,7 @@ const YEdit = ({ selectedView, setSelectedView }) => {
 
   return (
     <div className="cedit-page">
-      <div className="nav-space"></div>
-
+      
       <div className="search-container">
         <select
           onChange={(e) => setSelectedView(e.target.value)}
