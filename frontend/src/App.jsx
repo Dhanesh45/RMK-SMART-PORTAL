@@ -9,35 +9,37 @@ import OfficeStaffLogin from "./components/office-staff/OfficeStaffLogin"
 import OsDash from './components/office-staff/OsDash'
 import FacultyMain from "./components/faculty/FacultyMain"
 import FacultyLogin from './components/faculty/FacultyLogin'
+import CounsApprovalList from './components/faculty/counsellor/CounsApprovalList'
 
 const App = () => {
   return (
     <div>
       <BrowserRouter>
 
-      <Routes>
-        {/* landing page */}
-        <Route path="/" element={<LandingPage />}/>
-        {/* select role page */}
-        <Route path="/SelectRole" element={<SelectRole />}/>
-        {/* student login */}
-        <Route path="/StudentRegistration" element={<StudentRegistration />}/>
-        <Route path="/StuDash"element={<StuDash />}/>
-        <Route path="/StudentLogin"element={<StudentLogin />}/>
+       <Routes>
+         {/* landing page */}
+         <Route path="/" element={<LandingPage />}/>
+         {/* select role page */}
+         <Route path="/SelectRole" element={<SelectRole />}/>
+      {/* student login */}
+         <Route path="/StudentRegistration" element={<StudentRegistration />}/>
+         <Route path="/StuDash"element={<StuDash />}/>
+         <Route path="/StudentLogin"element={<StudentLogin />}/>
 
-        {/* faculty login   */}
-        <Route path="/FacultyMain"element={<FacultyMain />}/>
-        <Route path="/FacultyLogin"element={<FacultyLogin />}/>
+         {/* faculty login   */}
+         <Route path="/FacultyMain"element={<FacultyMain />}/>
+         <Route path="/FacultyLogin"element={<FacultyLogin />}/>
        
 
-        {/* office staff login   */}
-         <Route path="/OfficeStaffLogin"element={<OfficeStaffLogin />}/>
-        <Route path="/OsDash"element={<OsDash />}/>
+         {/* office staff login   */}
+        <Route path="/OfficeStaffLogin"element={<OfficeStaffLogin />}/>
+         <Route path="/OsDash"element={<OsDash />}/>
 
 
-      </Routes>
+     </Routes>
 
       </BrowserRouter>
+  
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 
 const inputStyle = {
   width: "100%",
@@ -8,7 +8,7 @@ const inputStyle = {
 };
 
 const CounsOutPass = () => {
-  const [permission, setPermission] = useState("");
+  // const [permission, setPermission] = useState("");
 
   return (
     <div style={{ height: "100vh", width: "100%",padding:"3% 3% 4% 3%" }}>
