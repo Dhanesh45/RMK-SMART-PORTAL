@@ -23,14 +23,16 @@
 }
 
 .input {
-  width: 25%;
-  height: 6vh;
-  border-radius: 1.5vh;
-  background-color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 8px;
   border: 1px solid #ccc;
-  font-size: 2vh;
-  padding-left: 2%;
+  background-color: #fff;
+  font-weight: bold;
+  font-size: 1rem;
+  color: #182f53;
+  cursor: pointer;
 }
+
 
 .search-container input {
   width: 25%;

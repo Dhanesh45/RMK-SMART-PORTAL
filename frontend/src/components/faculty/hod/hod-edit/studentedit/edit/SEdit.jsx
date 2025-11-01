@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./SEdit.css";
 import SView from "../../../../counsellor/counselloredit/view/SView";
+import SAdd from "../../../../counsellor/counselloredit/add/SAdd";
 
 const initialStudents = [
   {
@@ -23,6 +24,7 @@ const SEdit = ({ selectedView, setSelectedView }) => {
   const [students, setStudents] = useState(initialStudents);
   const [search, setSearch] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
   const filtered = students.filter((s) =>
     s.regNo.toLowerCase().includes(search.toLowerCase())
@@ -36,21 +38,26 @@ const SEdit = ({ selectedView, setSelectedView }) => {
     setStudents(students.map((s) => (s.id === updated.id ? updated : s)));
   };
 
+  const handleAdd = (newStudent) => {
+    const newId = students.length + 1;
+    setStudents([...students, { id: newId, ...newStudent }]);
+  };
+
   return (
     <div className="cedit-page">
       <div className="nav-space"></div>
 
       <div className="search-container">
         <select
-          onChange={(e) => setSelectedView(e.target.value)}
-          className="input"
-          Value={selectedView} // or "student" or "yearcode" depending on the file
-        >
-           <option value="student">Student</option>
-          <option value="yearcode">Year Code</option>
-          <option value="counsellor">Counsellor</option>
-         
-        </select>
+  onChange={(e) => setSelectedView(e.target.value)}
+  className="input"
+  value={selectedView}
+>
+  <option value="student">Student</option>
+  <option value="counsellor">Counsellor</option>
+  <option value="yearcode">Year Code</option>
+</select>
+
 
         <input
           type="text"
@@ -58,6 +65,10 @@ const SEdit = ({ selectedView, setSelectedView }) => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+
+        <button className="edit-btn" onClick={() => setIsAddOpen(true)}>
+          ADD
+        </button>
       </div>
 
       <h2 className="title">STUDENT DETAILS</h2>
@@ -111,6 +122,13 @@ const SEdit = ({ selectedView, setSelectedView }) => {
           student={selectedStudent}
           onClose={() => setSelectedStudent(null)}
           onSave={handleSave}
+        />
+      )}
+
+      {isAddOpen && (
+        <SAdd
+          onClose={() => setIsAddOpen(false)}
+          onAdd={handleAdd}
         />
       )}
     </div>

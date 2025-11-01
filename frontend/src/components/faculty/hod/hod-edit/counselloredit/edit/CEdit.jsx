@@ -1,49 +1,19 @@
 import React, { useState } from "react";
 import "./CEdit.css";
-import CView from "../../../../yearcoordinator/yearcodedit/counselloredit/view/CView";
+import CView from "../../yearcodedit/view/YView";
+import CAdd from "../../../../yearcoordinator/yearcodedit/counselloredit/add/CAdd";
 
 const initialCounsellors = [
-  {
-    id: 1,
-    name: "AKASH",
-    email: "230329.it@rmkec.ac.in",
-    branch: "IT",
-    noOfStudents: 20,
-  },
-  {
-    id: 2,
-    name: "HARISH",
-    email: "harish269005@gmail.com",
-    branch: "CSE",
-    noOfStudents: 18,
-  },
-  {
-    id: 3,
-    name: "MANOJ",
-    email: "manoj@gmail.com",
-    branch: "EEE",
-    noOfStudents: 25,
-  },
-  {
-    id: 4,
-    name: "RAJ",
-    email: "raj@gmail.com",
-    branch: "MECH",
-    noOfStudents: 30,
-  },
-  {
-    id: 5,
-    name: "PRIYA",
-    email: "priya@gmail.com",
-    branch: "CIVIL",
-    noOfStudents: 22,
-  },
+  { id: 1, name: "John Doe", noOfStudents: 25, email: "john@example.com" },
+  { id: 2, name: "Jane Smith", noOfStudents: 30, email: "jane@example.com" },
+  { id: 3, name: "Emily Brown", noOfStudents: 28, email: "emily@example.com" },
 ];
 
 const CEdit = ({ selectedView, setSelectedView }) => {
   const [counsellors, setCounsellors] = useState(initialCounsellors);
   const [search, setSearch] = useState("");
   const [selectedCounsellor, setSelectedCounsellor] = useState(null);
+  const [isAddOpen, setIsAddOpen] = useState(false);
 
   const filtered = counsellors.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase())
@@ -57,32 +27,43 @@ const CEdit = ({ selectedView, setSelectedView }) => {
     setCounsellors(counsellors.map((c) => (c.id === updated.id ? updated : c)));
   };
 
+  const handleAdd = (newCounsellor) => {
+    const newId = counsellors.length + 1;
+    setCounsellors([...counsellors, { id: newId, ...newCounsellor }]);
+  };
+
   return (
     <div className="cedit-page">
       <div className="nav-space"></div>
 
+      {/* Search and Add Section */}
       <div className="search-container">
         <select
-          onChange={(e) => setSelectedView(e.target.value)}
-          className="input"
-          Value={selectedView}// or "student" or "yearcode" depending on the file
-        >
-          <option value="student">Student</option>
-          <option value="yearcode">Year Code</option>
-          <option value="counsellor">Counsellor</option>
-          
-        </select>
+  onChange={(e) => setSelectedView(e.target.value)}
+  className="input"
+  value={selectedView}
+>
+  <option value="student">Student</option>
+  <option value="counsellor">Counsellor</option>
+  <option value="yearcode">Year Code</option>
+</select>
+
 
         <input
           type="text"
-          placeholder="Counsellor Name"
+          placeholder="Search by Counsellor Name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+
+        <button className="edit-btn" onClick={() => setIsAddOpen(true)}>
+          ADD
+        </button>
       </div>
 
       <h2 className="title">COUNSELLOR DETAILS</h2>
 
+      {/* Table Section */}
       {filtered.length === 0 ? (
         <p className="no-data">No data found</p>
       ) : (
@@ -93,8 +74,7 @@ const CEdit = ({ selectedView, setSelectedView }) => {
                 <tr>
                   <th>S.NO</th>
                   <th>NAME</th>
-                  <th>BRANCH</th>
-                  <th>NO OF STUDENTS</th>
+                  <th>NO. OF STUDENTS</th>
                   <th>E-MAIL-ID</th>
                   <th>CONTROL</th>
                 </tr>
@@ -104,7 +84,6 @@ const CEdit = ({ selectedView, setSelectedView }) => {
                   <tr key={c.id}>
                     <td>{index + 1}</td>
                     <td>{c.name}</td>
-                    <td>{c.branch}</td>
                     <td>{c.noOfStudents}</td>
                     <td>{c.email}</td>
                     <td>
@@ -129,11 +108,19 @@ const CEdit = ({ selectedView, setSelectedView }) => {
         </div>
       )}
 
+      {/* Popup Modals */}
       {selectedCounsellor && (
         <CView
           student={selectedCounsellor}
           onClose={() => setSelectedCounsellor(null)}
           onSave={handleSave}
+        />
+      )}
+
+      {isAddOpen && (
+        <CAdd
+          onClose={() => setIsAddOpen(false)}
+          onAdd={handleAdd}
         />
       )}
     </div>

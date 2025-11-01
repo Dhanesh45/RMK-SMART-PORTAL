@@ -5,14 +5,17 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  
 }
 
+/* Add navbar spacing if used */
 .nav-space {
   height: 10vh;
   width: 100%;
 }
 
-.search-container {
+/* Centralized search/filter/add section */
+.search-filter-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -22,7 +25,9 @@
   gap: 5%;
 }
 
-.input {
+/* Unified input/select styling */
+.search-input,
+.filter-select {
   width: 25%;
   height: 6vh;
   border-radius: 1.5vh;
@@ -32,14 +37,21 @@
   padding-left: 2%;
 }
 
-.search-container input {
-  width: 25%;
-  height: 6vh;
+/* Add Button */
+.add-btn {
+  background-color: #1e2e4f;
+  color: white;
+  padding: 1vh 3vh;
+  border: none;
   border-radius: 1.5vh;
-  background-color: #ffffff;
-  border: 1px solid #ccc;
   font-size: 2vh;
-  padding-left: 2%;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.add-btn:hover {
+  background-color: #23335c;
+  transform: scale(1.05);
 }
 
 .title {
@@ -58,11 +70,7 @@
   margin-top: 3%;
 }
 
-.table {
-  width: 100%;
-  margin-bottom: 2%;
-}
-
+/* Table Section */
 .table-wrapper {
   background-color: rgba(217, 217, 217, 1);
   width: 80%;
@@ -70,15 +78,17 @@
   overflow-y: auto;
   border: 0.5vh solid rgba(217, 217, 217, 1);
   border-radius: 1vh;
-  margin: 0 auto;
+  margin: 0 auto 2vh auto;
   padding: 1%;
 }
 
+/* Table Layout */
 .student-table {
   width: 100%;
   border-collapse: collapse;
 }
 
+/* Table Head */
 .student-table th {
   background-color: #ffffff;
   position: sticky;
@@ -92,6 +102,7 @@
   font-size: 2vh;
 }
 
+/* Table Body */
 .student-table td {
   background-color: #ffffff;
   padding: 1vh;
@@ -100,6 +111,8 @@
   font-size: 2vh;
 }
 
+/* Action Buttons */
+.view-btn,
 .delete-btn,
 .edit-btn {
   padding: 1vh 2vh;
@@ -125,7 +138,17 @@
   background-color: #d32f2f;
   transform: scale(1.05);
 }
+.view-btn {
+  background-color: #23335c;
+}
+.view-btn:hover {
+  background-color: #23335c;
+  transform: scale(1.05);
+}
 
+.edit-btn {
+  background-color: #1e2e4f;
+}
 .edit-btn:hover {
   background-color: #23335c;
   transform: scale(1.05);
@@ -133,16 +156,18 @@
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
-  .search-container {
+  .search-filter-container {
     flex-direction: column;
     align-items: center;
     gap: 2vh;
+    width: 95%;
   }
 
-  .input,
-  .search-container input {
+  .search-input,
+  .filter-select {
     width: 70%;
     font-size: 2vh;
+    margin-bottom: 1vh;
   }
 
   .student-table th,
@@ -150,9 +175,11 @@
     font-size: 1.8vh;
   }
 
+  .add-btn,
+  .view-btn,
   .delete-btn,
   .edit-btn {
-    font-size: 1.6vh;
+    font-size:1.9vh;
     padding: 0.8vh 1.5vh;
   }
 }
