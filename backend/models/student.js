@@ -1,76 +1,72 @@
+// models/student.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db");
 
 const Student = sequelize.define(
-  "Student",
+  "student",
   {
-    student_id: {
+    studentId: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
+      field: "student_id",
     },
-    student_mail: {
+    studentMail: {
       type: DataTypes.STRING(100),
-      unique: true,
-      allowNull: true,
+      allowNull: false,
+      field: "student_mail",
+      unique: "unique_student_mail", // named unique key
     },
     password: {
       type: DataTypes.STRING(100),
-      allowNull: true,
+      allowNull: false,
     },
-    "Reg No": {
+    regNo: {
       type: DataTypes.STRING(100),
-      unique: true,
-      allowNull: true,
+      allowNull: false,
+      field: "reg_no",
+      unique: "unique_reg_no", // avoid recreating anonymous unique indexes
     },
     year: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
+      type: DataTypes.STRING(100),
     },
     branch: {
       type: DataTypes.STRING(100),
-      allowNull: true,
     },
-    student_name: {
+    studentName: {
       type: DataTypes.STRING(100),
-      allowNull: true,
+      field: "student_name",
     },
     gender: {
-      type: DataTypes.ENUM("Male", "Female", "other"),
-      allowNull: true,
+      type: DataTypes.ENUM("Male", "Female", "Other"),
     },
-    "Dayscholar/Hosteller": {
-      type: DataTypes.ENUM("dayscholar", "hosteller"),
-      allowNull: true,
+    accommodation: {
+      type: DataTypes.ENUM("Dayscholar", "Hosteller"),
+      field: "accommodation",
     },
-    "Parent Name": {
+    parentName: {
       type: DataTypes.STRING(100),
-      allowNull: true,
+      field: "parent_name",
     },
-    "Parent Phone Number": {
+    parentPhone: {
       type: DataTypes.STRING(15),
-      unique: true,
-      allowNull: true,
+      field: "parent_phone",
     },
     native: {
       type: DataTypes.STRING(100),
-      allowNull: true,
     },
     counsellor: {
       type: DataTypes.STRING(100),
-      allowNull: true,
     },
-    "Year coordinator": {
+    yearCoordinator: {
       type: DataTypes.STRING(100),
-      allowNull: true,
+      field: "year_coordinator",
     },
     hod: {
       type: DataTypes.STRING(100),
-      allowNull: true,
     },
     section: {
       type: DataTypes.ENUM("A", "B", "C", "D", "E", "F"),
-      allowNull: true,
     },
   },
   {
