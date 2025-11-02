@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./YEdit.css";
 import YView from "../view/YView";
+import YAdd from "./YAdd"; // ✅ Import Add popup
 
 const initialCoordinators = [
   {
@@ -12,17 +13,17 @@ const initialCoordinators = [
   },
   {
     id: 2,
-    name: "AKASH",
-    branch: "IT",
+    name: "RAHUL",
+    branch: "CSE",
     year: "II",
-    email: "230329.it@rmkec.ac.in",
+    email: "rahul@rmkec.ac.in",
   },
   {
     id: 3,
-    name: "AKASH",
-    branch: "IT",
+    name: "VIGNESH",
+    branch: "ECE",
     year: "III",
-    email: "230329.it@rmkec.ac.in",
+    email: "vignesh@rmkec.ac.in",
   },
 ];
 
@@ -30,13 +31,17 @@ const YEdit = ({ selectedView, setSelectedView }) => {
   const [coordinators, setCoordinators] = useState(initialCoordinators);
   const [searchBranch, setSearchBranch] = useState("");
   const [selectedCoordinator, setSelectedCoordinator] = useState(null);
+  const [isAddOpen, setIsAddOpen] = useState(false); // ✅ Add popup state
 
   const filtered = coordinators.filter((c) =>
     c.branch.toLowerCase().includes(searchBranch.toLowerCase())
   );
 
   const handleDelete = (id) => {
-    setCoordinators(coordinators.filter((c) => c.id !== id));
+    if (window.confirm("Are you sure you want to delete this coordinator?")) {
+      setCoordinators(coordinators.filter((c) => c.id !== id));
+      alert("Coordinator deleted successfully!");
+    }
   };
 
   const handleSave = (updated) => {
@@ -45,20 +50,39 @@ const YEdit = ({ selectedView, setSelectedView }) => {
     );
   };
 
+  const handleAdd = (newCoordinator) => {
+    const newId = coordinators.length + 1;
+    setCoordinators([...coordinators, { id: newId, ...newCoordinator }]);
+  };
+
   return (
-    <div className="cedit-page">
-      
+    <div className="yedit-page">
+      <div className="nav-space"></div>
+
       <div className="search-container">
         <select
-          onChange={(e) => setSelectedView(e.target.value)}
-          className="input"
-          Value={selectedView} // or "student" or "yearcode" depending on the file
-        >
-          <option value="student">Student</option>
-          <option value="yearcode">Year Code</option>
-          <option value="counsellor">Counsellor</option>
-          
-        </select>
+  onChange={(e) => setSelectedView(e.target.value)}
+  className="input"
+  value={selectedView}
+>
+  <option value="student">Student</option>
+  <option value="counsellor">Counsellor</option>
+  <option value="yearcode">Year Code</option>
+</select>
+
+
+        <div className="filter-add">
+          <input
+            type="text"
+            placeholder="Search by Branch"
+            value={searchBranch}
+            onChange={(e) => setSearchBranch(e.target.value)}
+            className="search-input"
+          />
+          <button className="add-btn" onClick={() => setIsAddOpen(true)}>
+            + Add
+          </button>
+        </div>
       </div>
 
       <h2 className="title">YEAR COORDINATOR DETAILS</h2>
@@ -98,7 +122,7 @@ const YEdit = ({ selectedView, setSelectedView }) => {
                         className="edit-btn"
                         onClick={() => setSelectedCoordinator(c)}
                       >
-                        EDIT ✏️
+                        EDIT ✏
                       </button>
                     </td>
                   </tr>
@@ -109,11 +133,19 @@ const YEdit = ({ selectedView, setSelectedView }) => {
         </div>
       )}
 
+      {/* ✅ Popups */}
       {selectedCoordinator && (
         <YView
           coordinator={selectedCoordinator}
           onClose={() => setSelectedCoordinator(null)}
           onSave={handleSave}
+        />
+      )}
+
+      {isAddOpen && (
+        <YAdd
+          onClose={() => setIsAddOpen(false)}
+          onAdd={handleAdd}
         />
       )}
     </div>

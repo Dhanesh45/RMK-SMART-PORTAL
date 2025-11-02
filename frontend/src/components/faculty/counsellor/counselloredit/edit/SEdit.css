@@ -9,8 +9,15 @@
   
 }
 
+.nav-space {
+  height: 10vh;
+  width: 100vw;
+  
+}
+
 .search-container {
   display: flex;
+  justify-content: space-between;
   justify-content: flex-start;
  height:10%;
  margin-left: 10%;
