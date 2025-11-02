@@ -29,8 +29,6 @@ const CounsellorODApproval = () => {
         flexDirection: "column",
       }}
     >
-     
-
       {/* Content Section */}
       <div
         style={{
@@ -46,22 +44,12 @@ const CounsellorODApproval = () => {
         <div
           style={{
             width: "90%",
+            height:"10vh",
             display: "flex",
             justifyContent: "flex-end",
-            marginBottom: "1.5%",
           }}
         >
-          <select
-            style={{
-              padding: "1%",
-              borderRadius: "0.6%",
-              border: "0.1% solid #ccc",
-              fontSize: "90%",
-            }}
-          >
-            <option value="">Counsellor</option>
-            <option value="Student">Student</option>
-          </select>
+          
         </div>
 
         {/* Table Container */}
