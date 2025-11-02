@@ -164,17 +164,18 @@ const StudentRegistration = () => {
               </FormGroup>
             </FormControl>
 
-            <FormControl fullWidth sx={{ mb: "5%" }}>
-              <InputLabel>Type</InputLabel>
-              <Select defaultValue="Hosteler">
+          
+            <FormControl fullWidth variant="outlined" sx={{ mb: "5%" }}>
+              <InputLabel>Accommodation</InputLabel>
+              <Select defaultValue="">
                 <MenuItem value="c1">Hosteler</MenuItem>
                 <MenuItem value="c2">Dayscholar</MenuItem>
               </Select>
             </FormControl>
 
             {/* Year Co-ordinator */}
-            <FormControl fullWidth sx={{ mb: "5%" }}>
-              <InputLabel>Year Co-ordinator</InputLabel>
+            <FormControl fullWidth variant="outlined" sx={{ mb: "5%" }}>
+              <InputLabel >Year Co-ordinator</InputLabel>
               <Select defaultValue="">
                 <MenuItem value="c1">Coordinator 1</MenuItem>
                 <MenuItem value="c2">Coordinator 2</MenuItem>
@@ -189,6 +190,71 @@ const StudentRegistration = () => {
                 <MenuItem value="con2">Counsellor 2</MenuItem>
               </Select>
             </FormControl>
+
+          
+
+            <FormControl fullWidth sx={{ mb: "5%" }}>
+              <InputLabel>Branch</InputLabel>
+              <Select defaultValue="">
+                <MenuItem value="c1">IT</MenuItem>
+                <MenuItem value="c2">CSE</MenuItem>
+                <MenuItem value="c3">AIDS</MenuItem>
+                <MenuItem value="c4">ECE</MenuItem>
+                <MenuItem value="c5">MECH</MenuItem>
+                <MenuItem value="c6">CIVIL</MenuItem>
+              </Select>
+            </FormControl>
+
+          
+
+            <FormControl fullWidth sx={{ mb: "5%" }}>
+              <InputLabel>Section</InputLabel>
+              <Select defaultValue="">
+                <MenuItem value="c1">A</MenuItem>
+                <MenuItem value="c2">B</MenuItem>
+                <MenuItem value="c3">C</MenuItem>
+              </Select>
+            </FormControl>
+
+          
+
+             <FormControl fullWidth sx={{ mb: "5%" }}>
+              <InputLabel>Year</InputLabel>
+              <Select defaultValue="">
+                <MenuItem value="c1">I</MenuItem>
+                <MenuItem value="c2">II</MenuItem>
+                <MenuItem value="c3">III</MenuItem>
+                <MenuItem value="c4">IV</MenuItem>
+              </Select>
+            </FormControl>
+
+            {/* Parent Name*/}
+            <TextField
+              fullWidth
+              type="parentname"
+              label="Parent Name"
+              variant="outlined"
+              sx={{ mb: "5%" }}
+            />
+
+            
+            {/* Parent Phone Number*/}
+            <TextField
+              fullWidth
+              type="parentno"
+              label="Parent No"
+              variant="outlined"
+              sx={{ mb: "5%" }}
+            />
+
+         
+            <TextField
+              fullWidth
+              type="native"
+              label="Native"
+              variant="outlined"
+              sx={{ mb: "5%" }}
+            />
 
             {/* Submit Button */}
             <Button
