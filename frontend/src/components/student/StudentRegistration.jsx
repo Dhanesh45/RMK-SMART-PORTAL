@@ -1,6 +1,7 @@
-import React from "react";
-import loginimg from "../../assets/login.png"
+import React, { useState } from "react";
+import loginimg from "../../assets/login.png";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
   Box,
   Button,
@@ -12,15 +13,53 @@ import {
   Select,
   InputLabel,
   FormControl,
-  FormGroup,
-  FormControlLabel,
-  Checkbox,
 } from "@mui/material";
- 
+
 const StudentRegistration = () => {
-  const navigate=useNavigate();
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    student_mail: "",
+    password: "",
+    regNo: "",
+    year: "",
+    branch: "",
+    student_name: "",
+    gender: "",
+    accommodation: "",
+    parent_name: "",
+    parent_phone: "",
+    native: "",
+    counsellor: "",
+    year_coordinator: "",
+    hod: "",
+    section: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    
+    console.log("📦 Sending formData:", formData);
+
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/api/student/register",
+        formData,
+        { headers: { "Content-Type": "application/json" } }
+      );
+      alert(res.data.message);
+      navigate("/StuDash");
+    } catch (err) {
+      console.error("❌ Registration Error:", err);
+      console.log("🔍 Response data:", err.response?.data);
+      alert(err.response?.data?.message || "Registration failed");
+    }
+  };
+
   return (
-   
     <Box
       sx={{
         height: "100vh",
@@ -28,12 +67,10 @@ const StudentRegistration = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        backgroundImage: 'linear-gradient(to bottom, rgba(49, 72, 122, 1), rgba(143, 179, 226, 1))'
+        backgroundImage:
+          "linear-gradient(to bottom, rgba(49, 72, 122, 1), rgba(143, 179, 226, 1))",
       }}
-      
-    
     >
-      {/* Outer Container */}
       <Card
         sx={{
           width: "90%",
@@ -44,7 +81,7 @@ const StudentRegistration = () => {
           overflow: "hidden",
         }}
       >
-        {/* Left Side Image */}
+        {/* Left Image */}
         <Box
           sx={{
             width: "50%",
@@ -53,7 +90,6 @@ const StudentRegistration = () => {
             alignItems: "center",
             justifyContent: "center",
             background: "#e9f5ff",
-           
           }}
         >
           <img
@@ -67,7 +103,7 @@ const StudentRegistration = () => {
           />
         </Box>
 
-        {/* Right Side Form (Scrollable) */}
+        {/* Right Form */}
         <Box
           sx={{
             width: "50%",
@@ -86,188 +122,176 @@ const StudentRegistration = () => {
               Registration Form
             </Typography>
 
-            {/* Name */}
             <TextField
               fullWidth
               label="Name"
-              variant="outlined"
+              name="student_name"
+              value={formData.student_name}
+              onChange={handleChange}
               sx={{ mb: "5%" }}
             />
 
-            {/* Registration Number */}
             <TextField
               fullWidth
               label="Registration Number"
-              variant="outlined"
+              name="regNo"
+              value={formData.regNo}
+              onChange={handleChange}
               sx={{ mb: "5%" }}
             />
 
-            {/* Email */}
             <TextField
               fullWidth
               type="email"
               label="E-Mail"
-              variant="outlined"
+              name="student_mail"
+              value={formData.student_mail}
+              onChange={handleChange}
               sx={{ mb: "5%" }}
             />
 
-            {/* Password */}
             <TextField
               fullWidth
               type="password"
               label="Password"
-              variant="outlined"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
               sx={{ mb: "5%" }}
             />
 
-            {/* Confirm Password */}
+            <FormControl fullWidth sx={{ mb: "5%" }}>
+              <InputLabel>Gender</InputLabel>
+              <Select
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+              >
+                <MenuItem value="Male">Male</MenuItem>
+                <MenuItem value="Female">Female</MenuItem>
+                <MenuItem value="other">Other</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth sx={{ mb: "5%" }}>
+              <InputLabel>Accommodation</InputLabel>
+              <Select
+                name="accommodation"
+                value={formData.accommodation}
+                onChange={handleChange}
+              >
+                <MenuItem value="hosteller">Hosteller</MenuItem>
+                <MenuItem value="dayscholar">Dayscholar</MenuItem>
+              </Select>
+            </FormControl>
+
             <TextField
               fullWidth
-              type="password"
-              label="Confirm Password"
-              variant="outlined"
+              label="Parent Name"
+              name="parent_name"
+              value={formData.parent_name}
+              onChange={handleChange}
               sx={{ mb: "5%" }}
             />
 
-            {/* Gender */}
-            <FormControl fullWidth sx={{ mb: "5%" }}>
-              <Typography
-                sx={{
-                  fontSize: "100%",
-                  color: "text.secondary", // lighter color
-                  mb: "2%",
-                }}
-              >
-                Gender
-              </Typography>
-              <FormGroup
-                row
-                sx={{
-                  ml: "1%", // small left padding to align with fields
-                }}
-              >
-                <FormControlLabel
-                  control={<Checkbox size="small" />}
-                  label="Male"
-                  sx={{ mr: "10%", color: "text.secondary" }}
-                />
-                <FormControlLabel
-                  control={<Checkbox size="small" />}
-                  label="Female"
-                  sx={{ mr: "10%",color: "text.secondary" }}
-                />
-                <FormControlLabel
-                  control={<Checkbox size="small" />}
-                  label="Prefer not to say"
-                  sx={{ color: "text.secondary" }}
-                />
-              </FormGroup>
-            </FormControl>
+            <TextField
+              fullWidth
+              label="Parent Phone"
+              name="parent_phone"
+              value={formData.parent_phone}
+              onChange={handleChange}
+              sx={{ mb: "5%" }}
+            />
 
-          
-            <FormControl fullWidth variant="outlined" sx={{ mb: "5%" }}>
-              <InputLabel>Accommodation</InputLabel>
-              <Select defaultValue="">
-                <MenuItem value="c1">Hosteler</MenuItem>
-                <MenuItem value="c2">Dayscholar</MenuItem>
-              </Select>
-            </FormControl>
+            <TextField
+              fullWidth
+              label="Native"
+              name="native"
+              value={formData.native}
+              onChange={handleChange}
+              sx={{ mb: "5%" }}
+            />
 
-            {/* Year Co-ordinator */}
-            <FormControl fullWidth variant="outlined" sx={{ mb: "5%" }}>
-              <InputLabel >Year Co-ordinator</InputLabel>
-              <Select defaultValue="">
-                <MenuItem value="c1">Coordinator 1</MenuItem>
-                <MenuItem value="c2">Coordinator 2</MenuItem>
-              </Select>
-            </FormControl>
+            <TextField
+              fullWidth
+              label="Counsellor"
+              name="counsellor"
+              value={formData.counsellor}
+              onChange={handleChange}
+              sx={{ mb: "5%" }}
+            />
 
-            {/* Counsellor */}
-            <FormControl fullWidth sx={{ mb: "5%" }}>
-              <InputLabel>Counsellor</InputLabel>
-              <Select defaultValue="">
-                <MenuItem value="con1">Counsellor 1</MenuItem>
-                <MenuItem value="con2">Counsellor 2</MenuItem>
-              </Select>
-            </FormControl>
+            <TextField
+              fullWidth
+              label="Year Coordinator"
+              name="year_coordinator"
+              value={formData.year_coordinator}
+              onChange={handleChange}
+              sx={{ mb: "5%" }}
+            />
 
-          
+            <TextField
+              fullWidth
+              label="HOD"
+              name="hod"
+              value={formData.hod}
+              onChange={handleChange}
+              sx={{ mb: "5%" }}
+            />
 
             <FormControl fullWidth sx={{ mb: "5%" }}>
               <InputLabel>Branch</InputLabel>
-              <Select defaultValue="">
-                <MenuItem value="c1">IT</MenuItem>
-                <MenuItem value="c2">CSE</MenuItem>
-                <MenuItem value="c3">AIDS</MenuItem>
-                <MenuItem value="c4">ECE</MenuItem>
-                <MenuItem value="c5">MECH</MenuItem>
-                <MenuItem value="c6">CIVIL</MenuItem>
+              <Select
+                name="branch"
+                value={formData.branch}
+                onChange={handleChange}
+              >
+                <MenuItem value="IT">IT</MenuItem>
+                <MenuItem value="CSE">CSE</MenuItem>
+                <MenuItem value="AIDS">AIDS</MenuItem>
+                <MenuItem value="ECE">ECE</MenuItem>
+                <MenuItem value="MECH">MECH</MenuItem>
+                <MenuItem value="CIVIL">CIVIL</MenuItem>
               </Select>
             </FormControl>
-
-          
 
             <FormControl fullWidth sx={{ mb: "5%" }}>
               <InputLabel>Section</InputLabel>
-              <Select defaultValue="">
-                <MenuItem value="c1">A</MenuItem>
-                <MenuItem value="c2">B</MenuItem>
-                <MenuItem value="c3">C</MenuItem>
+              <Select
+                name="section"
+                value={formData.section}
+                onChange={handleChange}
+              >
+                <MenuItem value="A">A</MenuItem>
+                <MenuItem value="B">B</MenuItem>
+                <MenuItem value="C">C</MenuItem>
               </Select>
             </FormControl>
 
-          
-
-             <FormControl fullWidth sx={{ mb: "5%" }}>
+            <FormControl fullWidth sx={{ mb: "5%" }}>
               <InputLabel>Year</InputLabel>
-              <Select defaultValue="">
-                <MenuItem value="c1">I</MenuItem>
-                <MenuItem value="c2">II</MenuItem>
-                <MenuItem value="c3">III</MenuItem>
-                <MenuItem value="c4">IV</MenuItem>
+              <Select
+                name="year"
+                value={formData.year}
+                onChange={handleChange}
+              >
+                <MenuItem value="I">I</MenuItem>
+                <MenuItem value="II">II</MenuItem>
+                <MenuItem value="III">III</MenuItem>
+                <MenuItem value="IV">IV</MenuItem>
               </Select>
             </FormControl>
 
-            {/* Parent Name*/}
-            <TextField
-              fullWidth
-              type="parentname"
-              label="Parent Name"
-              variant="outlined"
-              sx={{ mb: "5%" }}
-            />
-
-            
-            {/* Parent Phone Number*/}
-            <TextField
-              fullWidth
-              type="parentno"
-              label="Parent No"
-              variant="outlined"
-              sx={{ mb: "5%" }}
-            />
-
-         
-            <TextField
-              fullWidth
-              type="native"
-              label="Native"
-              variant="outlined"
-              sx={{ mb: "5%" }}
-            />
-
-            {/* Submit Button */}
             <Button
               fullWidth
               variant="contained"
               sx={{
                 mt: "5%",
-                backgroundColor: "",
                 borderRadius: "1.5vh",
                 fontSize: "100%",
                 "&:hover": { backgroundColor: "#218838" },
               }}
-              onClick={()=>navigate("/StuDash")}
+              onClick={handleSubmit}
             >
               Submit
             </Button>
