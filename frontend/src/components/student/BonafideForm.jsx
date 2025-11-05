@@ -1,18 +1,63 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const BonafideForm = () => {
+  const [student, setStudent] = useState({});
+  const [formData, setFormData] = useState({
+    reason: "",
+    year: "",
+    fatherName: "",
+    section: "",
+    houseNo: "",
+    dob: "",
+    age: "",
+    street: "",
+    area: "",
+    city: "",
+    state: "",
+    pincode: "",
+    category: "",
+    boardingPlace: "",
+    bonafideType: "",
+  });
+
+  const studentId = 1; // 🔹 Replace with logged-in student's ID
+
+  useEffect(() => {
+    axios
+      .get(`http://localhost:8080/api/student/${studentId}`)
+      .then((res) => setStudent(res.data))
+      .catch((err) => console.error("Error fetching student:", err));
+  }, []);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const res = await axios.post("http://localhost:8080/api/application-form", {
+        studentId,
+        ...formData,
+      });
+      alert("Application submitted successfully!");
+      console.log(res.data);
+    } catch (err) {
+      console.error(err);
+      alert("Error submitting form");
+    }
+  };
+
   return (
     <div
       style={{
         width: "100vw",
-        height:"80%",
-        display:"flex",
-        justifyContent:"center",
-        alignItems:"center"
+        height: "80%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
       }}
     >
-     
-      {/* Form Container */}
       <div
         style={{
           marginTop: "1%",
@@ -24,7 +69,7 @@ const BonafideForm = () => {
           boxShadow: "0 0 1vh rgba(0,0,0,0.2)",
           display: "flex",
           flexDirection: "column",
-          maxHeight: "80vh", // You can adjust this value as needed
+          maxHeight: "80vh",
           overflowY: "auto",
         }}
       >
@@ -40,287 +85,84 @@ const BonafideForm = () => {
           APPLICATION FORM FOR BONAFIDE CERTIFICATE
         </h2>
 
-        {/* Form Fields */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 1fr", // ✅ 2-column layout
+            gridTemplateColumns: "1fr 1fr",
             gap: "2vh 2vw",
             fontSize: "2vh",
           }}
         >
-          {/* Row 1 */}
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Reason for Bonafide Request</label>
-            <input type="text" style={{
-              padding: "1vh",
-              borderRadius: "1vh",
-              border: "1px solid #999",
-            }} />
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", width: "99.5%", }}>
-            <div style={fieldStyle}><label style={labelStyle}>Year</label>
-              <select style={{
-                padding: "1vh",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-                width: "200%",
-              }} >
-                <option>Year</option>
-                <option>I Year</option>
-                <option>II Year</option>
-                <option>III Year</option>
-                <option>IV Year</option>
-              </select>
-            </div>
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Father’s/Guardian’s Name</label>
-              <input type="text" style={{
-                padding: "1vh",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-                width: "100%",
-              }} />
-            </div>
-          </div>
+          {/* Auto-filled fields */}
+          <Field label="Name" value={student.name || ""} readOnly />
+          <Field label="Register Number" value={student.registerNumber || ""} readOnly />
+          <Field label="Branch" value={student.branch || ""} readOnly />
+          <Field label="Year" value={student.year || ""} readOnly />
 
-
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Name</label>
-            <input type="text" style={{
-              padding: "1vh",
-              borderRadius: "1vh",
-              border: "1px solid #999",
-            }} />
-          </div>
-
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Register Number</label>
-            <input type="number" style={{
-              padding: "1vh",
-              borderRadius: "1vh",
-              border: "1px solid #999",
-            }} />
-          </div>
-
-
-
-          <div style={{ display: "flex", justifyContent: "space-between", width: "90%" }}>
-            <div style={fieldStyle}>
-              <label style={labelStyle}>
-                Branch</label>
-              <input type="text" style={{
-                padding: "1vh",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-                width: "100%",  
-              }} />
-            </div>
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Section</label>
-              <select style={{
-                padding: "1vh",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-                width: "126%",
-              }} >
-                <option>Select your section</option>
-                <option>A</option>
-                <option>B</option>
-                <option>C</option>
-                <option>D </option>
-                <option>E</option>
-              </select>
-            </div>
-          </div>
-
-
-
-
-
-
-          {/* Row 3 */}
-          <div style={fieldStyle}>
-            <label style={labelStyle}>House No</label>
-            <input type="number" style={{
-              padding: "1vh",
-              borderRadius: "1vh",
-              border: "1px solid #999",
-            }} />
-          </div>
-
-          <div style={{ display: "flex", justifyContent: "space-between", width: "96%" }}>
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Date of Birth</label>
-              <input type="date" style={{
-                padding: "1vh",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-                width: "130%",
-              }} />
-            </div>
-            <div style={fieldStyle}>
-              <label style={labelStyle}>Age</label>
-              <input type="number" style={{
-                padding: "1vh",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-                width: "109%",
-              }} />
-            </div>
-          </div>
-
-
-
-
-
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Street Name</label>
-            <input type="text" style={{
-              padding: "1vh",
-              borderRadius: "1vh",
-              border: "1px solid #999",
-            }} />
-          </div>
-
-          {/* Row 4 */}
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Enter Area</label>
-            <input type="text" style={{
-              padding: "1vh",
-              borderRadius: "1vh",
-              border: "1px solid #999",
-            }} />
-          </div>
-
-
-
-
-
-
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Enter City</label>
-            <input type="text" style={{
-              padding: "1vh",
-              borderRadius: "1vh",
-              border: "1px solid #999",
-            }} />
-          </div>
-
-          {/* Row 5 */}
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Enter State</label>
-            <input type="text" style={{
-              padding: "1vh",
-              borderRadius: "1vh",
-              border: "1px solid #999",
-            }} />
-          </div>
-
-
-
-
-
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Enter Pincode</label>
-            <input type="Number" style={{
-              padding: "1vh",
-              borderRadius: "1vh",
-              border: "1px solid #999",
-            }} />
-          </div>
-
-          {/* Row 6 */}
-
-          {/* Row 7 */}
-          <div style={fieldStyle}>
-            <label style={labelStyle}>Select Category</label>
-            <select style={{
-              padding: "1vh",
-              borderRadius: "1vh",
-              border: "1px solid #999",
-              width: "100%",
-            }} >
-              <option>Select Category</option>
-              <option>GOVERMENT QUOTA</option>
-              <option>MANAGEMENT QUOTA</option>
-            </select>
-          </div>
-
-
-
-
-            <div style={fieldStyle}>
-              <label style={labelStyle}>
-                If Dayscholar, Boarding Place</label>
-              <input type="text" style={{
-                padding: "1vh",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-                width: "100%",
-              }} />
-            </div>
-          <div style={fieldStyle}>
-              <label style={labelStyle}>Select the Type of Bonafide</label>
-              <select style={{
-                padding: "1vh",
-                borderRadius: "1vh",
-                border: "1px solid #999",
-                width: "100%",
-              }} >
-                <option>Select the Type of Bonafide</option>
-                <option>WITH FEE STRUCTURE</option>
-                <option>WITHOUT FEE STRUCTURE</option>
-                <option>INPLANT TRAINING /PROJECT WORK</option>
-                <option>PAPER PRESENTATION </option>
-                <option>GENERAL</option>
-              </select>
-            </div>
-
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "end",
-              padding: "2%",
-              width: "100%",
-              alignItems: "end",
-            }}
-          >
-            <button
-              style={{
-                backgroundColor: "#1f2a44",
-                color: "rgba(224, 231, 231, 1)",
-                borderRadius: "2vh",
-                padding: "2% 9% 2%",
-                fontSize: "2vh",
-                fontWeight: "bolder",
-                cursor: "pointer",
-              }}
-            >
-              SUBMIT
-            </button>
-          </div>
+          {/* User-input fields */}
+          <Field label="Reason for Bonafide Request" name="reason" onChange={handleChange} />
+          <Field label="Father’s/Guardian’s Name" name="fatherName" onChange={handleChange} />
+          <Field label="Section" name="section" onChange={handleChange} />
+          <Field label="House No" name="houseNo" onChange={handleChange} />
+          <Field label="Date of Birth" name="dob" type="date" onChange={handleChange} />
+          <Field label="Age" name="age" type="number" onChange={handleChange} />
+          <Field label="Street Name" name="street" onChange={handleChange} />
+          <Field label="Enter Area" name="area" onChange={handleChange} />
+          <Field label="Enter City" name="city" onChange={handleChange} />
+          <Field label="Enter State" name="state" onChange={handleChange} />
+          <Field label="Enter Pincode" name="pincode" onChange={handleChange} />
+          <Field label="Select Category" name="category" onChange={handleChange} />
+          <Field label="If Dayscholar, Boarding Place" name="boardingPlace" onChange={handleChange} />
+          <Field label="Select the Type of Bonafide" name="bonafideType" onChange={handleChange} />
         </div>
 
-        {/* Submit Button */}
-
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "end",
+            padding: "2%",
+            width: "100%",
+            alignItems: "end",
+          }}
+        >
+          <button
+            style={{
+              backgroundColor: "#1f2a44",
+              color: "rgba(224, 231, 231, 1)",
+              borderRadius: "2vh",
+              padding: "2% 9% 2%",
+              fontSize: "2vh",
+              fontWeight: "bolder",
+              cursor: "pointer",
+            }}
+            onClick={handleSubmit}
+          >
+            SUBMIT
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-const fieldStyle = {
-  display: "flex",
-  flexDirection: "column",
-  height: "10vh",
-  fontSize: "2.1vh",
-};
-
-const labelStyle = {
-  marginBottom: "0.9vh",
-  fontWeight: "600",
-  fontSize: "2.5vh",
-  color: "rgba(0, 0, 0, 1)",
-};
+// Small reusable component
+const Field = ({ label, name, type = "text", value, onChange, readOnly }) => (
+  <div style={{ display: "flex", flexDirection: "column", height: "10vh" }}>
+    <label style={{ fontWeight: "600", marginBottom: "0.9vh" }}>{label}</label>
+    <input
+      type={type}
+      name={name}
+      value={value}
+      onChange={onChange}
+      readOnly={readOnly}
+      style={{
+        padding: "1vh",
+        borderRadius: "1vh",
+        border: "1px solid #999",
+        backgroundColor: readOnly ? "#f3f3f3" : "white",
+      }}
+    />
+  </div>
+);
 
 export default BonafideForm;
