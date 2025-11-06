@@ -1,30 +1,22 @@
-// route/studentRoute.js
+// backend/route/studentRoute.js
 const express = require("express");
 const router = express.Router();
-const {
-  registerStudent,
-  getAllStudents,
-} = require("../controller/studentController");
 const Student = require("../models/student");
 
-// ✅ Register new student
-router.post("/register", registerStudent);
-
-// ✅ Get all students
-router.get("/all", getAllStudents);
-
-// ✅ Get single student by ID (sid)
-router.get("/:sid", async (req, res) => {
+// 🔹 Fetch a student by ID
+router.get("/:id", async (req, res) => {
   try {
-    const { sid } = req.params;
-    const student = await Student.findByPk(sid);
+    const { id } = req.params; // ✅ Fixed: defined id
+    const student = await Student.findByPk(id);
+
     if (!student) {
-      return res.status(404).json({ message: "Student not found" });
+      return res.status(404).json({ error: "Student not found" });
     }
+
     res.json(student);
   } catch (error) {
     console.error("❌ Error fetching student:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ error: "Server error", details: error.message });
   }
 });
 

@@ -1,54 +1,47 @@
 const express = require("express");
 const router = express.Router();
-const Student = require("../models/student");
 const ApplicationForm = require("../models/application_form");
+const Student = require("../models/student");
 
-// 🧾 POST: Create application form
+// ✅ Create new application form
 router.post("/", async (req, res) => {
   try {
-    const { student_mail, reason, from_date, to_date, place, contact_number, parent_permission } = req.body;
+    console.log("🧾 Received body:", req.body);
+    const { studentId, reason, fatherName,section, houseNo, dob, age, street, area, city, state, pincode, category, boardingPlace, bonafideType } = req.body;
 
-    // Step 1: Find the student
-    const student = await Student.findOne({ where: { student_mail } });
+    if (!studentId) {
+      return res.status(400).json({ error: "Missing studentId" });
+    }
+
+    // ✅ Find the student first
+    const student = await Student.findByPk(studentId);
     if (!student) {
       return res.status(404).json({ error: "Student not found" });
     }
 
-    // Step 2: Create application form (auto-fill + user fields)
-    const application = await ApplicationForm.create({
-      student_id: student.student_id,
-      student_mail: student.student_mail,
-      regNo: student.regNo,
-      student_name: student.student_name,
-      branch: student.branch,
-      year: student.year,
-      section: student.section,
+    // ✅ Create the application form
+    const form = await ApplicationForm.create({
+      student_id:studentId,
       reason,
-      from_date,
-      to_date,
-      place,
-      contact_number,
-      parent_permission,
+      fatherName,
+      houseNo,
+      dob,
+      age,
+      street,
+      area,
+      city,
+      state,
+      pincode,
+      category,
+      boardingPlace,
+      bonafideType,
     });
 
-    res.status(201).json({
-      message: "Application form submitted successfully",
-      application,
-    });
+    console.log("✅ Application Form saved:", form.toJSON());
+    res.status(201).json({ message: "Form submitted successfully!", data: form });
   } catch (error) {
-    console.error("❌ Error creating application form:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-// 🧾 GET all applications
-router.get("/", async (req, res) => {
-  try {
-    const applications = await ApplicationForm.findAll({ include: Student });
-    res.json(applications);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to fetch application forms" });
+    console.error("❌ Error submitting form:", error);
+    res.status(500).json({ error: "Server error while submitting form." });
   }
 });
 

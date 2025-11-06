@@ -1,4 +1,3 @@
-// models/application_form.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db");
 const Student = require("./student");
@@ -9,56 +8,31 @@ const ApplicationForm = sequelize.define("ApplicationForm", {
     primaryKey: true,
     autoIncrement: true,
   },
-  reason: {
-    type: DataTypes.STRING,
-  },
-  year: {
-    type: DataTypes.STRING,
-  },
-  fatherName: {
-    type: DataTypes.STRING,
-  },
-  section: {
-    type: DataTypes.STRING,
-  },
-  houseNo: {
-    type: DataTypes.STRING,
-  },
-  dob: {
-    type: DataTypes.DATE,
-  },
-  age: {
+  studentId: {
     type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: Student,
+      key: "student_id",
+    },
   },
-  street: {
-    type: DataTypes.STRING,
-  },
-  area: {
-    type: DataTypes.STRING,
-  },
-  city: {
-    type: DataTypes.STRING,
-  },
-  state: {
-    type: DataTypes.STRING,
-  },
-  pincode: {
-    type: DataTypes.STRING,
-  },
-  category: {
-    type: DataTypes.STRING,
-  },
-  boardingPlace: {
-    type: DataTypes.STRING,
-  },
-  bonafideType: {
-    type: DataTypes.STRING,
-  },
+  reason: DataTypes.STRING,
+  fatherName: DataTypes.STRING,
+  houseNo: DataTypes.STRING,
+  dob: DataTypes.DATEONLY,
+  age: DataTypes.INTEGER,
+  street: DataTypes.STRING,
+  area: DataTypes.STRING,
+  city: DataTypes.STRING,
+  state: DataTypes.STRING,
+  pincode: DataTypes.STRING,
+  category: DataTypes.STRING,
+  boardingPlace: DataTypes.STRING,
+  bonafideType: DataTypes.STRING,
 });
 
-// Relationship: ApplicationForm belongs to Student
 ApplicationForm.belongsTo(Student, {
-  foreignKey: "studentId",
+  foreignKey: "student_id",
   onDelete: "CASCADE",
 });
 
