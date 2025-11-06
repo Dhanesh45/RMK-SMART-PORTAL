@@ -50,10 +50,8 @@ const StudentRegistration = () => {
 
     alert(res.data.message);
 
-    // ✅ Pass regNo without using localStorage
-    // navigate("/Outpass", { state: { regNo: formData.regNo } });
-    // navigate("/StuDash");
-    navigate("/StuDash", { state: { regNo: formData.regNo } });
+    
+    navigate("/StuDash", { state:{accommodation: formData.accommodation ,regNo: formData.regNo} });
 
 
   } catch (err) {

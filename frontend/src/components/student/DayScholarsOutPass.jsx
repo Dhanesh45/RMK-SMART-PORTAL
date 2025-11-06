@@ -4,23 +4,23 @@ const DayScholarsOutPass = () => {
   return (
     <div
       style={{
-        height: "100vh",
+        height: "90vh",
         width: "100%",
         display: "flex",
-        flexDirection: "column",
+        justifyContent:"center",
+        alignItems:"center",
         backgroundColor: "#f4f4f4",
         overflow: "hidden",
       }}
     >
-      {/* Navbar */}
-      <div style={{ height: "10vh", width: "100vw" }}>Navbar</div>
+      
 
       {/* Main Content */}
       <div
         style={{
-          height: "85%",
+          height: "90%",
           width: "80%",
-          margin: "0 auto",
+          
           backgroundColor: "white",
           borderRadius: "2vh",
           padding: "3%",

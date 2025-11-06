@@ -80,7 +80,7 @@ const Outpass = ({regNo:passedRegNo}) => {
           padding: "2%",
           boxShadow: "0px 0px 15px rgba(0,0,0,0.1)",
           overflowY: "auto",
-          maxHeight: "85vh",
+          minHeight: "85vh",
         }}
       >
         <div
