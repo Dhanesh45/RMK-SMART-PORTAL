@@ -4,8 +4,7 @@ const Student = require("../models/student");
 // Register a new student
 exports.registerStudent = async (req, res) => {
   try {
-    console.log("🧾 Received body:", req.body);
-
+    
     const {
       student_mail,
       password,
@@ -23,7 +22,7 @@ exports.registerStudent = async (req, res) => {
       hod,
       section,
     } = req.body;
-
+     console.log(accommodation)
     // Validation
     if (!student_mail || !password || !regNo || !student_name) {
       return res.status(400).json({ message: "Missing required fields" });
