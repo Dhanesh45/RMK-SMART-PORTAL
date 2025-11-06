@@ -29,7 +29,7 @@ const Outpass = ({regNo:passedRegNo}) => {
     fromDate: "",
     toDate: "",
     reasonForLeave: "",
-    parentsPermission: "",
+   
     forOd: "No",
     leavingDate: "",
     leavingTime: "",
