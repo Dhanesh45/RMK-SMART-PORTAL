@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import StuNavbar from "./StuNavbar";
 import Studentdash from "./Studentdash";
 import Outpass from "./Outpass";
@@ -9,6 +10,9 @@ import BonafideForm from "./BonafideForm";
 const StuDash = () => {
   const [activePage, setActivePage] = useState("HOME");
   const [accommodation, setAccommodation] = useState("");
+
+   const location = useLocation();
+  const regNo = location.state?.regNo || "";
 
   useEffect(() => {
     const storedAcc = localStorage.getItem("accommodation");
@@ -23,9 +27,9 @@ const StuDash = () => {
       {activePage === "HOME" && <Studentdash />}
       {activePage === "OUTPASS" &&
         (accommodation === "Dayscholar" ? (
-          <DayScholarsOutPass />
+          <DayScholarsOutPass regNo={regNo}/>
         ) : (
-          <Outpass />
+          <Outpass regNo={regNo} />
         ))}
       {activePage === "ON DUTY" && <ODform />}
       {activePage === "APPLICATION" && <BonafideForm />}

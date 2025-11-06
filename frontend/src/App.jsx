@@ -10,6 +10,7 @@ import OsDash from './components/office-staff/OsDash'
 import FacultyMain from "./components/faculty/FacultyMain"
 import FacultyLogin from './components/faculty/FacultyLogin'
 import CounsApprovalList from './components/faculty/counsellor/CounsApprovalList'
+import Outpass from './components/student/Outpass'
 
 const App = () => {
   return (
@@ -25,6 +26,9 @@ const App = () => {
          <Route path="/StudentRegistration" element={<StudentRegistration />}/>
          <Route path="/StuDash"element={<StuDash />}/>
          <Route path="/StudentLogin"element={<StudentLogin />}/>
+
+         {/* Outpass */}
+         {/* <Route path="/Outpass" element={<Outpass/>}/> */}
 
          {/* faculty login   */}
          <Route path="/FacultyMain"element={<FacultyMain />}/>
