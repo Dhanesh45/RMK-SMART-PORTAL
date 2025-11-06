@@ -1,3 +1,4 @@
+// models/outpass.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db");
 const Student = require("./student");
@@ -6,83 +7,107 @@ const Faculty = require("./faculty");
 const Outpass = sequelize.define(
   "Outpass",
   {
-    "Outpass id": {
+    outpassId: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
+      field: "Outpass id",
     },
-    "Student id": {
+    studentId: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
         model: Student,
         key: "student_id",
       },
+      field: "Student id",
     },
-    "Faculty id": {
+    facultyId: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
         model: Faculty,
         key: "f_id",
       },
+      field: "Faculty id",
     },
-    "Date of application": {
-      type: DataTypes.DATE,
+
+    // ✅ Extra student info (auto-filled)
+    studentName: {
+      type: DataTypes.STRING(100),
       allowNull: true,
+      field: "Student name",
     },
-    "Room number": {
-      type: DataTypes.INTEGER,
+    regNo: {
+      type: DataTypes.STRING(20),
       allowNull: true,
+      field: "Register number",
     },
-    "No. of. Days": {
+    year: {
       type: DataTypes.STRING(10),
       allowNull: true,
     },
-    "From Date": {
-      type: DataTypes.DATE,
+    branch: {
+      type: DataTypes.STRING(50),
       allowNull: true,
     },
-    "To Date": {
-      type: DataTypes.DATE,
+    parentName: {
+      type: DataTypes.STRING(100),
       allowNull: true,
+      field: "Parent name",
     },
-    "Reason for leave": {
+    parentPhone: {
+      type: DataTypes.STRING(15),
+      allowNull: true,
+      field: "Parent phone",
+    },
+
+    dateOfApplication: {
+      type: DataTypes.DATE,
+      field: "Date of application",
+    },
+    roomNumber: {
+      type: DataTypes.INTEGER,
+      field: "Room number",
+    },
+    noOfDays: {
+      type: DataTypes.STRING(10),
+      field: "No. of. Days",
+    },
+    fromDate: {
+      type: DataTypes.DATE,
+      field: "From Date",
+    },
+    toDate: {
+      type: DataTypes.DATE,
+      field: "To Date",
+    },
+    reasonForLeave: {
       type: DataTypes.STRING(200),
-      allowNull: true,
+      field: "Reason for leave",
     },
-    "Parents permission": {
+    parentsPermission: {
       type: DataTypes.ENUM("Yes", "No"),
-      allowNull: true,
+      field: "Parents permission",
     },
     remarks: {
       type: DataTypes.STRING(255),
-      allowNull: true,
     },
-    "Leaving Date": {
+    leavingDate: {
       type: DataTypes.DATE,
-      allowNull: true,
+      field: "Leaving Date",
     },
-    "Leaving Time": {
+    leavingTime: {
       type: DataTypes.TIME,
-      allowNull: true,
+      field: "Leaving Time",
     },
-    "For od": {
+    forOd: {
       type: DataTypes.ENUM("Yes", "No"),
-      allowNull: true,
+      field: "For od",
     },
-    cstatus: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    ystatus: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    hstatus: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
+    cstatus: DataTypes.INTEGER,
+    ystatus: DataTypes.INTEGER,
+    hstatus: DataTypes.INTEGER,
   },
   {
     tableName: "outpass",
@@ -90,11 +115,11 @@ const Outpass = sequelize.define(
   }
 );
 
-// Associations
-Student.hasMany(Outpass, { foreignKey: "Student id" });
-Outpass.belongsTo(Student, { foreignKey: "Student id" });
+// ✅ Associations
+Student.hasMany(Outpass, { foreignKey: "studentId" });
+Outpass.belongsTo(Student, { foreignKey: "studentId" });
 
-Faculty.hasMany(Outpass, { foreignKey: "Faculty id" });
-Outpass.belongsTo(Faculty, { foreignKey: "Faculty id" });
+Faculty.hasMany(Outpass, { foreignKey: "facultyId" });
+Outpass.belongsTo(Faculty, { foreignKey: "facultyId" });
 
 module.exports = Outpass;

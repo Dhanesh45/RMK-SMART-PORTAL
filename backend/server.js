@@ -1,9 +1,10 @@
+// server.js
 const express = require("express");
 const cors = require("cors");
 const sequelize = require("./db");
 require("dotenv").config();
 
-// Import models (ensure all are loaded before syncing)
+// ✅ Import all models before syncing
 require("./models/student");
 require("./models/faculty");
 require("./models/office_staff");
@@ -12,44 +13,46 @@ require("./models/od_form");
 require("./models/dayscholar_outpass");
 require("./models/application_form");
 
-// Import routes
+// ✅ Import routes
 const studentRoute = require("./route/studentRoute");
+const outpassRoute = require("./route/outpassRoute");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-
-// Allow requests from your frontend
-app.use(cors({
-  origin: "http://localhost:5173", // frontend URL
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true,
-}));
-
-// Middleware
+// ✅ Middleware
 app.use(express.json());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Vite frontend
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
-// Test route
+// ✅ Test route
 app.get("/", (req, res) => {
-  res.send("Backend is running on 🚀 and DB is connected ✅");
+  res.send("🚀 Backend running successfully ✅");
 });
 
-// Student routes
+// ✅ Routes
 app.use("/api/student", studentRoute);
+app.use("/api/outpass", outpassRoute); // ✅ Use plural to match frontend
 
-// Connect and sync database
+// ✅ Database connection + sync
 (async () => {
   try {
     await sequelize.authenticate();
-    console.log("✅ MySQL connection established successfully!");
+    console.log("✅ MySQL connected successfully!");
+
     await sequelize.sync({ alter: true });
     console.log("✅ All models synchronized successfully.");
   } catch (error) {
-    console.error("❌ Unable to connect to the database:", error.message);
+    console.error("❌ DB connection error:", error.message);
   }
 })();
 
-// Start server
+// ✅ Start server
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`🌐 Server running at http://localhost:${PORT}`);
 });

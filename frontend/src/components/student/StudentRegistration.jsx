@@ -40,24 +40,27 @@ const StudentRegistration = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    
-    console.log("📦 Sending formData:", formData);
+ const handleSubmit = async () => {
+  try {
+    const res = await axios.post(
+      "http://localhost:5000/api/student/register",
+      formData,
+      { headers: { "Content-Type": "application/json" } }
+    );
 
-    try {
-      const res = await axios.post(
-        "http://localhost:5000/api/student/register",
-        formData,
-        { headers: { "Content-Type": "application/json" } }
-      );
-      alert(res.data.message);
-      navigate("/StuDash");
-    } catch (err) {
-      console.error("❌ Registration Error:", err);
-      console.log("🔍 Response data:", err.response?.data);
-      alert(err.response?.data?.message || "Registration failed");
-    }
-  };
+    alert(res.data.message);
+
+    // ✅ Pass regNo without using localStorage
+    // navigate("/Outpass", { state: { regNo: formData.regNo } });
+    // navigate("/StuDash");
+    navigate("/StuDash", { state: { regNo: formData.regNo } });
+
+
+  } catch (err) {
+    alert(err.response?.data?.message || "Registration failed");
+  }
+};
+
 
   return (
     <Box
