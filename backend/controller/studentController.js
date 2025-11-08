@@ -22,7 +22,7 @@ exports.registerStudent = async (req, res) => {
       hod,
       section,
     } = req.body;
-     console.log(accommodation)
+     
     // Validation
     if (!student_mail || !password || !regNo || !student_name) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -73,4 +73,55 @@ exports.getAllStudents = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
-  
+
+//Dhanesh Work 
+
+// controller/studentController.js
+
+// ... (existing code for Student require and other exports) ...
+
+// Login an existing student
+exports.loginStudent = async (req, res) => {
+  try {
+    const { student_mail, password } = req.body;
+
+    // Validation
+    if (!student_mail || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    // 1. Find the student by email
+    const student = await Student.findOne({ 
+        where: { studentMail: student_mail },
+        // Use 'attributes' to explicitly select the fields you need, including sensitive ones 
+        // that must be checked (password) and non-sensitive ones to return.
+        attributes: ['studentMail', 'password', 'regNo', 'accommodation'] 
+    });
+
+    // Check if student exists
+    if (!student) {
+      return res.status(404).json({ message: "Student not found or incorrect email" });
+    }
+
+    // 2. Verify the password (NOTE: Use bcrypt for production!)
+    const isMatch = (password === student.password); // Simple comparison for this example
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials (incorrect password)" });
+    }
+
+    // 3. Successful login - RETURN THE REQUIRED DATA
+    res.status(200).json({
+      message: "Login successful",
+      studentData: {
+        // Only return the non-sensitive data needed for the dashboard/session
+        regNo: student.regNo,
+        accommodation: student.accommodation,
+      }
+    });
+
+  } catch (error) {
+    console.error("❌ Error logging in student:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

@@ -17,6 +17,8 @@ const approveBtn = {
   borderRadius: "20px",
   border: "none",
   cursor: "pointer",
+  
+  
 };
 
 const Outpass = ({regNo:passedRegNo}) => {
@@ -69,7 +71,7 @@ const Outpass = ({regNo:passedRegNo}) => {
         alignItems: "flex-start", // so it doesn’t stick to the middle of viewport
         minHeight: "100vh",
         backgroundColor: "#f5f6fa",
-        paddingTop: "10vh", // space for navbar
+        paddingTop: "3vh", // space for navbar
       }}
     >
       <div
@@ -80,7 +82,7 @@ const Outpass = ({regNo:passedRegNo}) => {
           padding: "2%",
           boxShadow: "0px 0px 15px rgba(0,0,0,0.1)",
           overflowY: "auto",
-          minHeight: "85vh",
+          maxHeight: "85vh",
         }}
       >
         <div
@@ -224,18 +226,7 @@ const Outpass = ({regNo:passedRegNo}) => {
                 />
               </div>
 
-              {/* <div style={{ width: "95%" }}>
-                <label>PARENTS PERMISSION (Write Yes / No / Any remark)</label>
-                <input
-                  type="text"
-                  placeholder="e.g., Yes, informed over call"
-                  style={inputStyle}
-                  onChange={(e) =>
-                    setForm({ ...form, parentsPermission: e.target.value })
-                  }
-                />
-              </div>
-               */}
+              
               <div style={{ display: "flex", gap: "30px" }}>
                 <div style={{ flex: 1 }}>
                   <label>LEAVING DATE</label>
@@ -280,3 +271,16 @@ const Outpass = ({regNo:passedRegNo}) => {
 };
 
 export default Outpass;
+
+{/* <div style={{ width: "95%" }}>
+                <label>PARENTS PERMISSION (Write Yes / No / Any remark)</label>
+                <input
+                  type="text"
+                  placeholder="e.g., Yes, informed over call"
+                  style={inputStyle}
+                  onChange={(e) =>
+                    setForm({ ...form, parentsPermission: e.target.value })
+                  }
+                />
+              </div>
+               */}
