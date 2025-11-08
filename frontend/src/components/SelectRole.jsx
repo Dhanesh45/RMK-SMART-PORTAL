@@ -16,7 +16,7 @@ const SelectRole = () => {
 
         <div className="flex justify-evenly items-center  w-[100%] h-[40vh]">
           {/* Student Card */}
-          <Link to="/StudentRegistration" className="w-[20%]  bg-white rounded-[2vh] border-[1vh] border-[#1E2E4F] mb-[2.5vh] sm:mb-0 flex flex-col items-center justify-between p-[2.5vh] text-center">
+          <Link to="/StudentLogin" className="w-[20%]  bg-white rounded-[2vh] border-[1vh] border-[#1E2E4F] mb-[2.5vh] sm:mb-0 flex flex-col items-center justify-between p-[2.5vh] text-center">
             <div className="h-[25vh] w-full flex justify-center items-center">
               <img src={stuimg} alt="Student" className="h-[90%]" />
             </div>

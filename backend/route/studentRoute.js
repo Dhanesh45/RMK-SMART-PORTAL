@@ -1,5 +1,5 @@
 const express = require("express");
-const { registerStudent, getAllStudents } = require("../controller/studentController");
+const { registerStudent, getAllStudents ,loginStudent } = require("../controller/studentController");
 
 const router = express.Router();
 
@@ -8,5 +8,8 @@ router.post("/register", registerStudent);
 
 // ✅ Get all students
 router.get("/all", getAllStudents);
+
+//Dhanesh Work
+router.post("/login", loginStudent);
 
 module.exports = router;
