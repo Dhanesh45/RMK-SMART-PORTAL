@@ -1,258 +1,225 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import axios from "axios";
 
-const DayScholarsOutPass = () => {
+const inputStyle = {
+  width: "100%",
+  padding: "8px",
+  borderRadius: "5px",
+  border: "1px solid #ccc",
+};
+
+const submitBtn = {
+  padding: "10px 40px",
+  backgroundColor: "#1E2E4F",
+  color: "white",
+  fontWeight: "bold",
+  borderRadius: "20px",
+  border: "none",
+  cursor: "pointer",
+};
+
+const DayscholarOutpass = ({ regNo: passedRegNo }) => {
+  const location = useLocation();
+  const [regNo, setRegNo] = useState(passedRegNo || location.state?.regNo || "");
+  const [student, setStudent] = useState(null);
+  const [form, setForm] = useState({
+    reason: "",
+    fromDate: "",
+    toDate: "",
+    leavingTime: "",
+    parentPermission: "",
+  });
+
+  // Fetch student by regNo or email
+  const fetchStudent = async (reg = regNo) => {
+    if (!reg) return;
+    try {
+      const res = await axios.get(`http://localhost:5000/api/dayscholarOutpass/student/${reg}`);
+      setStudent(res.data);
+    } catch (err) {
+      alert("❌ Student not found");
+      setStudent(null);
+    }
+  };
+
+  // Fetch student when regNo changes
+  useEffect(() => {
+    fetchStudent();
+  }, [regNo]);
+
+  // Handle form submission
+  const handleSubmit = async () => {
+    // 1. Ensure student exists
+    if (!student || !student.regNo) {
+      alert("❌ Please enter a valid student registration number first!");
+      return;
+    }
+
+    // 2. Validate form fields
+    if (!form.reason || !form.fromDate || !form.leavingTime || !form.parentPermission) {
+      alert("❌ Please fill all required fields!");
+      return;
+    }
+
+    try {
+      // 3. Send request to backend
+      await axios.post("http://localhost:5000/api/dayscholarOutpass/create", {
+        regNo: student.regNo,             // required by backend
+        reason: form.reason,              // maps to "Purpose of Leaving"
+        fromDate: form.fromDate,             // date
+        toDate: form.toDate || form.fromDate,// optional
+        leavingTime: form.leavingTime,
+        // maps to "time"
+        parentPermission: form.parentPermission, // maps to "Parent Permission"
+      });
+
+      alert("✅ Day Scholar Outpass submitted!");
+
+      // 4. Reset form
+      setForm({
+        reason: "",
+        fromDate: "",
+        toDate: "",
+        leavingTime: "",
+        parentPermission: "",
+      });
+    } catch (err) {
+      console.error("❌ Failed to submit outpass:", err);
+      alert("❌ Failed to submit outpass. Check console for details.");
+    }
+  };
+
+
   return (
     <div
       style={{
-        height: "90vh",
-        width: "100%",
         display: "flex",
-        justifyContent:"center",
-        alignItems:"center",
-        backgroundColor: "#f4f4f4",
-        overflow: "hidden",
+        justifyContent: "center",
+        alignItems: "flex-start",
+        minHeight: "100vh",
+        backgroundColor: "#f5f6fa",
+        paddingTop: "3vh",
       }}
     >
-      
-
-      {/* Main Content */}
       <div
         style={{
-          height: "90%",
           width: "80%",
-          
           backgroundColor: "white",
-          borderRadius: "2vh",
-          padding: "3%",
-          boxShadow: "0% 0% 2% rgba(0,0,0,0.1)",
-          display: "flex",
-          flexDirection: "column",
-          gap: "3%",
+          borderRadius: "15px",
+          padding: "2%",
+          boxShadow: "0px 0px 15px rgba(0,0,0,0.1)",
+          overflowY: "auto",
+          maxHeight: "85vh",
         }}
       >
-        {/* Title */}
-        <h2
-          style={{
-            textAlign: "center",
-            fontSize: "3vh",
-            fontWeight: "bold",
-            margin: 0,
-          }}
-        >
-          APPLICATION FOR GATE PASS (DAYSCHOLARS)
-        </h2>
+        <div style={{ width: "100%", textAlign: "center", fontSize: "3vh", fontWeight: "bold", marginBottom: "1%" }}>
+          <h3>DAY SCHOLAR OUTPASS</h3>
+        </div>
 
-        {/* Two Column Layout */}
-        <div style={{ display: "flex", gap: "5%", height: "100%" }}>
-          {/* Left Column */}
-          <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-            <label style={{ fontSize: "2vh" }}>NAME OF THE STUDENT</label>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
+          {/* Registration Number Input */}
+          <div style={{ width: "95%" }}>
+            <label>REGISTRATION NUMBER / EMAIL</label>
             <input
               type="text"
-              style={{
-                width: "100%",
-                padding: "2%",
-                marginBottom: "2%",
-                borderRadius: "1vh",
-                border: "0.2vh solid #ccc",
-              }}
-            />
-
-            <label style={{ fontSize: "2vh" }}>REGISTER NUMBER</label>
-            <input
-              type="text"
-              style={{
-                width: "100%",
-                padding: "2%",
-                marginBottom: "2%",
-                borderRadius: "1vh",
-                border: "0.2vh solid #ccc",
-              }}
-            />
-
-            <label style={{ fontSize: "2vh" }}>BRANCH</label>
-            <input
-              type="text"
-              style={{
-                width: "100%",
-                padding: "2%",
-                marginBottom: "2%",
-                borderRadius: "1vh",
-                border: "0.2vh solid #ccc",
-              }}
-            />
-
-            {/* Year & Section */}
-            <div style={{ display: "flex", gap: "5%" }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ fontSize: "2vh" }}>YEAR</label>
-                <select
-                  style={{
-                    width: "100%",
-                    padding: "3%",
-                    marginBottom: "2%",
-                    borderRadius: "1vh",
-                    border: "0.2vh solid #ccc",
-                  }}
-                >
-                  <option value="">SELECT</option>
-                  <option value="I">I</option>
-                  <option value="II">II</option>
-                  <option value="III">III</option>
-                  <option value="IV">IV</option>
-                </select>
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ fontSize: "2vh" }}>SECTION</label>
-                <select
-                  style={{
-                    width: "100%",
-                    padding: "3%",
-                    marginBottom: "2%",
-                    borderRadius: "1vh",
-                    border: "0.2vh solid #ccc",
-                  }}
-                >
-                  <option value="">SELECT</option>
-                  <option value="A">A</option>
-                  <option value="B">B</option>
-                  <option value="C">C</option>
-                  <option value="D">D</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Date & Time */}
-            <div style={{ display: "flex", gap: "5%" }}>
-              <div style={{ flex: 1 }}>
-                <label style={{ fontSize: "2vh" }}>DATE</label>
-                <input
-                  type="date"
-                  style={{
-                    width: "100%",
-                    padding: "3%",
-                    marginBottom: "2%",
-                    borderRadius: "1vh",
-                    border: "0.2vh solid #ccc",
-                  }}
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ fontSize: "2vh" }}>TIME</label>
-                <input
-                  type="time"
-                  style={{
-                    width: "100%",
-                    padding: "3%",
-                    marginBottom: "2%",
-                    borderRadius: "1vh",
-                    border: "0.2vh solid #ccc",
-                  }}
-                />
-              </div>
-            </div>
-
-            <label style={{ fontSize: "2vh" }}>PURPOSE OF LEAVING</label>
-            <input
-              type="text"
-              style={{
-                width: "100%",
-                padding: "2%",
-                marginBottom: "2%",
-                borderRadius: "1vh",
-                border: "0.2vh solid #ccc",
-              }}
+              style={inputStyle}
+              value={regNo}
+              onChange={(e) => setRegNo(e.target.value)}
             />
           </div>
 
-          {/* Right Column */}
-          <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-            <label style={{ fontSize: "2vh" }}>NAME OF THE COUNSELLOR</label>
-            <input
-              type="text"
-              style={{
-                width: "100%",
-                padding: "2%",
-                marginBottom: "2%",
-                borderRadius: "1vh",
-                border: "0.2vh solid #ccc",
-              }}
-            />
+          {/* Auto-filled fields */}
+          {student && (
+            <>
+              <div style={{ width: "95%" }}>
+                <label>NAME OF THE STUDENT</label>
+                <input type="text" style={inputStyle} value={student.studentName} disabled />
+              </div>
 
-            <label style={{ fontSize: "2vh" }}>NAME OF THE PARENT</label>
-            <input
-              type="text"
-              style={{
-                width: "100%",
-                padding: "2%",
-                marginBottom: "2%",
-                borderRadius: "1vh",
-                border: "0.2vh solid #ccc",
-              }}
-            />
+              <div style={{ width: "95%" }}>
+                <label>BRANCH</label>
+                <input type="text" style={inputStyle} value={student.branch} disabled />
+              </div>
 
-            <label style={{ fontSize: "2vh" }}>CONTACT NUMBER OF THE PARENT</label>
-            <input
-              type="number"
-              style={{
-                width: "100%",
-                padding: "2%",
-                marginBottom: "2%",
-                borderRadius: "1vh",
-                border: "0.2vh solid #ccc",
-              }}
-            />
+              <div style={{ width: "95%" }}>
+                <label>NAME OF THE COUNSELLOR</label>
+                <input type="text" style={inputStyle} value={student.counsellor} disabled />
+              </div>
 
-            <label style={{ fontSize: "2vh" }}>PARENT PERMISSION</label>
-            <select
-              style={{
-                width: "100%",
-                padding: "2%",
-                marginBottom: "2%",
-                borderRadius: "1vh",
-                border: "0.2vh solid #ccc",
-              }}
-            >
-              <option value="">SELECT</option>
-              <option value="Phone">OBTAINED OVER PHONE</option>
-              <option value="InPerson">HAS COME IN PERSON</option>
-            </select>
+              <div style={{ width: "95%" }}>
+                <label>NAME OF THE PARENT</label>
+                <input type="text" style={inputStyle} value={student.parentName} disabled />
+              </div>
 
-            <label style={{ fontSize: "2vh" }}>REMARKS</label>
-            <input
-              type="text"
-              style={{
-                width: "100%",
-                padding: "2%",
-                marginBottom: "2%",
-                borderRadius: "1vh",
-                border: "0.2vh solid #ccc",
-              }}
-            />
+              <div style={{ width: "95%" }}>
+                <label>CONTACT NUMBER OF THE PARENT</label>
+                <input type="text" style={inputStyle} value={student.parentPhone} disabled />
+              </div>
 
-            {/* Submit Button */}
-            <button
-              style={{
-                padding: "1.5% 4%",
-                fontSize: "2vh",
-                fontWeight: "bold",
-                backgroundColor: "#0d3b66",
-                color: "white",
-                border: "none",
-                borderRadius: "5vh",
-                cursor: "pointer",
-                alignSelf: "flex-end",
-                marginTop: "auto",
-                boxShadow: "0% 0% 2% rgba(0,0,0,0.2)",
-              }}
-            >
-              SUBMIT
-            </button>
-          </div>
+              {/* User inputs */}
+              <div style={{ width: "95%" }}>
+                <label>REASON FOR LEAVING</label>
+                <input
+                  type="text"
+                  style={inputStyle}
+                  value={form.reason}
+                  onChange={(e) => setForm({ ...form, reason: e.target.value })}
+                />
+              </div>
+
+              <div style={{ display: "flex", gap: "30px" }}>
+                <div style={{ flex: 1 }}>
+                  <label>FROM DATE</label>
+                  <input
+                    type="date"
+                    style={inputStyle}
+                    value={form.fromDate}
+                    onChange={(e) => setForm({ ...form, fromDate: e.target.value })}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label>TO DATE</label>
+                  <input
+                    type="date"
+                    style={inputStyle}
+                    value={form.toDate}
+                    onChange={(e) => setForm({ ...form, toDate: e.target.value })}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label>LEAVING TIME</label>
+                  <input
+                    type="time"
+                    style={inputStyle}
+                    value={form.leavingTime}
+                    onChange={(e) => setForm({ ...form, leavingTime: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div style={{ width: "95%" }}>
+                <label>PARENTS PERMISSION (Yes/No/Remarks)</label>
+                <input
+                  type="text"
+                  style={inputStyle}
+                  value={form.parentPermission}
+                  onChange={(e) => setForm({ ...form, parentPermission: e.target.value })}
+                />
+              </div>
+
+              {/* Submit button */}
+              <div style={{ width: "100%", paddingTop: "3.2%", textAlign: "end" }}>
+                <button onClick={handleSubmit} style={submitBtn}>
+                  SUBMIT
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
   );
 };
 
-export default DayScholarsOutPass;
+export default DayscholarOutpass;
