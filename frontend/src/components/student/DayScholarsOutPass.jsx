@@ -199,13 +199,16 @@ const DayscholarOutpass = ({ regNo: passedRegNo }) => {
               </div>
 
               <div style={{ width: "95%" }}>
-                <label>PARENTS PERMISSION (Yes/No/Remarks)</label>
-                <input
-                  type="text"
+                <label>PARENTS PERMISSION (Yes/No)</label>
+                <select
                   style={inputStyle}
                   value={form.parentPermission}
                   onChange={(e) => setForm({ ...form, parentPermission: e.target.value })}
-                />
+                >
+                  <option value="">Select Permission</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
               </div>
 
               {/* Submit button */}

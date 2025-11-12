@@ -18,26 +18,32 @@ const getStudentByRegNo = async (req, res) => {
 /** ✅ Create Day Scholar Outpass */
 const createDayScholarOutpass = async (req, res) => {
   try {
-    const { regNo, reason, fromDate, toDate, leavingTime } = req.body;
+    // Destructure all needed fields from the request body
+    const { regNo, reason, fromDate, toDate, leavingTime, parentPermission } = req.body;
 
     const student = await Student.findOne({ where: { regNo } });
     if (!student) return res.status(404).json({ message: "Student not found" });
 
+    // The fields provided in the `create` function MUST match the property names in your Sequelize model (dayscholar_outpass.js)
     const newOutpass = await DayScholarOutpass.create({
+      // 1. Foreign Key
       studentId: student.studentId,
-      studentName: student.studentName,
-      regNo: student.regNo,
-      year: student.year,
-      branch: student.branch,
-      section: student.section,
-      parentName: student.parentName,
-      parentPhone: student.parentPhone,
-      counsellor: student.counsellor,
-      reason,
-      fromDate,
-      toDate,
-      leavingTime,
-      dateOfApplication: new Date(),
+
+      // 2. User-input fields, mapped to the correct model properties:
+      reason: reason, // Maps to "Purpose of Leaving" DB column
+      date: fromDate, // FIX: Maps from 'fromDate' (req.body) to 'date' (model property)
+      time: leavingTime, // FIX: Maps from 'leavingTime' (req.body) to 'time' (model property)
+      parentPermission: parentPermission, // Maps to "Parent Permission" DB column
+
+      // 3. Auto-filled/Redundant student details (only include columns that exist in the dayscholars_outpass table)
+      parentName: student.parentName, // This field exists in your DayscholarsOutpass model
+      parentNumber: student.parentPhone, // This field exists in your DayscholarsOutpass model
+      
+      // Optional: Use remarks to save the 'toDate' since your model doesn't have a dedicated 'toDate' column
+      remarks: toDate ? `Return Date: ${toDate}` : null,
+      
+      // NOTE: Fields like studentName, regNo, year, branch, section, and counsellor
+      // are NOT columns in the DayscholarsOutpass model and should not be included here.
     });
 
     res.status(201).json({ message: "✅ Day Scholar Outpass Created", newOutpass });

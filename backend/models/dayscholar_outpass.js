@@ -41,10 +41,10 @@ const DayscholarsOutpass = sequelize.define(
       field: "Parent name",
     },
     parentPermission: {
-      type: DataTypes.ENUM("Yes", "No"),
-      allowNull: true,
-      field: "Parent Permission",
-    },
+  type: DataTypes.ENUM("Yes", "No"), // This ONLY accepts "Yes" or "No"
+  allowNull: true,
+  field: "Parent Permission",
+},
     parentNumber: {
       type: DataTypes.STRING(15),
       allowNull: true,
