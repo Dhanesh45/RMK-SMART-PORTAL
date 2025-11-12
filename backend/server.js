@@ -16,6 +16,7 @@ require("./models/application_form");
 // ✅ Import routes
 const studentRoute = require("./route/studentRoute");
 const outpassRoute = require("./route/outpassRoute");
+const dayscholarOutpassRoutes = require("./route/dayscholarRoute");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -38,7 +39,7 @@ app.get("/", (req, res) => {
 // ✅ Routes
 app.use("/api/student", studentRoute);
 app.use("/api/outpass", outpassRoute); // ✅ Use plural to match frontend
-
+app.use("/api/dayscholarOutpass", dayscholarOutpassRoutes);
 // ✅ Database connection + sync
 (async () => {
   try {

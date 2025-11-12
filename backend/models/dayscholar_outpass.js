@@ -3,16 +3,18 @@ const sequelize = require("../db");
 const Student = require("./student");
 
 const DayscholarsOutpass = sequelize.define(
-  "Dayscholars_Outpass",
+  "DayscholarsOutpass",
   {
-    dayscholaroutpass_id: {
+    dayscholaroutpassId: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
+      field: "dayscholaroutpass_id",
     },
-    "Student id": {
+    studentId: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      field: "Student id",
       references: {
         model: Student,
         key: "student_id",
@@ -21,30 +23,37 @@ const DayscholarsOutpass = sequelize.define(
     date: {
       type: DataTypes.DATE,
       allowNull: true,
+      field: "date",
     },
     time: {
       type: DataTypes.TIME,
       allowNull: true,
+      field: "time",
     },
-    "Purpose of Leaving": {
+    reason: {
       type: DataTypes.STRING(100),
       allowNull: true,
+      field: "Purpose of Leaving",
     },
-    "Parent name": {
+    parentName: {
       type: DataTypes.STRING(100),
       allowNull: true,
+      field: "Parent name",
     },
-    "Parent Permission": {
-      type: DataTypes.ENUM("Yes", "No"),
-      allowNull: true,
-    },
-    "Parent number": {
+    parentPermission: {
+  type: DataTypes.ENUM("Yes", "No"), // This ONLY accepts "Yes" or "No"
+  allowNull: true,
+  field: "Parent Permission",
+},
+    parentNumber: {
       type: DataTypes.STRING(15),
       allowNull: true,
+      field: "Parent number",
     },
     remarks: {
       type: DataTypes.STRING(255),
       allowNull: true,
+      field: "remarks",
     },
   },
   {
@@ -53,8 +62,8 @@ const DayscholarsOutpass = sequelize.define(
   }
 );
 
-// Association
-Student.hasMany(DayscholarsOutpass, { foreignKey: "Student id" });
-DayscholarsOutpass.belongsTo(Student, { foreignKey: "Student id" });
+// Associations
+Student.hasMany(DayscholarsOutpass, { foreignKey: "studentId" });
+DayscholarsOutpass.belongsTo(Student, { foreignKey: "studentId" });
 
 module.exports = DayscholarsOutpass;
