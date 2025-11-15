@@ -7,6 +7,7 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
     passedRegNo || location.state?.regNo || ""
   );
   const [student, setStudent] = useState(null);
+  const [errors, setErrors] = useState({});
 
   const [form, setForm] = useState({
     reason: "",
@@ -26,6 +27,66 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
     type_of_application: "",
   });
 
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!form.reason || form.reason.trim() === "") {
+      newErrors.reason = "Reason is required";
+    }
+    if (!form.fatherName.trim())
+      newErrors.fatherName = "Father/Guardian name required";
+    if (!form.semester) newErrors.semester = "Select a semester";
+    if (!form.houseno) newErrors.houseno = "House number required";
+    if (!form.date_of_birth) {
+      newErrors.date_of_birth = "Date of Birth is required";
+    } else {
+      const dob = new Date(form.date_of_birth);
+      const today = new Date();
+
+      if (dob.toString() === "Invalid Date") {
+        newErrors.date_of_birth = "Invalid date";
+      } else if (dob > today) {
+        newErrors.date_of_birth = "DOB cannot be in the future";
+      }
+    }
+    if (!form.age) {
+      newErrors.age = "Age is required";
+    } else if (form.age <= 0) {
+      newErrors.age = "Enter a valid age";
+    }
+    if (!form.street.trim()) {
+      newErrors.street = "Street is required";
+    }
+    if (!form.area) newErrors.area = "Area required";
+    if (!form.city) newErrors.city = "City required";
+    if (!form.state) newErrors.state = "State required";
+
+    if (!form.pincode) {
+      newErrors.pincode = "Pincode is required";
+    } else if (!/^\d{6}$/.test(form.pincode)) {
+      newErrors.pincode = "Pincode must be 6 digits";
+    }
+    if (!form.category || form.category === "Select Category") {
+      newErrors.category = "Select category";
+    }
+    if (!form.fees_detail_year || form.fees_detail_year === "Year") {
+      newErrors.fees_detail_year = "Select year";
+    }
+    if (student?.accommodation === "DAYSCHOLAR" && !form.boarding.trim()) {
+      newErrors.boarding = "Boarding place required";
+    }
+    if (
+      !form.type_of_application ||
+      form.type_of_application === "Select the Type of Bonafide"
+    ) {
+      newErrors.type_of_application = "Select type of application";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0; // returns true if NO error
+  };
+
   // ✅ Fetch student details by RegNo
   const fetchStudent = async (reg = regNo) => {
     try {
@@ -42,6 +103,10 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
 
   // ✅ Handle Submit
   const handleSubmit = async () => {
+    if (!validateForm()) {
+      alert("❌ Please fill all required fields");
+      return;
+    }
     try {
       await axios.post("http://localhost:5000/api/bonafide", {
         regNo,
@@ -105,20 +170,35 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
             <label style={labelStyle}>Reason for Bonafide Request</label>
             <input
               type="text"
-              onChange={(e) => setForm({ ...form, reason: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, reason: e.target.value });
+                if (errors.reason) {
+                  setErrors({ ...errors, reason: "" });
+                }
+              }}
               style={{
                 padding: "1vh",
                 borderRadius: "1vh",
                 border: "1px solid #999",
               }}
             />
+            {errors.reason && (
+              <span style={{ color: "red", fontSize: "1.8vh" }}>
+                {errors.reason}
+              </span>
+            )}
           </div>
 
           <div style={fieldStyle}>
             <label style={labelStyle}>Father's/Guardian's Name</label>
             <input
               type="text"
-              onChange={(e) => setForm({ ...form, fatherName: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, fatherName: e.target.value });
+                if (errors.fatherName) {
+                  setErrors({ ...errors, fatherName: "" });
+                }
+              }}
               style={{
                 padding: "1vh",
                 borderRadius: "1vh",
@@ -126,6 +206,11 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
                 width: "100%",
               }}
             />
+            {errors.fatherName && (
+              <span style={{ color: "red", fontSize: "1.8vh" }}>
+                {errors.fatherName}
+              </span>
+            )}
           </div>
 
           <div style={fieldStyle}>
@@ -186,7 +271,12 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
                   border: "1px solid #999",
                   width: "126%",
                 }}
-                onChange={(e) => setForm({ ...form, semester: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, semester: e.target.value });
+                  if (errors.semester) {
+                    setErrors({ ...errors, semester: "" });
+                  }
+                }}
               >
                 <option>Select the semester</option>
                 <option>1</option>
@@ -198,6 +288,11 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
                 <option>7 </option>
                 <option>8</option>
               </select>
+              {errors.semester && (
+                <span style={{ color: "red", fontSize: "1.8vh" }}>
+                  {errors.semester}
+                </span>
+              )}
             </div>
           </div>
 
@@ -205,14 +300,24 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
           <div style={fieldStyle}>
             <label style={labelStyle}>House No</label>
             <input
-              type="number"
-              onChange={(e) => setForm({ ...form, houseno: e.target.value })}
+              type="text"
+              onChange={(e) => {
+                setForm({ ...form, houseno: e.target.value });
+                if (errors.houseno) {
+                  setErrors({ ...errors, houseno: "" });
+                }
+              }}
               style={{
                 padding: "1vh",
                 borderRadius: "1vh",
                 border: "1px solid #999",
               }}
             />
+            {errors.houseno && (
+              <span style={{ color: "red", fontSize: "1.8vh" }}>
+                {errors.houseno}
+              </span>
+            )}
           </div>
 
           <div
@@ -226,9 +331,12 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
               <label style={labelStyle}>Date of Birth</label>
               <input
                 type="date"
-                onChange={(e) =>
-                  setForm({ ...form, date_of_birth: e.target.value })
-                }
+                onChange={(e) => {
+                  setForm({ ...form, date_of_birth: e.target.value });
+                  if (errors.date_of_birth) {
+                    setErrors({ ...errors, date_of_birth: "" });
+                  }
+                }}
                 style={{
                   padding: "1vh",
                   borderRadius: "1vh",
@@ -236,12 +344,23 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
                   width: "130%",
                 }}
               />
+              {errors.date_of_birth && (
+                <span style={{ color: "red", fontSize: "1.8vh" }}>
+                  {errors.date_of_birth}
+                </span>
+              )}
             </div>
+
             <div style={fieldStyle}>
               <label style={labelStyle}>Age</label>
               <input
                 type="number"
-                onChange={(e) => setForm({ ...form, age: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, age: e.target.value });
+                  if (errors.age) {
+                    setErrors({ ...errors, age: "" });
+                  }
+                }}
                 style={{
                   padding: "1vh",
                   borderRadius: "1vh",
@@ -249,6 +368,11 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
                   width: "109%",
                 }}
               />
+              {errors.age && (
+                <span style={{ color: "red", fontSize: "1.8vh" }}>
+                  {errors.age}
+                </span>
+              )}
             </div>
           </div>
 
@@ -256,13 +380,23 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
             <label style={labelStyle}>Street Name</label>
             <input
               type="text"
-              onChange={(e) => setForm({ ...form, street: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, street: e.target.value });
+                if (errors.street) {
+                  setErrors({ ...errors, street: "" });
+                }
+              }}
               style={{
                 padding: "1vh",
                 borderRadius: "1vh",
                 border: "1px solid #999",
               }}
             />
+            {errors.street && (
+              <span style={{ color: "red", fontSize: "1.8vh" }}>
+                {errors.street}
+              </span>
+            )}
           </div>
 
           {/* Row 4 */}
@@ -270,26 +404,46 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
             <label style={labelStyle}>Enter Area</label>
             <input
               type="text"
-              onChange={(e) => setForm({ ...form, area: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, area: e.target.value });
+                if (errors.area) {
+                  setErrors({ ...errors, area: "" });
+                }
+              }}
               style={{
                 padding: "1vh",
                 borderRadius: "1vh",
                 border: "1px solid #999",
               }}
             />
+            {errors.area && (
+              <span style={{ color: "red", fontSize: "1.8vh" }}>
+                {errors.area}
+              </span>
+            )}
           </div>
 
           <div style={fieldStyle}>
             <label style={labelStyle}>Enter City</label>
             <input
               type="text"
-              onChange={(e) => setForm({ ...form, city: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, city: e.target.value });
+                if (errors.city) {
+                  setErrors({ ...errors, city: "" });
+                }
+              }}
               style={{
                 padding: "1vh",
                 borderRadius: "1vh",
                 border: "1px solid #999",
               }}
             />
+            {errors.city && (
+              <span style={{ color: "red", fontSize: "1.8vh" }}>
+                {errors.city}
+              </span>
+            )}
           </div>
 
           {/* Row 5 */}
@@ -297,26 +451,46 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
             <label style={labelStyle}>Enter State</label>
             <input
               type="text"
-              onChange={(e) => setForm({ ...form, state: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, state: e.target.value });
+                if (errors.state) {
+                  setErrors({ ...errors, state: "" });
+                }
+              }}
               style={{
                 padding: "1vh",
                 borderRadius: "1vh",
                 border: "1px solid #999",
               }}
             />
+            {errors.state && (
+              <span style={{ color: "red", fontSize: "1.8vh" }}>
+                {errors.state}
+              </span>
+            )}
           </div>
 
           <div style={fieldStyle}>
             <label style={labelStyle}>Enter Pincode</label>
             <input
               type="Number"
-              onChange={(e) => setForm({ ...form, pincode: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, pincode: e.target.value });
+                if (errors.pincode) {
+                  setErrors({ ...errors, pincode: "" });
+                }
+              }}
               style={{
                 padding: "1vh",
                 borderRadius: "1vh",
                 border: "1px solid #999",
               }}
             />
+            {errors.pincode && (
+              <span style={{ color: "red", fontSize: "1.8vh" }}>
+                {errors.pincode}
+              </span>
+            )}
           </div>
 
           {/* Row 6 */}
@@ -331,12 +505,22 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
                 border: "1px solid #999",
                 width: "100%",
               }}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, category: e.target.value });
+                if (errors.category) {
+                  setErrors({ ...errors, category: "" });
+                }
+              }}
             >
               <option>Select Category</option>
               <option>GOVERMENT QUOTA</option>
               <option>MANAGEMENT QUOTA</option>
             </select>
+            {errors.category && (
+              <span style={{ color: "red", fontSize: "1.8vh" }}>
+                {errors.category}
+              </span>
+            )}
           </div>
           <div style={fieldStyle}>
             <label style={labelStyle}>Fees Details Required Year</label>
@@ -347,9 +531,12 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
                 border: "1px solid #999",
                 width: "100%",
               }}
-              onChange={(e) =>
-                setForm({ ...form, fees_detail_year: e.target.value })
-              }
+              onChange={(e) => {
+                setForm({ ...form, fees_detail_year: e.target.value });
+                if (errors.fees_detail_year) {
+                  setErrors({ ...errors, fees_detail_year: "" });
+                }
+              }}
             >
               <option>Year</option>
               <option>I Year</option>
@@ -357,6 +544,11 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
               <option>III Year</option>
               <option>IV Year</option>
             </select>
+            {errors.fees_detail_year && (
+              <span style={{ color: "red", fontSize: "1.8vh" }}>
+                {errors.fees_detail_year}
+              </span>
+            )}
           </div>
           <div style={fieldStyle}>
             <label style={labelStyle}>Accommodation</label>
@@ -375,12 +567,18 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
               }
             />
           </div>
-   
+
           <div style={fieldStyle}>
             <label style={labelStyle}>If Dayscholar, Boarding Place</label>
             <input
               type="text"
-              onChange={(e) => setForm({ ...form, boarding: e.target.value })}
+              onChange={(e) => {
+                setForm({ ...form, boarding: e.target.value });
+                if (errors.boarding) {
+                  setErrors({ ...errors, boarding: "" });
+                }
+              }}
+               disabled={student?.accommodation !== "Dayscholar"} 
               style={{
                 padding: "1vh",
                 borderRadius: "1vh",
@@ -388,6 +586,11 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
                 width: "100%",
               }}
             />
+            {errors.boarding && (
+              <span style={{ color: "red", fontSize: "1.8vh" }}>
+                {errors.boarding}
+              </span>
+            )}
           </div>
           <div style={fieldStyle}>
             <label style={labelStyle}>Select the Type of Bonafide</label>
@@ -398,9 +601,12 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
                 border: "1px solid #999",
                 width: "100%",
               }}
-              onChange={(e) =>
-                setForm({ ...form, type_of_application: e.target.value })
-              }
+              onChange={(e) => {
+                setForm({ ...form, type_of_application: e.target.value });
+                if (errors.type_of_application) {
+                  setErrors({ ...errors, type_of_application: "" });
+                }
+              }}
             >
               <option>Select the Type of Bonafide</option>
               <option>WITH FEE STRUCTURE</option>
@@ -409,6 +615,11 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
               <option>PAPER PRESENTATION </option>
               <option>GENERAL</option>
             </select>
+            {errors.type_of_application && (
+              <span style={{ color: "red", fontSize: "1.8vh" }}>
+                {errors.type_of_application}
+              </span>
+            )}
           </div>
 
           <div
