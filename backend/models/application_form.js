@@ -3,20 +3,30 @@ const sequelize = require("../db");
 const Student = require("./student");
 
 const ApplicationForm = sequelize.define(
-  "Application_Form",
+  "application_form",
   {
     ap_id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
+      field: "ap_id",
     },
     sid: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: Student,
         key: "student_id",
       },
+      field: "sid",
+    },
+    fatherName: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    age:{
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
     semester: {
       type: DataTypes.INTEGER,
@@ -31,23 +41,23 @@ const ApplicationForm = sequelize.define(
       allowNull: true,
     },
     houseno: {
-      type: DataTypes.STRING(25),
+      type: DataTypes.STRING(50),
       allowNull: true,
     },
     street: {
-      type: DataTypes.STRING(25),
+      type: DataTypes.STRING(50),
       allowNull: true,
     },
     area: {
-      type: DataTypes.STRING(25),
+      type: DataTypes.STRING(50),
       allowNull: true,
     },
     city: {
-      type: DataTypes.STRING(25),
+      type: DataTypes.STRING(50),
       allowNull: true,
     },
     state: {
-      type: DataTypes.STRING(25),
+      type: DataTypes.STRING(50),
       allowNull: true,
     },
     pincode: {
@@ -55,28 +65,34 @@ const ApplicationForm = sequelize.define(
       allowNull: true,
     },
     reason: {
-      type: DataTypes.STRING(25),
+      type: DataTypes.STRING(255),
       allowNull: true,
     },
     category: {
-      type: DataTypes.STRING(25),
+      type: DataTypes.STRING(50),
       allowNull: true,
     },
     fees_detail_year: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING(25),
       allowNull: true,
     },
     type_of_application: {
-      type: DataTypes.STRING(25),
+      type: DataTypes.STRING(100),
       allowNull: true,
     },
     hstatus: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
+      defaultValue: 0, // 0=pending
     },
     osstatus: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
+      defaultValue: 0, // 0=pending
+    },
+    applied_date: {
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
     },
   },
   {
@@ -85,7 +101,7 @@ const ApplicationForm = sequelize.define(
   }
 );
 
-// Association
+// Associations
 Student.hasMany(ApplicationForm, { foreignKey: "sid" });
 ApplicationForm.belongsTo(Student, { foreignKey: "sid" });
 

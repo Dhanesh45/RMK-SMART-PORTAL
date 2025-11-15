@@ -17,6 +17,8 @@ require("./models/application_form");
 const studentRoute = require("./route/studentRoute");
 const outpassRoute = require("./route/outpassRoute");
 const dayscholarOutpassRoutes = require("./route/dayscholarRoute");
+const bonafideRoute = require("./route/BonafideRoute");
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -40,6 +42,8 @@ app.get("/", (req, res) => {
 app.use("/api/student", studentRoute);
 app.use("/api/outpass", outpassRoute); // ✅ Use plural to match frontend
 app.use("/api/dayscholarOutpass", dayscholarOutpassRoutes);
+app.use("/api/bonafide", bonafideRoute);
+
 // ✅ Database connection + sync
 (async () => {
   try {
