@@ -233,12 +233,19 @@ const StudentRegistration = () => {
                   label="Password"
                   name="password"
                   value={formData.password}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.length <= 8) {
+                      handleChange(e);
+                    }
+                  }}
+                  inputProps={{ maxLength: 8 }}
                   required
                   error={!!errors.password}
                   helperText={errors.password}
                   sx={{ mb: "5%" }}
                 />
+
 
                 <FormControl fullWidth required error={!!errors.gender} sx={{ mb: "5%" }}>
                   <InputLabel>Gender</InputLabel>
