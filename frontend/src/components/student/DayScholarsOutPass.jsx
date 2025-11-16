@@ -21,6 +21,12 @@ const submitBtn = {
 
 const DayscholarOutpass = ({ regNo: passedRegNo }) => {
   const location = useLocation();
+  const [reasonError, setReasonError] = useState(false);
+  const [parentPermissionError, setParentPermissionError] = useState("");
+  const [fromDateError, setFromDateError] = useState(false);
+  const [leavingTimeError, setLeavingTimeError] = useState("");
+  const [toDateError, setToDateError] = useState(false);
+  const today = new Date().toISOString().split("T")[0];
   const [regNo, setRegNo] = useState(passedRegNo || location.state?.regNo || "");
   const [student, setStudent] = useState(null);
   const [form, setForm] = useState({
@@ -120,11 +126,12 @@ const DayscholarOutpass = ({ regNo: passedRegNo }) => {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
           {/* Registration Number Input */}
           <div style={{ width: "95%" }}>
-            <label>REGISTRATION NUMBER / EMAIL</label>
+            <label>REGISTRATION NUMBER</label>
             <input
               type="text"
               style={inputStyle}
               value={regNo}
+              disabled
               onChange={(e) => setRegNo(e.target.value)}
             />
           </div>
@@ -132,6 +139,7 @@ const DayscholarOutpass = ({ regNo: passedRegNo }) => {
           {/* Auto-filled fields */}
           {student && (
             <>
+
               <div style={{ width: "95%" }}>
                 <label>NAME OF THE STUDENT</label>
                 <input type="text" style={inputStyle} value={student.studentName} disabled />
@@ -160,56 +168,200 @@ const DayscholarOutpass = ({ regNo: passedRegNo }) => {
               {/* User inputs */}
               <div style={{ width: "95%" }}>
                 <label>REASON FOR LEAVING</label>
+
                 <input
                   type="text"
-                  style={inputStyle}
+                  style={{
+                    ...inputStyle,
+                    border: reasonError ? "2px solid red" : inputStyle.border,
+                  }}
                   value={form.reason}
-                  onChange={(e) => setForm({ ...form, reason: e.target.value })}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setForm({ ...form, reason: value });
+
+                    // Remove red when typing
+                    if (value.trim() !== "") setReasonError(false);
+                  }}
+                  onBlur={() => {
+                    // Show red border if empty (same as TextField error)
+                    setReasonError(!form.reason.trim());
+                  }}
+                  required
                 />
+                {reasonError && (
+                  <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+                    Reason for leaving is required
+                  </p>
+                )}
               </div>
 
-              <div style={{ display: "flex", gap: "30px" }}>
+              <div style={{ display: "flex", gap: "30px", width: "34.3vw" }}>
+                {/* FROM DATE */}
                 <div style={{ flex: 1 }}>
                   <label>FROM DATE</label>
                   <input
                     type="date"
-                    style={inputStyle}
+                    style={{
+                      ...inputStyle,
+                      border: fromDateError ? "2px solid red" : inputStyle.border,
+                    }}
+                    min={today}
                     value={form.fromDate}
-                    onChange={(e) => setForm({ ...form, fromDate: e.target.value })}
+                    required
+                    onBlur={() => {
+                      setFromDateError(!form.fromDate);
+                    }}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setForm({ ...form, fromDate: value });
+
+                      if (value) setFromDateError(false);
+                    }}
                   />
+
+                  {fromDateError && (
+                    <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+                      FROM DATE is required
+                    </p>
+                  )}
                 </div>
+
+                {/* TO DATE */}
                 <div style={{ flex: 1 }}>
                   <label>TO DATE</label>
                   <input
                     type="date"
-                    style={inputStyle}
+                    style={{
+                      ...inputStyle,
+                      border: toDateError ? "2px solid red" : inputStyle.border,
+                    }}
                     value={form.toDate}
-                    onChange={(e) => setForm({ ...form, toDate: e.target.value })}
+                    required
+                    onBlur={() => {
+                      setToDateError(!form.toDate);
+                    }}
+                    onChange={(e) => {
+                      const toDate = e.target.value;
+                      const fromDate = form.fromDate;
+
+                      if (!fromDate) {
+                        setToDateError(true);
+                        return setForm({ ...form, toDate: "" });
+                      }
+
+                      if (toDate < fromDate) {
+                        setToDateError(true);
+                        return setForm({ ...form, toDate: "" });
+                      }
+
+                      setToDateError(false);
+                      setForm({ ...form, toDate });
+                    }}
                   />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <label>LEAVING TIME</label>
-                  <input
-                    type="time"
-                    style={inputStyle}
-                    value={form.leavingTime}
-                    onChange={(e) => setForm({ ...form, leavingTime: e.target.value })}
-                  />
+
+                  {toDateError && (
+                    <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>
+                      {form.fromDate
+                        ? "TO DATE cannot be earlier than FROM DATE"
+                        : "TO DATE is required"}
+                    </p>
+                  )}
                 </div>
               </div>
 
+
+              <div style={{ flex: 1, position: "relative", width: "34.4vw" }}>
+                <label>LEAVING TIME</label>
+
+                <div style={{ position: "relative" }}>
+                  <input
+                    type="time"
+                    value={form.leavingTime}
+                    style={{
+                      ...inputStyle,
+                      paddingRight: "12%",
+                      border: leavingTimeError ? "2px solid red" : inputStyle.border,
+                    }}
+                    onBlur={() => {
+                      if (!form.leavingTime) {
+                        setLeavingTimeError("Leaving time is required");
+                      }
+                    }}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setForm({ ...form, leavingTime: value });
+
+                      // clear error when user types
+                      if (value) setLeavingTimeError("");
+                    }}
+                  />
+
+                  {/* AM/PM next to time */}
+                  {form.leavingTime && (
+                    <span
+                      style={{
+                        position: "absolute",
+                        left: "calc(100% - 55px)",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        fontWeight: "bold",
+                        color: "#444",
+                        pointerEvents: "none",
+                      }}
+                    >
+                      {parseInt(form.leavingTime.split(":")[0]) >= 12 ? "PM" : "AM"}
+                    </span>
+                  )}
+                </div>
+
+                {/* Error message BELOW field */}
+                {leavingTimeError && (
+                  <p style={{ color: "red", fontSize: "12px", marginTop: "5px" }}>
+                    {leavingTimeError}
+                  </p>
+                )}
+              </div>
+
+
+
+
               <div style={{ width: "95%" }}>
                 <label>PARENTS PERMISSION (Yes/No)</label>
+
                 <select
-                  style={inputStyle}
+                  style={{
+                    ...inputStyle,
+                    border: parentPermissionError ? "2px solid red" : inputStyle.border,
+                  }}
                   value={form.parentPermission}
-                  onChange={(e) => setForm({ ...form, parentPermission: e.target.value })}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setForm({ ...form, parentPermission: value });
+
+                    // Clear error when selected
+                    if (value) setParentPermissionError("");
+                  }}
+                  onBlur={() => {
+                    if (!form.parentPermission) {
+                      setParentPermissionError("Parent permission is required");
+                    }
+                  }}
                 >
                   <option value="">Select Permission</option>
                   <option value="Yes">Yes</option>
                   <option value="No">No</option>
                 </select>
+
+                {/* Error message */}
+                {parentPermissionError && (
+                  <p style={{ color: "red", fontSize: "12px", marginTop: "5px" }}>
+                    {parentPermissionError}
+                  </p>
+                )}
               </div>
+
+
 
               {/* Submit button */}
               <div style={{ width: "100%", paddingTop: "3.2%", textAlign: "end" }}>
