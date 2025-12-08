@@ -26,7 +26,7 @@ const Faculty = sequelize.define(
       type: DataTypes.STRING(100),
       allowNull: true,
     },
-    "Faculty Branch": {
+    faculty_branch: {
       type: DataTypes.STRING(50),
       allowNull: true,
     },

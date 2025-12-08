@@ -6,6 +6,7 @@ import Outpass from "./Outpass";
 import DayScholarsOutPass from "./DayScholarsOutPass"; 
 import ODform from "./ODform";
 import BonafideForm from "./BonafideForm";
+import DayscholarOD from "./DayscholarOD";
 
 const StuDash = () => {
   const [activePage, setActivePage] = useState("HOME");
@@ -27,7 +28,8 @@ const StuDash = () => {
         accommodation === "hosteller"  &&
           <Outpass regNo={regNo}/>
         }
-      {activePage === "ON DUTY" && <ODform />}
+      {activePage === "ON DUTY" && accommodation === "hosteller"  && <ODform regNo={regNo} />}
+      {activePage === "ON DUTY" && accommodation === "dayscholar"  && <DayscholarOD regNo={regNo} />}
       {activePage === "APPLICATION" && <BonafideForm />}
     </div>
   );
