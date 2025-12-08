@@ -12,12 +12,18 @@ require("./models/outpass");
 require("./models/od_form");
 require("./models/dayscholar_outpass");
 require("./models/application_form");
+require("./models/dayscholor_od");
 
 // ✅ Import routes
 const studentRoute = require("./route/studentRoute");
 const outpassRoute = require("./route/outpassRoute");
 const dayscholarOutpassRoutes = require("./route/dayscholarRoute");
 const bonafideRoute = require("./route/BonafideRoute");
+const odRoute = require("./route/odRoute.js");
+const dayscholarODRoute = require("./route/dayscholarOdRoute");
+
+
+
 
 
 const app = express();
@@ -43,6 +49,8 @@ app.use("/api/student", studentRoute);
 app.use("/api/outpass", outpassRoute); // ✅ Use plural to match frontend
 app.use("/api/dayscholarOutpass", dayscholarOutpassRoutes);
 app.use("/api/bonafide", bonafideRoute);
+app.use("/api/od", odRoute);
+app.use("/api/dayscholar-od", dayscholarODRoute);
 
 // ✅ Database connection + sync
 (async () => {

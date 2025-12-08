@@ -3,8 +3,9 @@ const sequelize = require("../db");
 const Student = require("./student");
 const Outpass = require("./outpass");
 
-const ODForm = sequelize.define(
-  "OD_Form",
+
+const DayscholarOD = sequelize.define(
+  "dayscholor_od",
   {
     od_id: {
       type: DataTypes.INTEGER,
@@ -17,14 +18,6 @@ const ODForm = sequelize.define(
       references: {
         model: Student,
         key: "student_id",
-      },
-    },
-    outpass_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: Outpass,
-        key: "Outpass id",
       },
     },
     purpose: {
@@ -77,17 +70,15 @@ const ODForm = sequelize.define(
     },
   },
   {
-    tableName: "od_form",
+    tableName: "dayscholar_od",
     timestamps: false,
   }
 );
 
 // Associations
-Student.hasMany(ODForm, { foreignKey: "student_id" });
-ODForm.belongsTo(Student, { foreignKey: "student_id" });
-
-Outpass.hasOne(ODForm, { foreignKey: "outpass_id" });
-ODForm.belongsTo(Outpass, { foreignKey: "outpass_id" });
+Student.hasMany(DayscholarOD, { foreignKey: "student_id" });
+DayscholarOD.belongsTo(Student, { foreignKey: "student_id" });
 
 
-module.exports = ODForm;
+
+module.exports = DayscholarOD;
