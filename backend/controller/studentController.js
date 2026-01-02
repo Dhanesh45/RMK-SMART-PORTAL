@@ -1,5 +1,6 @@
 // controller/studentController.js
-const Student = require("../models/student");
+const { Student, Faculty } = require('../models'); // import from index.js
+
 
 // Register a new student
 exports.registerStudent = async (req, res) => {
@@ -34,6 +35,12 @@ exports.registerStudent = async (req, res) => {
       return res.status(400).json({ message: "Student already registered" });
     }
 
+    // 🔹 Map counsellor email to f_id
+const faculty = await Faculty.findOne({ where: { mail: counsellor } });
+if (!faculty) {
+  return res.status(400).json({ message: "Selected counsellor not found" });
+}
+
     // Create a new student
     const newStudent = await Student.create({
       studentMail: student_mail,
@@ -47,7 +54,7 @@ exports.registerStudent = async (req, res) => {
       parentName: parent_name,
       parentPhone: parent_phone,
       native,
-      counsellor,
+      counsellor:faculty.f_id,
       yearCoordinator: year_coordinator,
       hod,
       section,

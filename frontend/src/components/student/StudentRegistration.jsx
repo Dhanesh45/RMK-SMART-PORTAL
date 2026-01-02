@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import loginimg from "../../assets/login.png";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -39,11 +39,25 @@ const StudentRegistration = () => {
     hod: "",
     section: "",
   });
+  const [counsellors, setCounsellors] = useState([]);
 
   const handleChange = (e) => {
     setErrors({ ...errors, [e.target.name]: "" }); // remove error on typing
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
+
+  useEffect(() => {
+    if (formData.branch) {
+      axios
+        .get(`http://localhost:5000/api/faculty/by-branch/${formData.branch}`)
+        .then((res) => {
+          setCounsellors(res.data);
+        })
+        .catch((err) => {
+          console.error("Error fetching counsellors", err);
+        });
+    }
+  }, [formData.branch]);
 
   // 🔥 Required fields validation
   const validateFields = () => {
@@ -99,7 +113,6 @@ const StudentRegistration = () => {
           regNo: formData.regNo,
         },
       });
-
     } catch (err) {
       alert(err.response?.data?.message || "Registration failed");
     }
@@ -223,7 +236,9 @@ const StudentRegistration = () => {
                   }}
                   required
                   error={!!errors.student_mail}
-                  helperText={errors.student_mail || "Email must end with @rmkec.ac.in"}
+                  helperText={
+                    errors.student_mail || "Email must end with @rmkec.ac.in"
+                  }
                   sx={{ mb: "5%" }}
                 />
 
@@ -246,10 +261,18 @@ const StudentRegistration = () => {
                   sx={{ mb: "5%" }}
                 />
 
-
-                <FormControl fullWidth required error={!!errors.gender} sx={{ mb: "5%" }}>
+                <FormControl
+                  fullWidth
+                  required
+                  error={!!errors.gender}
+                  sx={{ mb: "5%" }}
+                >
                   <InputLabel>Gender</InputLabel>
-                  <Select name="gender" value={formData.gender} onChange={handleChange}>
+                  <Select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                  >
                     <MenuItem value="Male">Male</MenuItem>
                     <MenuItem value="Female">Female</MenuItem>
                     <MenuItem value="other">Other</MenuItem>
@@ -307,7 +330,6 @@ const StudentRegistration = () => {
                   sx={{ mb: "5%" }}
                 />
 
-
                 <TextField
                   fullWidth
                   label="Native"
@@ -320,9 +342,18 @@ const StudentRegistration = () => {
                   sx={{ mb: "5%" }}
                 />
 
-                <FormControl fullWidth required error={!!errors.branch} sx={{ mb: "5%" }}>
+                <FormControl
+                  fullWidth
+                  required
+                  error={!!errors.branch}
+                  sx={{ mb: "5%" }}
+                >
                   <InputLabel>Branch</InputLabel>
-                  <Select name="branch" value={formData.branch} onChange={handleChange}>
+                  <Select
+                    name="branch"
+                    value={formData.branch}
+                    onChange={handleChange}
+                  >
                     <MenuItem value="IT">IT</MenuItem>
                     <MenuItem value="CSE">CSE</MenuItem>
                     <MenuItem value="AIDS">AIDS</MenuItem>
@@ -333,9 +364,18 @@ const StudentRegistration = () => {
                   <FormHelperText>{errors.branch}</FormHelperText>
                 </FormControl>
 
-                <FormControl fullWidth required error={!!errors.year} sx={{ mb: "5%" }}>
+                <FormControl
+                  fullWidth
+                  required
+                  error={!!errors.year}
+                  sx={{ mb: "5%" }}
+                >
                   <InputLabel>Year</InputLabel>
-                  <Select name="year" value={formData.year} onChange={handleChange}>
+                  <Select
+                    name="year"
+                    value={formData.year}
+                    onChange={handleChange}
+                  >
                     <MenuItem value="I">I</MenuItem>
                     <MenuItem value="II">II</MenuItem>
                     <MenuItem value="III">III</MenuItem>
@@ -373,13 +413,13 @@ const StudentRegistration = () => {
                   <Select
                     name="counsellor"
                     value={formData.counsellor}
-                    label="Counsellor"
                     onChange={handleChange}
                   >
-                    <MenuItem value="Mr. Prakash">Mr. Prakash</MenuItem>
-                    <MenuItem value="Ms. Divya">Ms. Divya</MenuItem>
-                    <MenuItem value="Mr. Karthik">Mr. Karthik</MenuItem>
-                    <MenuItem value="Ms. Anitha">Ms. Anitha</MenuItem>
+                    {counsellors.map((c) => (
+                      <MenuItem key={c.f_id} value={c.mail}>
+                        {c.faculty_name} - {c.mail}
+                      </MenuItem>
+                    ))}
                   </Select>
                   <FormHelperText>{errors.counsellor}</FormHelperText>
                 </FormControl>
@@ -405,7 +445,12 @@ const StudentRegistration = () => {
                   <FormHelperText>{errors.year_coordinator}</FormHelperText>
                 </FormControl>
 
-                <FormControl fullWidth required error={!!errors.hod} sx={{ mb: "5%" }}>
+                <FormControl
+                  fullWidth
+                  required
+                  error={!!errors.hod}
+                  sx={{ mb: "5%" }}
+                >
                   <InputLabel>HOD</InputLabel>
                   <Select
                     name="hod"
