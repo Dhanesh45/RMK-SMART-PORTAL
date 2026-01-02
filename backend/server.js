@@ -21,6 +21,7 @@ const dayscholarOutpassRoutes = require("./route/dayscholarRoute");
 const bonafideRoute = require("./route/BonafideRoute");
 const odRoute = require("./route/odRoute.js");
 const dayscholarODRoute = require("./route/dayscholarOdRoute");
+const facultyRoute = require("./route/facultyRoute");
 
 
 
@@ -51,6 +52,7 @@ app.use("/api/dayscholarOutpass", dayscholarOutpassRoutes);
 app.use("/api/bonafide", bonafideRoute);
 app.use("/api/od", odRoute);
 app.use("/api/dayscholar-od", dayscholarODRoute);
+app.use("/api/faculty", facultyRoute);
 
 // ✅ Database connection + sync
 (async () => {
