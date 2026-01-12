@@ -12,11 +12,11 @@ exports.facultyLogin = async (req, res) => {
     }
 
     // 2️⃣ Normalize role (frontend vs DB)
-    const roleMap = {
-      Counsellor: "counsellor",
-      "Year Coordinator": "year_coordinator",
-      "Head of the Department": "hod",
-      "Office Assistant": "office_assistant",
+   const roleMap = {
+      Counsellor: "Counsellor",
+      "Year Coordinator": "Year Coordinator",
+      "Head of the Department": "Head of the Department",
+      "Office Assistant": "Office Assistant",
     };
 
     const dbRole = roleMap[role];
