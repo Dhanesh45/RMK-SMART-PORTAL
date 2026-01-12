@@ -83,21 +83,33 @@ exports.getFacultyByEmail = async (req, res) => {
   }
 };
 
-exports.getCounsellorsByBranch = async (req, res) => {
+exports.getFacultyByBranchAndRole = async (req, res) => {
   try {
-    const { branch } = req.params;
+    const { branch, role } = req.params;
 
-    const counsellors = await Faculty.findAll({
+    // Map frontend role to DB role
+    const roleMap = {
+      counsellor: "Counsellor",
+      year_coordinator: "Year Coordinator",
+      hod: "Head of the Department",
+    };
+
+    const dbRole = roleMap[role]; // maps 'year_coordinator' -> 'Year Coordinator'
+
+    if (!dbRole) return res.status(400).json({ message: "Invalid role" });
+
+    const faculty = await Faculty.findAll({
       where: {
         faculty_branch: branch,
-        role: "Counsellor",
+        role: dbRole,
       },
       attributes: ["f_id", "faculty_name", "mail"],
     });
 
-    res.json(counsellors);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error fetching counsellors" });
+    res.status(200).json(faculty);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
   }
 };
+
