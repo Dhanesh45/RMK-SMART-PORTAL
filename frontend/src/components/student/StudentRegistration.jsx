@@ -25,6 +25,7 @@ const StudentRegistration = () => {
     hod: "",
     section: "",
   });
+  const [counsellors, setCounsellors] = useState([]);
 
   const [counsellors, setCounsellors] = useState([]);
 

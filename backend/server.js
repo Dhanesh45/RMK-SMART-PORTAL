@@ -55,6 +55,7 @@ app.use("/api/dayscholarOutpass", dayscholarOutpassRoutes);
 app.use("/api/bonafide", bonafideRoute);
 app.use("/api/od", odRoute);
 app.use("/api/dayscholar-od", dayscholarODRoute);
+app.use("/api/faculty", facultyRoute);
 
 app.use("/api/faculty", facultyRoute);
 // ✅ Database connection + sync
