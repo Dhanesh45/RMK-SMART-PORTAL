@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
 import StuNavbar from "./StuNavbar"
 export default function Studentdash() {
-  const currentStage = 4;
+   
+ const currentStage = 0;
 
   const stages = [
     "Applied",

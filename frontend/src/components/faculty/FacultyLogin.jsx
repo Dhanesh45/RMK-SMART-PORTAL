@@ -1,22 +1,45 @@
 import { useState } from "react";
 import loginimg from "../../assets/login.png";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
+
+
 
 const FacultyLogin = () => {
-  
+  const [email, setEmail] = useState("");
+const [password, setPassword] = useState("");
   const [isChecked, setIsChecked] = useState(false);
   const [role, setRole] = useState(""); // 👈 New state for role
   const navigate=useNavigate();
-   const handleLogin = ({}) => {
-     if (!role) {
-      alert("Please select a role");
-      return;
-    }
-     localStorage.setItem("facultyRole", role);
+   const handleLogin = async () => {
+  if (!email || !password || !role) {
+    alert("Please fill all fields");
+    return;
+  }
 
-    // 2️⃣ Navigate to FacultyMain page (or dashboard route)
-    navigate("/FacultyMain"); 
-  };
+  try {
+    const res = await axios.post("http://localhost:5000/api/faculty/login", {
+      email,
+      password,
+      role,
+    });
+
+    // save role for routing
+     localStorage.setItem("facultyEmail", email);
+    localStorage.setItem("facultyRole", role);
+    localStorage.setItem("facultyData", JSON.stringify(res.data.faculty));
+
+    navigate("/FacultyMain");
+  } catch (error) {
+    if (error.response) {
+      alert(error.response.data.message);
+    } else {
+      alert("Server not reachable");
+    }
+  }
+};
+
   return (
     <div style={{ width: "100%", height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", backgroundImage: 'linear-gradient(to bottom, rgba(49, 72, 122, 1), rgba(143, 179, 226, 1))' }}>
       <div style={{ width: "85%", height: "85%", backgroundColor: "white", borderRadius: "4vh", boxShadow: "2px 2px 5px  rgba(0, 0, 0, 0.5 )", display: "flex", overflow: "hidden" }}>
@@ -39,7 +62,7 @@ const FacultyLogin = () => {
             {/* Email */}
             <div style={{ paddingBottom: "4%" }}>
               <p style={{ fontSize: "3vh", fontWeight: "600", paddingBottom: "0.8%", color: "rgba(30, 46, 76, 1 )" }}>EMAIL</p>
-              <input type="email" style={{ width: "97%", padding: "1.25%", borderRadius: "0.7vh", border: "1px solid rgba(30, 46, 76, 1 )", fontSize: "3vh", fontWeight: "500" }} />
+              <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" style={{ width: "97%", padding: "1.25%", borderRadius: "0.7vh", border: "1px solid rgba(30, 46, 76, 1 )", fontSize: "3vh", fontWeight: "500" }} />
             </div>
 
             {/* Role */}
@@ -62,7 +85,7 @@ const FacultyLogin = () => {
             <div style={{ paddingBottom: "1%" }}>
               <p style={{ fontSize: "3vh", fontWeight: "600", paddingBottom: "0.8%", color: "rgba(30, 46, 76, 1 )" }}>PASSWORD</p>
               <input
-                type={isChecked ? "text" : "password"}
+                type={isChecked ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
                 style={{ width: "97%", padding: "1.25%", borderRadius: "0.7vh", border: "1px solid rgba(30, 46, 76, 1 )", fontSize: "3vh", fontWeight: "500" }}
               />
             </div>

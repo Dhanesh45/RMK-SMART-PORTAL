@@ -27,6 +27,8 @@ const facultyRoute = require("./route/facultyRoute");
 
 
 
+
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -39,6 +41,7 @@ app.use(
     credentials: true,
   })
 );
+
 
 // ✅ Test route
 app.get("/", (req, res) => {
@@ -54,6 +57,7 @@ app.use("/api/od", odRoute);
 app.use("/api/dayscholar-od", dayscholarODRoute);
 app.use("/api/faculty", facultyRoute);
 
+app.use("/api/faculty", facultyRoute);
 // ✅ Database connection + sync
 (async () => {
   try {
@@ -71,3 +75,5 @@ app.use("/api/faculty", facultyRoute);
 app.listen(PORT, () => {
   console.log(`🌐 Server running at http://localhost:${PORT}`);
 });
+
+

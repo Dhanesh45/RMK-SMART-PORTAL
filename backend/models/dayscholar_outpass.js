@@ -1,6 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db");
 const Student = require("./student");
+const Faculty = require("./faculty");
 
 const DayscholarsOutpass = sequelize.define(
   "DayscholarsOutpass",
@@ -20,16 +21,34 @@ const DayscholarsOutpass = sequelize.define(
         key: "student_id",
       },
     },
-    date: {
-      type: DataTypes.DATE,
+    facultyId: {
+      type: DataTypes.INTEGER,
       allowNull: true,
-      field: "date",
+      references: {
+        model: Faculty,
+        key: "f_id",
+      },
+      field: "Faculty id",
     },
-    time: {
-      type: DataTypes.TIME,
+     studentName: {
+      type: DataTypes.STRING(100),
       allowNull: true,
-      field: "time",
+      field: "Student name",
     },
+    regNo: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      field: "Register number",
+    },
+    year: {
+      type: DataTypes.STRING(10),
+      allowNull: true,
+    },
+    branch: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+    },
+    
     reason: {
       type: DataTypes.STRING(100),
       allowNull: true,
@@ -50,11 +69,34 @@ const DayscholarsOutpass = sequelize.define(
       allowNull: true,
       field: "Parent number",
     },
+   
+    fromDate: {
+      type: DataTypes.DATE,
+      field: "From Date",
+    },
+    toDate: {
+      type: DataTypes.DATE,
+      field: "To Date",
+    },
     remarks: {
       type: DataTypes.STRING(255),
       allowNull: true,
       field: "remarks",
     },
+    
+    dateOfApplication: {
+      type: DataTypes.DATE,
+      field: "Date of application",
+    },
+    
+    leavingTime: {
+      type: DataTypes.TIME,
+      field: "Leaving Time",
+    },
+    
+    cstatus: DataTypes.INTEGER,
+    ystatus: DataTypes.INTEGER,
+    hstatus: DataTypes.INTEGER,
   },
   {
     tableName: "dayscholars_outpass",
@@ -65,5 +107,8 @@ const DayscholarsOutpass = sequelize.define(
 // Associations
 Student.hasMany(DayscholarsOutpass, { foreignKey: "studentId" });
 DayscholarsOutpass.belongsTo(Student, { foreignKey: "studentId" });
+
+Faculty.hasMany(DayscholarsOutpass, { foreignKey: "facultyId" });
+DayscholarsOutpass.belongsTo(Faculty, { foreignKey: "facultyId" });
 
 module.exports = DayscholarsOutpass;
