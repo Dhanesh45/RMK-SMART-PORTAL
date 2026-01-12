@@ -2,6 +2,8 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../db");
 const Student = require("./student");
 const Outpass = require("./outpass");
+const Faculty = require("./faculty");
+
 
 const ODForm = sequelize.define(
   "OD_Form",
@@ -19,6 +21,15 @@ const ODForm = sequelize.define(
         key: "student_id",
       },
     },
+    facultyId: {
+          type: DataTypes.INTEGER,
+          allowNull: true,
+          references: {
+            model: Faculty,
+            key: "f_id",
+          },
+          field: "Faculty id",
+        },
     outpass_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -26,6 +37,16 @@ const ODForm = sequelize.define(
         model: Outpass,
         key: "Outpass id",
       },
+    },
+    studentName: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      field: "Student name",
+    },
+    regNo: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      field: "Register number",
     },
     purpose: {
       type: DataTypes.STRING,
@@ -88,6 +109,8 @@ ODForm.belongsTo(Student, { foreignKey: "student_id" });
 
 Outpass.hasOne(ODForm, { foreignKey: "outpass_id" });
 ODForm.belongsTo(Outpass, { foreignKey: "outpass_id" });
+Faculty.hasMany(ODForm, { foreignKey: "facultyId" });
+ODForm.belongsTo(Faculty, { foreignKey: "facultyId" });
 
 
 module.exports = ODForm;

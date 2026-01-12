@@ -1,21 +1,105 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 const CounsApprovalList = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
+const [students, setStudents] = useState([]);
+useEffect(() => {
+  const fetchOutpasses = async () => {
+    try {
+      const email = localStorage.getItem("facultyEmail");
+      if (!email) return;
 
-  const students = [
-    { sno: 1, nof: 111723203001, name: "AKASH" },
-    { sno: 2, nof: 111723203002, name: "ABISHEK" },
-    { sno: 3, nof: 111723203003, name: "ARULJOTHEE" },
-    { sno: 4, nof: 111723203004, name: "SARAVANAN" },
-    { sno: 5, nof: 111723203005, name: "DHINESH" },
-    { sno: 6, nof: 111723203006, name: "DHANRAJ" },
-    { sno: 7, nof: 111723203007, name: "JAGADISH" },
-    { sno: 8, nof: 111723203008, name: "GOKUL" },
-  ];
+      // get facultyId
+      const facultyRes = await axios.get(
+        `http://localhost:5000/api/faculty/email/${email}`
+      );
+      const facultyId = facultyRes.data.f_id;
 
-  const dayScholars = ["AKASH", "ABISHEK", "GOKUL"];
+      // fetch hosteller outpasses
+      const hostellerRes =
+      await axios.get(
+        `http://localhost:5000/api/outpass/counsellor/${facultyId}`
+      );
+
+      const hostellerMapped = hostellerRes.data.outpasses.map((op, index) => ({
+        sno: index + 1,
+        nof: op.regNo,
+        name: op.studentName,
+        outpassId: op.outpassId,
+        type: "HOSTELLER",
+      }));
+
+      // fetch day scholar outpasses
+      const dayScholarRes = 
+      await axios.get(
+        `http://localhost:5000/api/dayscholarOutpass/counsellor/${facultyId}`
+      );
+
+      const dayScholarMapped = dayScholarRes.data.outpasses.map((op, index) => ({
+        sno: hostellerMapped.length + index + 1,
+        nof: op.regNo,
+        name: op.studentName,
+        outpassId: op.dayscholaroutpassId, // use correct PK
+        type: "DAYSCHOLAR",
+      }));
+
+      // merge both
+      setStudents([...hostellerMapped, ...dayScholarMapped]);
+    } catch (err) {
+      console.error("Failed to load outpasses", err);
+    }
+  };
+
+  fetchOutpasses();
+}, []);
+const handleApprove = async (student) => {
+  const url =
+    student.type === "HOSTELLER"
+      ? `http://localhost:5000/api/outpass/counsellor/update/${student.outpassId}`
+      : `http://localhost:5000/api/dayscholarOutpass/counsellor/update/${student.outpassId}`;
+
+  await axios.put(url, { action: "approve" });
+
+  setStudents((prev) =>
+    prev.filter((s) => s.outpassId !== student.outpassId)
+  );
+};
+const handleApproveAll = async () => {
+  try {
+    await Promise.all(
+      students.map((student) => {
+        const url =
+          student.type === "HOSTELLER"
+            ? `http://localhost:5000/api/outpass/counsellor/update/${student.outpassId}`
+            : `http://localhost:5000/api/dayscholarOutpass/counsellor/update/${student.outpassId}`;
+
+        return axios.put(url, { action: "approve" });
+      })
+    );
+
+    // clear all approved requests from UI
+    setStudents([]);
+  } catch (error) {
+    console.error("Approve all failed", error);
+  }
+};
+
+
+const handleReject = async (student) => {
+  const url =
+    student.type === "HOSTELLER"
+      ? `http://localhost:5000/api/outpass/counsellor/update/${student.outpassId}`
+      : `http://localhost:5000/api/dayscholarOutpass/counsellor/update/${student.outpassId}`;
+
+  await axios.put(url, { action: "reject" });
+
+  setStudents((prev) =>
+    prev.filter((s) => s.outpassId !== student.outpassId)
+  );
+};
+
 
   const handleViewForm = (student) => {
     setSelectedStudent(student);
@@ -88,21 +172,21 @@ const CounsApprovalList = () => {
             </thead>
             <tbody>
               {students.map((student) => {
-                const isDayScholar = dayScholars.includes(student.name);
-                const accommodation = isDayScholar ? "Dayscholar" : "Hosteller";
-
+           
                 return (
                   <tr
                     key={student.sno}
                     style={{
                       backgroundColor: "white",
+                      borderRadius: "10px",
                       boxShadow: "0px 2px 6px rgba(0,0,0,0.1)",
+                      
                     }}
                   >
-                    <td style={cellStyle}>{student.sno}</td>
-                    <td style={cellStyle}>{student.name}</td>
+                    <td style={{...cellStyle, borderTopLeftRadius: "10px", borderBottomLeftRadius: "10px"}}>{student.sno}</td>
+                    <td style={{...cellStyle}}>{student.name}</td>
                     <td style={cellStyle}>{student.nof}</td>
-                    <td style={cellStyle}>{accommodation}</td>
+                    <td style={cellStyle}>{student.type}</td>
                     <td style={cellStyle}>
                       <button
                         style={viewBtn}
@@ -112,8 +196,13 @@ const CounsApprovalList = () => {
                       </button>
                     </td>
                     <td style={cellStyle}>
-                      <button style={approveBtn}>APPROVE</button>
-                      <button style={rejectBtn}>REJECT</button>
+                      <button style={approveBtn} onClick={() => handleApprove(student)}>
+                        APPROVE
+                      </button>
+                      <button style={rejectBtn} onClick={() => handleReject(student)}>
+                        REJECT
+                        </button>
+
                     </td>
                   </tr>
                 );
@@ -123,7 +212,7 @@ const CounsApprovalList = () => {
 
           {/* Approve All Button */}
           <div style={{ textAlign: "end", marginTop: "2%" }}>
-            <button style={approveAllBtn}>Approve All</button>
+            <button style={approveAllBtn} onClick={()=>handleApproveAll()}>Approve All</button>
           </div>
         </div>
       </div>
@@ -352,7 +441,9 @@ const headerStyle = {
   fontWeight: "bold",
 };
 
-const cellStyle = { padding: "9px", textAlign: "center" };
+const cellStyle = { padding: "14px 8px",   // 👈 this gives ~58px row height
+  textAlign: "center",
+  };
 const approveBtn = {
   fontWeight: "bold",
   padding: "5px 10px",

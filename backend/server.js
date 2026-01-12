@@ -21,6 +21,9 @@ const dayscholarOutpassRoutes = require("./route/dayscholarRoute");
 const bonafideRoute = require("./route/BonafideRoute");
 const odRoute = require("./route/odRoute.js");
 const dayscholarODRoute = require("./route/dayscholarOdRoute");
+const facultyRoute = require("./route/facultyRoute");
+
+
 
 
 
@@ -39,6 +42,7 @@ app.use(
   })
 );
 
+
 // ✅ Test route
 app.get("/", (req, res) => {
   res.send("🚀 Backend running successfully ✅");
@@ -52,6 +56,7 @@ app.use("/api/bonafide", bonafideRoute);
 app.use("/api/od", odRoute);
 app.use("/api/dayscholar-od", dayscholarODRoute);
 
+app.use("/api/faculty", facultyRoute);
 // ✅ Database connection + sync
 (async () => {
   try {
@@ -69,3 +74,5 @@ app.use("/api/dayscholar-od", dayscholarODRoute);
 app.listen(PORT, () => {
   console.log(`🌐 Server running at http://localhost:${PORT}`);
 });
+
+

@@ -65,13 +65,8 @@ const DayscholarOutpass = ({ regNo: passedRegNo }) => {
     try {
       // 3. Send request to backend
       await axios.post("http://localhost:5000/api/dayscholarOutpass/create", {
-        regNo: student.regNo,             // required by backend
-        reason: form.reason,              // maps to "Purpose of Leaving"
-        fromDate: form.fromDate,             // date
-        toDate: form.toDate || form.fromDate,// optional
-        leavingTime: form.leavingTime,
-        // maps to "time"
-        parentPermission: form.parentPermission, // maps to "Parent Permission"
+        regNo,
+        ...form, // maps to "Parent Permission"
       });
 
       alert("✅ Day Scholar Outpass submitted!");
@@ -120,7 +115,7 @@ const DayscholarOutpass = ({ regNo: passedRegNo }) => {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
           {/* Registration Number Input */}
           <div style={{ width: "95%" }}>
-            <label>REGISTRATION NUMBER / EMAIL</label>
+            <label>REGISTRATION NUMBER</label>
             <input
               type="text"
               style={inputStyle}

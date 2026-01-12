@@ -55,9 +55,15 @@ const Student = sequelize.define(
     native: {
       type: DataTypes.STRING(100),
     },
-    counsellor: {
-      type: DataTypes.STRING(100),
-    },
+   counsellor: {
+  type: DataTypes.INTEGER,
+  allowNull: true,
+  references: {
+    model: 'faculty',
+    key: 'f_id',
+  },
+},
+
     yearCoordinator: {
       type: DataTypes.STRING(100),
       field: "year_coordinator",
