@@ -35,30 +35,53 @@ exports.registerStudent = async (req, res) => {
       return res.status(400).json({ message: "Student already registered" });
     }
 
-    // 🔹 Map counsellor email to f_id
-const faculty = await Faculty.findOne({ where: { mail: counsellor } });
-if (!faculty) {
+   // 🔹 Map counsellor email → f_id
+const counsellorFaculty = await Faculty.findOne({
+  where: { mail: counsellor, role: "Counsellor" }, // DB value
+});
+if (!counsellorFaculty) {
   return res.status(400).json({ message: "Selected counsellor not found" });
 }
 
+// 🔹 Map year coordinator email → f_id
+const yearCoordinatorFaculty = await Faculty.findOne({
+  where: { mail: year_coordinator, role: "Year Coordinator" }, // DB value
+});
+if (!yearCoordinatorFaculty) {
+  return res.status(400).json({ message: "Selected year coordinator not found" });
+}
+
+// 🔹 Map HOD email → f_id
+const hodFaculty = await Faculty.findOne({
+  where: { mail: hod, role: "Head of the Department" }, // DB value
+});
+if (!hodFaculty) {
+  return res.status(400).json({ message: "Selected HOD not found" });
+}
+
+
+
     // Create a new student
     const newStudent = await Student.create({
-      studentMail: student_mail,
-      password,
-      regNo,
-      year,
-      branch,
-      studentName: student_name,
-      gender,
-      accommodation,
-      parentName: parent_name,
-      parentPhone: parent_phone,
-      native,
-      counsellor:faculty.f_id,
-      yearCoordinator: year_coordinator,
-      hod,
-      section,
-    });
+  studentMail: student_mail,
+  password,
+  regNo,
+  year,
+  branch,
+  studentName: student_name,
+  gender,
+  accommodation,
+  parentName: parent_name,
+  parentPhone: parent_phone,
+  native,
+
+  counsellor: counsellorFaculty.f_id,
+  yearCoordinator: yearCoordinatorFaculty.f_id,
+  hod: hodFaculty.f_id,
+
+  section,
+});
+
 
     res.status(201).json({
       message: "Student registered successfully",

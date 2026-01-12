@@ -65,12 +65,24 @@ const Student = sequelize.define(
 },
 
     yearCoordinator: {
-      type: DataTypes.STRING(100),
-      field: "year_coordinator",
-    },
-    hod: {
-      type: DataTypes.STRING(100),
-    },
+  type: DataTypes.INTEGER,
+  allowNull: true,
+  field: "year_coordinator",
+  references: {
+    model: "faculty",
+    key: "f_id",
+  },
+},
+
+hod: {
+  type: DataTypes.INTEGER,
+  allowNull: true,
+  references: {
+    model: "faculty",
+    key: "f_id",
+  },
+},
+
     section: {
       type: DataTypes.ENUM("A", "B", "C", "D", "E", "F"),
     },
