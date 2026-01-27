@@ -22,18 +22,18 @@ const DayscholarOD = ({ regNo: passedRegNo }) => {
   const [proof, setProof] = useState(null);
 
   // ✅ fetch student
-  const fetchStudent = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:5000/api/dayscholar-od/${regNo}`
-      );
-      setStudent(res.data);
-    } catch {
-      alert("❌ Student not found");
-    }
-  };
-
   useEffect(() => {
+    const fetchStudent = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:5000/api/dayscholar-od/${regNo}`
+        );
+        setStudent(res.data);
+      } catch {
+        alert("❌ Student not found");
+      }
+    };
+
     if (regNo) fetchStudent();
   }, [regNo]);
 

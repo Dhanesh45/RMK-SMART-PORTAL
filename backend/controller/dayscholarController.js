@@ -150,10 +150,80 @@ const getOutpassesForStudent = async (req, res) => {
       .json({ message: "Server error", error: err.message });
   }
 };
+/** ================================
+ * ✅ YEAR COORDINATOR VIEW OUTPASSES
+ * ================================ */
+const getYearCoordinatorOutpasses = async (req, res) => {
+  try {
+    const { facultyId } = req.params;
+
+    if (!facultyId) {
+      return res.status(400).json({ message: "facultyId is required" });
+    }
+
+    const outpasses = await DayScholarOutpass.findAll({
+      where: {
+        facultyId: Number(facultyId), // assigned to YC
+        cstatus: 1,                  // counsellor approved
+        ystatus: 0,                  // pending with YC
+      },
+      order: [["dateOfApplication", "DESC"]],
+    });
+
+    return res.status(200).json({ outpasses });
+  } catch (error) {
+    console.error("❌ Error fetching year coordinator outpasses:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+/** ================================
+ * ✅ YEAR COORDINATOR APPROVE / REJECT
+ * ================================ */
+const updateYstatus = async (req, res) => {
+  try {
+    const { dayscholaroutpassId } = req.params;
+    const { action } = req.body;
+
+    if (!["approve", "reject"].includes(action)) {
+      return res.status(400).json({ message: "Invalid action" });
+    }
+
+    const outpass = await DayScholarOutpass.findByPk(dayscholaroutpassId);
+    if (!outpass) {
+      return res.status(404).json({ message: "Outpass not found" });
+    }
+
+    if (action === "approve") {
+      outpass.ystatus = 1;
+
+      // OPTIONAL: forward to HOD if needed later
+      const student = await Student.findByPk(outpass.studentId);
+      if (student?.hodId) {
+        outpass.facultyId = student.hodId;
+      }
+
+    } else {
+      outpass.ystatus = -1;
+    }
+
+    await outpass.save();
+
+    return res.json({
+      message: `Year coordinator ${action}d the outpass`,
+      outpass,
+    });
+  } catch (err) {
+    console.error("❌ updateYstatus error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   getStudentByRegNo,
   createDayScholarOutpass,
   getOutpassesForCounsellor,
   updateCstatus,
   getOutpassesForStudent,
+  getYearCoordinatorOutpasses,
+  updateYstatus,
 };

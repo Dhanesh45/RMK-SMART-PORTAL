@@ -261,7 +261,7 @@ const handleReject = async (student) => {
               ×
             </button>
 
-            {dayScholars.includes(selectedStudent.name) ? (
+            {selectedStudent.type === "DAYSCHOLAR" ? (
               <DayScholarForm />
             ) : (
               <HostellerForm />

@@ -152,6 +152,20 @@ exports.updateCstatus = async (req, res) => {
     if (!outpass) return res.status(404).json({ message: "Outpass not found" });
 
     outpass.cstatus = action === "approve" ? 1 : -1;
+    
+    // ✅ When counselor approves, automatically forward to Year Coordinator
+    if (action === "approve") {
+      // Fetch the student to get their year coordinator ID
+      const student = await Student.findByPk(outpass.studentId);
+      if (student && student.yearCoordinator) {
+        // Update facultyId to year coordinator's ID so they can see it
+        outpass.facultyId = Number(student.yearCoordinator);
+        outpass.ystatus = 0; // Set to pending for year coordinator
+      } else {
+        console.warn(`Student ${outpass.studentId} has no year coordinator assigned`);
+      }
+    }
+    
     await outpass.save();
 
     return res.json({ message: `Outpass ${action}d`, outpass });
@@ -186,20 +200,15 @@ exports.getOutpassesForYearCoordinator = async (req, res) => {
   try {
     const outpasses = await Outpass.findAll({
       where: {
-        cstatus: 1,   // counselor approved
-        ystatus: 0    // pending for YC
+        cstatus: 1,   // counsellor approved
+        ystatus: 0    // pending for year coordinator
       },
-      include: [
-        {
-          model: Student,
-          attributes: ["name", "regNo"]
-        }
-      ]
+      order: [["dateOfApplication", "DESC"]],
     });
 
-    res.status(200).json(outpasses);
+    res.status(200).json({ outpasses });
   } catch (error) {
-    console.error(error);
+    console.error("getOutpassesForYearCoordinator error:", error);
     res.status(500).json({ message: "Error fetching outpasses" });
   }
 };
@@ -275,9 +284,9 @@ exports.getYearCoordinatorOutpasses = async (req, res) => {
     });
 
     const formatted = outpasses.map((op) => ({
-      outpassId: op.id,
-      studentName: op.Student?.studentName,
-      regNo: op.Student?.regNo,
+      outpassId: op.outpassId,
+      studentName: op.studentName,
+      regNo: op.regNo,
       counsellorName: op.Faculty?.faculty_name || "N/A",
       fromDate: op.fromDate,
       toDate: op.toDate,
@@ -313,7 +322,7 @@ exports.updateYstatus = async (req, res) => {
     if (action === "approve") {
       outpass.ystatus = 1;
 
-      // 🔴 MOVE facultyId HERE (SAFE)
+      // ✅ Forward to HOD after year coordinator approval
       const student = await Student.findByPk(outpass.studentId);
       outpass.facultyId = student.hodId; // or next authority
 

@@ -31,39 +31,62 @@ const YearApprovalList = () => {
    *    - If your backend does use "year-coordinator" (with dash), change this advice accordingly.
    */
 
-  useEffect(() => {
+   useEffect(() => {
     const fetchOutpasses = async () => {
       try {
         const email = localStorage.getItem("facultyEmail");
-        if (!email) return;
+        if (!email) {
+          console.error("Faculty email not found");
+          return;
+        }
 
-        // 1️⃣ get facultyId
+        /* 🔹 1. GET FACULTY ID */
         const facultyRes = await axios.get(
           `http://localhost:5000/api/faculty/email/${email}`
         );
-        const facultyId = facultyRes.data.f_id;
 
-        // 2️⃣ get counsellor-approved outpasses for THIS Year Coordinator
-        // Backend route: GET /api/outpass/year-coordinator/:facultyId
-        const res = await axios.get(
+        const facultyId = facultyRes.data.f_id;
+        console.log("Faculty response:", facultyRes.data);
+      
+        if (!facultyId) {
+          console.error("Faculty ID not found");
+          return;
+        }
+
+        /* 🔹 2. HOSTELLER OUTPASSES */
+        const hostellerRes = await axios.get(
           `http://localhost:5000/api/outpass/year-coordinator/${facultyId}`
         );
+        console.log("HOSTELLER API DATA:", hostellerRes.data.outpasses[0]);
 
-        // Support both raw array and { outpasses: [...] } shapes from backend
-        const data = Array.isArray(res.data)
-          ? res.data
-          : res.data.outpasses || [];
 
-        const mapped = data.map((op, index) => ({
+        const hostellerMapped = hostellerRes.data.outpasses.map((op, index) => ({
           sno: index + 1,
           outpassId: op.outpassId,
           name: op.studentName,
           reg: op.regNo,
-          couns: op.counsellorName || "N/A",
+          couns: op.counsellorName,
+          type: "HOSTELLER",
           fullData: op,
         }));
 
-        setStudents(mapped);
+        /* 🔹 3. DAY SCHOLAR OUTPASSES */
+        const dayScholarRes = await axios.get(
+          `http://localhost:5000/api/dayscholarOutpass/year-coordinator/${facultyId}`
+        );
+
+        const dayScholarMapped = dayScholarRes.data.outpasses.map((op, index) => ({
+          sno: hostellerMapped.length + index + 1,
+          outpassId: op.dayscholaroutpassId,
+          name: op.studentName,
+          reg: op.regNo,
+          couns: op.counsellorName || "N/A",
+          type: "DAYSCHOLAR",
+          fullData: op,
+        }));
+
+        /* 🔹 4. MERGE */
+        setStudents([...hostellerMapped, ...dayScholarMapped]);
 
       } catch (err) {
         console.error("Error fetching year coordinator outpasses", err);
@@ -76,21 +99,24 @@ const YearApprovalList = () => {
   /* ===========================
      APPROVE / REJECT
   =========================== */
-  const updateStatus = async (outpassId, action) => {
-    try {
-      await axios.put(
-        `http://localhost:5000/api/outpass/year-coordinator/update/${outpassId}`,
-        { action }
-      );
+ const updateStatus = async (student, action) => {
+  try {
+    console.log("UPDATE CLICKED:", student);
+    const url =
+      student.type === "HOSTELLER"
+        ? `http://localhost:5000/api/outpass/year-coordinator/update/${student.outpassId}/approve`
+        : `http://localhost:5000/api/dayscholarOutpass/year-coordinator/update/${student.outpassId}/approve`;
 
-      // Remove approved/rejected from UI
-      setStudents((prev) =>
-        prev.filter((s) => s.outpassId !== outpassId)
-      );
-    } catch (err) {
-      console.error("Failed to update ystatus", err);
-    }
-  };
+    await axios.put(url, { action });
+
+    // remove from UI
+    setStudents((prev) =>
+      prev.filter((s) => s.outpassId !== student.outpassId)
+    );
+  } catch (err) {
+    console.error("Failed to update ystatus", err);
+  }
+};
 
   return (
     <div
@@ -136,7 +162,7 @@ const YearApprovalList = () => {
                 <th style={headerStyle}>S.NO</th>
                 <th style={headerStyle}>NAME</th>
                 <th style={headerStyle}>REG.NO</th>
-                <th style={headerStyle}>Counsellor Name</th>
+                <th style={headerStyle}>Coordinator Name</th>
                 <th style={headerStyle}>FORM DETAILS</th>
                 <th style={headerStyle}>VALIDATION</th>
               </tr>
@@ -161,22 +187,17 @@ const YearApprovalList = () => {
                     </button>
                   </td>
                   <td style={cellStyle}>
-                    <button
-                      style={approveBtn}
-                      onClick={() =>
-                        updateStatus(student.outpassId, "approve")
-                      }
-                    >
-                      APPROVE
-                    </button>
-                    <button
-                      style={rejectBtn}
-                      onClick={() =>
-                        updateStatus(student.outpassId, "reject")
-                      }
-                    >
-                      REJECT
-                    </button>
+                   <button style={approveBtn}
+           onClick={() => updateStatus(student, "approve")}
+>
+  APPROVE
+</button>
+<button
+  style={rejectBtn}
+  onClick={() => updateStatus(student, "reject")}
+>
+  REJECT
+</button>
                   </td>
                 </tr>
               ))}

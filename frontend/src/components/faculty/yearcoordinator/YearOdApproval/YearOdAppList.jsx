@@ -1,75 +1,98 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import OutpassView from "./YearOutpassView";
 import YearodView from "./YearOdView";
 
 const YearOdAppList = () => {
-  const [showPopup, setShowPopup] = useState(false); // Control popup
-  const [activeForm, setActiveForm] = useState(""); // "outpass" or "onduty"
+  const [showPopup, setShowPopup] = useState(false);
+  const [activeForm, setActiveForm] = useState("");
+  const [records, setRecords] = useState([]);
+  const [selectedData, setSelectedData] = useState(null);
 
-  const students = [
-    { sno: 1, nof: 20, name: "Nandhini" },
-    { sno: 2, nof: 20, name: "Shobana" },
-    { sno: 3, nof: 20, name: "Saravanan" },
-    { sno: 4, nof: 20, name: "Vijayaraj" },
-    { sno: 5, nof: 20, name: "Akila" },
-    { sno: 6, nof: 20, name: "Rajitha" },
-    { sno: 7, nof: 20, name: "Akila" },
-    { sno: 8, nof: 20, name: "Rajitha" },
-    { sno: 9, nof: 20, name: "Akila" },
-    { sno: 10, nof: 20, name: "Rajitha" },
-  ];
+  /* ============================
+     FETCH OD + OUTPASS (YC)
+  ============================ */
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const email = localStorage.getItem("facultyEmail");
+        if (!email) return;
+
+        // 1️⃣ get facultyId
+        const facultyRes = await axios.get(
+          `http://localhost:5000/api/faculty/email/${email}`
+        );
+        const facultyId = facultyRes.data.f_id;
+
+        // 2️⃣ Fetch OD requests
+        const odRes = await axios.get(
+          `http://localhost:5000/api/od/year-coordinator/od/${facultyId}`
+        );
+
+        // 3️⃣ Fetch Outpass (already counsellor approved)
+        const outpassRes = await axios.get(
+          `http://localhost:5000/api/od/year-coordinator/${facultyId}`
+        );
+
+        // 4️⃣ Merge OD with Outpass using outpassId
+        const merged = outpassRes.data.map((op, index) => {
+          const od = odRes.data.ods.find(
+            (o) => o.outpass_id === op.outpassId
+          );
+
+          return {
+            sno: index + 1,
+            outpassId: op.outpassId,
+            studentName: op.studentName,
+            regNo: op.regNo,
+            outpassData: op,       // ✅ for popup
+            odData: od || null,    // ⚠️ may be null
+          };
+        });
+
+        setRecords(merged);
+      } catch (err) {
+        console.error("YC fetch error", err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  /* ============================
+     APPROVE / REJECT OD
+  ============================ */
+  const handleAction = async (odId, action) => {
+    try {
+      if (!odId) return;
+
+      await axios.put(
+        `http://localhost:5000/api/od/year-coordinator/approve/od/${odId}`,
+        { action }
+      );
+
+      // remove approved / rejected record
+      setRecords((prev) =>
+        prev.filter((r) => r.odData && r.odData.od_id !== odId)
+      );
+    } catch (err) {
+      console.error("YC approval failed", err);
+    }
+  };
 
   return (
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      
-
-      {/* Content Section */}
+    <div style={{ width: "100vw", height: "100vh" }}>
       <div
         style={{
-          flex: 1,
-          backgroundColor: "rgba(238, 238, 238, 0.5)",
+          height: "100%",
+          backgroundColor: "rgba(238,238,238,0.5)",
           display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          justifyContent: "center",
           paddingTop: "2%",
         }}
       >
-        {/* Dropdown */}
-        <div
-          style={{
-            width: "90%",
-            display: "flex",
-            justifyContent: "flex-end",
-            height:"10vh"
-          }}
-        >
-          
-        </div>
-
-        {/* Table Container */}
-        <div
-          style={{
-            width: "90%",
-            height: "65vh",
-            backgroundColor: "rgba(217, 217, 217, 1)",
-            border: "0.4% solid rgba(217, 217, 217,1)",
-            borderRadius: "1%",
-            padding: "0.8%",
-            boxSizing: "border-box",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-          }}
-        >
-          {/* Table Header */}
+        <div style={{ width: "90%" }}>
+          {/* Header */}
           <div
             style={{
               display: "grid",
@@ -77,132 +100,117 @@ const YearOdAppList = () => {
               backgroundColor: "white",
               fontWeight: "bold",
               textAlign: "center",
-              padding: "0.8%",
-              borderRadius: "0.5vh",
-              marginBottom: "0.8%",
+              padding: "1%",
+              borderRadius: "8px",
             }}
           >
             <div>S.NO</div>
             <div>NAME</div>
             <div>REG.NO</div>
-            <div>OUTPASS DETAILS</div>
-            <div>ONDUTY DETAILS</div>
+            <div>OUTPASS</div>
+            <div>ONDUTY</div>
             <div>VALIDATION</div>
           </div>
 
-          {/* Table Body */}
-          <div style={{ flex: 1, overflowY: "auto" }}>
-            {students.map((student) => (
+          {/* Body */}
+          <div style={{ marginTop: "1%", maxHeight: "70vh", overflowY: "auto" }}>
+            {records.map((r) => (
               <div
-                key={student.sno}
+                key={r.outpassId}
                 style={{
                   display: "grid",
                   gridTemplateColumns: "8% 18% 20% 20% 17% 17%",
-                  alignItems: "center",
                   backgroundColor: "white",
-                  borderRadius: "1vh",
-                  padding: "0.8%",
-                  marginBottom: "0.8%",
-                  boxShadow: "0% 0.3% 0.6% rgba(0,0,0,0.15)",
+                  padding: "1%",
+                  marginBottom: "1%",
+                  borderRadius: "8px",
+                  textAlign: "center",
                 }}
               >
-                <div style={cardCell}>{student.sno}</div>
-                <div style={cardCell}>{student.name}</div>
-                <div style={cardCell}>{student.nof}</div>
-                <div style={cardCell}>
+                <div>{r.sno}</div>
+                <div>{r.studentName}</div>
+                <div>{r.regNo}</div>
+
+                {/* OUTPASS VIEW */}
+                <div>
                   <button
                     style={formBtn}
                     onClick={() => {
-                      setShowPopup(true);
+                      setSelectedData(r.outpassData);
                       setActiveForm("outpass");
+                      setShowPopup(true);
                     }}
                   >
                     OUTPASS
                   </button>
                 </div>
-                <div style={cardCell}>
+
+                {/* OD VIEW */}
+                <div>
                   <button
                     style={formBtn}
+                    disabled={!r.odData}
                     onClick={() => {
-                      setShowPopup(true);
+                      if (!r.odData) return;
+                      setSelectedData(r.odData);
                       setActiveForm("onduty");
+                      setShowPopup(true);
                     }}
                   >
                     ONDUTY
                   </button>
                 </div>
-                <div style={cardCell}>
-                  <button style={approveBtn}>APPROVE</button>
-                  <button style={rejectBtn}>REJECT</button>
+
+                {/* APPROVAL */}
+                <div>
+                  <button
+                    style={{
+                      ...approveBtn,
+                      opacity: r.odData ? 1 : 0.5,
+                      cursor: r.odData ? "pointer" : "not-allowed",
+                    }}
+                    disabled={!r.odData}
+                    onClick={() =>
+                      handleAction(r.odData?.od_id, "approve")
+                    }
+                  >
+                    APPROVE
+                  </button>
+
+                  <button
+                    style={{
+                      ...rejectBtn,
+                      opacity: r.odData ? 1 : 0.5,
+                      cursor: r.odData ? "pointer" : "not-allowed",
+                    }}
+                    disabled={!r.odData}
+                    onClick={() =>
+                      handleAction(r.odData?.od_id, "reject")
+                    }
+                  >
+                    REJECT
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         </div>
-
-        {/* Bottom Buttons */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "end",
-            margin: "auto",
-            width: "90%",
-          }}
-        >
-          <button style={bottomBtn}>Approve All</button>
-        </div>
       </div>
 
-      {/* Conditional Popup */}
-      {showPopup && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0,0,0,0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 9999,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "10px",
-              width: "80%",
-              height: "90%",
-              overflowY: "auto",
-              padding: "1%",
-              position: "relative",
-              boxShadow: "0 0 10px rgba(0,0,0,0.3)",
-            }}
-          >
-            <button
-              onClick={() => setShowPopup(false)}
-              style={{
-                position: "absolute",
-                top: "10px",
-                right: "20px",
-                backgroundColor: "#d9534f",
-                color: "white",
-                border: "none",
-                borderRadius: "50%",
-                width: "35px",
-                height: "35px",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-            >
+      {/* POPUP */}
+      {showPopup && selectedData && (
+        <div style={popupOverlay}>
+          <div style={popupBox}>
+            <button style={closeBtn} onClick={() => setShowPopup(false)}>
               ✕
             </button>
 
-            {/* Conditional Rendering with clean popup */}
-            {activeForm === "outpass" && <OutpassView isPopup={true} />}
-            {activeForm === "onduty" && <YearodView isPopup={true} />}
+            {activeForm === "outpass" && (
+              <OutpassView data={selectedData} isPopup />
+            )}
+            {activeForm === "onduty" && (
+              <YearodView data={selectedData} isPopup />
+            )}
           </div>
         </div>
       )}
@@ -210,50 +218,66 @@ const YearOdAppList = () => {
   );
 };
 
-// Common Styles
-const cardCell = { textAlign: "center", fontSize: "90%" };
-
+/* ============================
+   STYLES
+============================ */
 const formBtn = {
   fontWeight: "bold",
-  padding: "0.7% 5%",
-  color: "white",
+  padding: "6px 20px",
   backgroundColor: "#3b4b75",
+  color: "white",
   border: "none",
-  borderRadius: "8%",
-  cursor: "pointer",
-  alignItems: "center",
+  borderRadius: "6px",
 };
 
 const approveBtn = {
-  fontWeight: "bold",
-  padding: "1% 3%",
-  color: "white",
   backgroundColor: "#3b4b75",
+  color: "white",
   border: "none",
-  borderRadius: "12%",
-  marginRight: "1%",
-  cursor: "pointer",
+  padding: "6px 10px",
+  marginRight: "6px",
+  borderRadius: "6px",
 };
 
 const rejectBtn = {
-  fontWeight: "bold",
-  padding: "1% 2%",
-  color: "white",
   backgroundColor: "#d9534f",
+  color: "white",
   border: "none",
-  borderRadius: "8%",
-  cursor: "pointer",
+  padding: "6px 10px",
+  borderRadius: "6px",
 };
 
-const bottomBtn = {
-  backgroundColor: "#3b4b75",
-  color: "white",
+const popupOverlay = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100vw",
+  height: "100vh",
+  backgroundColor: "rgba(0,0,0,0.5)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+};
+
+const popupBox = {
+  backgroundColor: "white",
+  width: "85%",
+  height: "90%",
+  borderRadius: "10px",
+  padding: "1%",
+  position: "relative",
+};
+
+const closeBtn = {
+  position: "absolute",
+  top: "10px",
+  right: "20px",
   border: "none",
-  padding: "1% 3%",
-  borderRadius: "8%",
-  cursor: "pointer",
-  fontSize: "100%",
-  fontWeight: "bold",
+  background: "#d9534f",
+  color: "white",
+  borderRadius: "50%",
+  width: "35px",
+  height: "35px",
 };
 
 export default YearOdAppList;
