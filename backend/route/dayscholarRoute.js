@@ -13,5 +13,8 @@ router.put("/counsellor/update/:dayscholaroutpassId", dayscholarController.updat
 // ✅ ADD THIS FOR YEAR COORDINATOR
 router.get("/year-coordinator/:facultyId", dayscholarController.getYearCoordinatorOutpasses);
 router.put("/year-coordinator/update/:dayscholaroutpassId", dayscholarController.updateYstatus);
-
+router.post(
+  "/year-coordinator/assign/:outpassId",
+  dayscholarController.assignYearCoordinator
+);
 module.exports = router;

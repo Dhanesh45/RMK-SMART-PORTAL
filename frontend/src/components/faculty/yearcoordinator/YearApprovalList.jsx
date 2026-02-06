@@ -57,7 +57,7 @@ const YearApprovalList = () => {
         const hostellerRes = await axios.get(
           `http://localhost:5000/api/outpass/year-coordinator/${facultyId}`
         );
-        console.log("HOSTELLER API DATA:", hostellerRes.data.outpasses[0]);
+        
 
 
         const hostellerMapped = hostellerRes.data.outpasses.map((op, index) => ({
@@ -99,24 +99,31 @@ const YearApprovalList = () => {
   /* ===========================
      APPROVE / REJECT
   =========================== */
- const updateStatus = async (student, action) => {
-  try {
-    console.log("UPDATE CLICKED:", student);
-    const url =
-      student.type === "HOSTELLER"
-        ? `http://localhost:5000/api/outpass/year-coordinator/update/${student.outpassId}/approve`
-        : `http://localhost:5000/api/dayscholarOutpass/year-coordinator/update/${student.outpassId}/approve`;
+ const handleApprove = async (student) => {
+  const url =
+    student.type === "HOSTELLER"
+      ? `http://localhost:5000/api/outpass/year-coordinator/update/${student.outpassId}`
+      : `http://localhost:5000/api/dayscholarOutpass/year-coordinator/update/${student.outpassId}`;
 
-    await axios.put(url, { action });
+  await axios.put(url, { action: "approve" });
 
-    // remove from UI
-    setStudents((prev) =>
-      prev.filter((s) => s.outpassId !== student.outpassId)
-    );
-  } catch (err) {
-    console.error("Failed to update ystatus", err);
-  }
+  setStudents((prev) =>
+    prev.filter((s) => s.outpassId !== student.outpassId)
+  );
 };
+const handleReject = async (student) => {
+  const url =
+    student.type === "HOSTELLER"
+      ? `http://localhost:5000/api/outpass/year-coordinator/update/${student.outpassId}`
+      : `http://localhost:5000/api/dayscholarOutpass/year-coordinator/update/${student.outpassId}`;
+
+  await axios.put(url, { action: "reject" });
+
+  setStudents((prev) =>
+    prev.filter((s) => s.outpassId !== student.outpassId)
+  );
+};
+
 
   return (
     <div
@@ -188,13 +195,13 @@ const YearApprovalList = () => {
                   </td>
                   <td style={cellStyle}>
                    <button style={approveBtn}
-           onClick={() => updateStatus(student, "approve")}
+           onClick={() => handleApprove(student)}
 >
   APPROVE
 </button>
 <button
   style={rejectBtn}
-  onClick={() => updateStatus(student, "reject")}
+  onClick={() => handleReject(student)}
 >
   REJECT
 </button>

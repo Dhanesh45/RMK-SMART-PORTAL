@@ -56,7 +56,8 @@ router.post(
 );
 
 // 🔟 Year Coordinator approves / rejects
-router.put("/year-coordinator/update/:id/approve", updateYstatus);
+router.put("/year-coordinator/update/:outpassId", updateYstatus);
+
 
 // 1️⃣ Get student details using regNo
 //    NOTE: placed LAST so it does not swallow more specific routes like /year-coordinator
