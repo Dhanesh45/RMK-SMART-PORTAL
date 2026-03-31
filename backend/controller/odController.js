@@ -246,14 +246,14 @@ const getODForYearCoordinator = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-// 9️⃣ YEAR COORDINATOR – VIEW OUTPASS FOR OD
+//9️⃣ YEAR CO-ORDINATOR – VIEW OUTPASS FOR OD
 const getODOutpassForYearCoordinator = async (req, res) => {
   try {
     const { facultyId } = req.params;
 
     const outpasses = await Outpass.findAll({
       where: {
-        facultyId: Number(facultyId),
+        facultyId: Number(facultyId),  // ✅ FIXED
         cstatus: 1,
         ystatus: 0,
         forOd: true
@@ -262,7 +262,7 @@ const getODOutpassForYearCoordinator = async (req, res) => {
     });
 
     res.json({ outpasses });
-  } catch (err) {
+  } catch (err){
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }

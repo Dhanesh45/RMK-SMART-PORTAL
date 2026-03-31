@@ -278,7 +278,7 @@ const updateYstatus = async (req, res) => {
 
     if (!["approve", "reject"].includes(action))
       return res.status(400).json({ message: "Invalid action" });
-
+    
     const outpass = await DayScholarOutpass.findByPk(dayscholaroutpassId);
     if (!outpass) return res.status(404).json({ message: "Outpass not found" });
 

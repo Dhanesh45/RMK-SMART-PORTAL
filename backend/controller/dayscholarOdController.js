@@ -132,9 +132,89 @@ const updateCstatus = async (req, res) => {
       .json({ message: "Server error", error: err.message });
   }
 };
+
+const forwardDayscholarODToYC = async (req, res) => {
+  try {
+    const { od_id } = req.params;
+    const { yearCoordinatorFacultyId } = req.body;
+
+    if (!yearCoordinatorFacultyId) {
+      return res.status(400).json({ message: "YC facultyId required" });
+    }
+
+    const od = await DayscholarOD.findByPk(od_id);
+
+    if (!od) return res.status(404).json({ message: "OD not found" });
+
+    if (od.cstatus !== 1) {
+      return res.status(400).json({
+        message: "OD not approved by counsellor",
+      });
+    }
+
+    // 🔥 MOVE TO YEAR COORDINATOR
+    od.facultyId = Number(yearCoordinatorFacultyId);
+    od.ystatus = 0;
+
+    await od.save();
+
+    res.json({ message: "Dayscholar OD forwarded to YC" });
+  } catch (err) {
+    console.error("forwardDayscholarODToYC error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const getDayscholarODForYearCoordinator = async (req, res) => {
+  try {
+    const { facultyId } = req.params;
+
+    const ods = await DayscholarOD.findAll({
+      where: {
+        facultyId: Number(facultyId),
+        cstatus: 1,
+        ystatus: 0,
+      },
+      order: [["date", "DESC"]],
+    });
+
+    res.json({ ods });
+  } catch (err) {
+    console.error("getDayscholarODForYearCoordinator error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const updateYstatusDayscholarOD = async (req, res) => {
+  try {
+    const { od_id } = req.params;
+    const { action } = req.body;
+
+    if (!["approve", "reject"].includes(action)) {
+      return res.status(400).json({ message: "Invalid action" });
+    }
+
+    const od = await DayscholarOD.findByPk(od_id);
+
+    if (!od) return res.status(404).json({ message: "OD not found" });
+
+    const status = action === "approve" ? 1 : -1;
+
+    od.ystatus = status;
+    await od.save();
+
+    res.json({ message: `Dayscholar OD ${action}d by YC` });
+  } catch (err) {
+    console.error("updateYstatusDayscholarOD error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 module.exports = {
   getStudentForDayscholarOD,
   createDayscholarOD,
+  getDayscholarODForYearCoordinator,
+  forwardDayscholarODToYC,
   getdayscholarODForCounsellor,
   updateCstatus,
+  updateYstatusDayscholarOD,
 };

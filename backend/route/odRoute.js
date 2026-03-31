@@ -7,10 +7,10 @@ const {
   getODoutpassforCounsellor,
   updateCstatushosod,
   updateCstatusOdOut,
- getODOutpassForYearCoordinator,
-   updateYstatusOD
-
- 
+  getODForYearCoordinator,              // ✅ ADDED
+  getODOutpassForYearCoordinator,
+  forwardODToYearCoordinator,           // ✅ (optional but useful)
+  updateYstatusOD
 } = require("../controller/odController");
 
 /**
@@ -25,7 +25,6 @@ router.post("/", createODWithOutpass);
  * COUNSELLOR FETCH HOSTELLER OD
  * ===============================
  * /api/od/counsellor/:facultyId
- * optional query: ?status=0 | 1 | -1
  */
 router.get("/counsellor/:facultyId", getHostellerODForCounsellor);
 
@@ -34,7 +33,6 @@ router.get("/counsellor/:facultyId", getHostellerODForCounsellor);
  * COUNSELLOR FETCH OD OUTPASS
  * ===============================
  * /api/od/outpass/counsellor/:facultyId
- * optional query: ?status=0 | 1 | -1
  */
 router.get("/outpass/counsellor/:facultyId", getODoutpassforCounsellor);
 
@@ -42,45 +40,52 @@ router.get("/outpass/counsellor/:facultyId", getODoutpassforCounsellor);
  * ===============================
  * COUNSELLOR APPROVE / REJECT OD
  * ===============================
- * body: { action: "approve" | "reject" }
  */
 router.put("/approve/od/:od_id", updateCstatushosod);
 
 /**
  * ===============================
- * COUNSELLOR APPROVE / REJECT OD OUTPASS
+ * COUNSELLOR APPROVE / REJECT OUTPASS
  * ===============================
- * body: { action: "approve" | "reject" }
  */
 router.put("/approve/outpass/:outpassId", updateCstatusOdOut);
 
-
-// YEAR COORDINATOR ROUTES
+/**
+ * ===============================
+ * FORWARD TO YEAR COORDINATOR
+ * ===============================
+ */
+router.put("/forward/:od_id", forwardODToYearCoordinator);
 
 /**
  * ===============================
- * YEAR COORDINATOR FETCH APPROVED BY COUNSELLOR
+ * YEAR COORDINATOR FETCH OD
  * ===============================
- * /api/od/year-coordinator/:facultyId
- * shows only counsellor-approved records
+ * IMPORTANT: This is what your frontend expects
  */
-// YEAR COORDINATOR – FETCH OD (ONDUTY)
-// YEAR COORDINATOR – FETCH OD (Counsellor approved)
-// YEAR COORDINATOR – FETCH OUTPASS (OD)
 router.get(
   "/year-coordinator/:facultyId",
+  getODForYearCoordinator
+);
+
+/**
+ * ===============================
+ * YEAR COORDINATOR FETCH OUTPASS (OPTIONAL)
+ * ===============================
+ */
+router.get(
+  "/year-coordinator/outpass/:facultyId",
   getODOutpassForYearCoordinator
 );
 
-
-
-// YEAR COORDINATOR – APPROVE / REJECT OD
-// YEAR COORDINATOR – APPROVE / REJECT OD
+/**
+ * ===============================
+ * YEAR COORDINATOR APPROVE / REJECT OD
+ * ===============================
+ */
 router.put(
   "/year-coordinator/approve/od/:od_id",
   updateYstatusOD
 );
-
-
 
 module.exports = router;
