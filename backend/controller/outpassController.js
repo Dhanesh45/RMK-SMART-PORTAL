@@ -114,26 +114,50 @@ exports.createOutpass = async (req, res) => {
 exports.getOutpassesForCounsellor = async (req, res) => {
   try {
     const { facultyId } = req.params;
-    const { status } = req.query;
 
     if (!facultyId)
       return res.status(400).json({ message: "facultyId is required" });
 
-    const where = { facultyId: Number(facultyId) };
-    if (status !== undefined) where.cstatus = Number(status);
-
     const outpasses = await Outpass.findAll({
-      where:{
+      where: {
         facultyId: Number(facultyId),
-        cstatus:0,
+        cstatus: 0,
       },
+      include: [
+        {
+          model: Student,
+          attributes: [
+            "studentName",
+            "regNo",
+            "section",
+            "gender",
+            "year",
+            "branch",
+            "yearCoordinator",
+            "studentMail",
+            "native",
+            "parentPhone",
+          ],
+          include: [
+            {
+              model: Faculty,
+              as: "YearCoordinator",
+              attributes: ["faculty_name"],
+            },
+          ],
+        },
+        {
+          model: Faculty,
+          attributes: ["faculty_name"],
+        },
+      ],
       order: [["dateOfApplication", "DESC"]],
     });
 
     return res.json({ outpasses });
   } catch (err) {
     console.error("getOutpassesForCounsellor error:", err);
-    return res.status(500).json({ message: "Server error", error: err.message });
+    return res.status(500).json({ message: "Server error" });
   }
 };
 

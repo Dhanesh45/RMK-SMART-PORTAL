@@ -17,13 +17,13 @@ const approveBtn = {
   borderRadius: "20px",
   border: "none",
   cursor: "pointer",
-  
-  
+
+
 };
 
-const Outpass = ({regNo:passedRegNo}) => {
+const Outpass = ({ regNo: passedRegNo }) => {
   const location = useLocation();
-  const [regNo, setRegNo] = useState(passedRegNo||location.state?.regNo || "");
+  const [regNo, setRegNo] = useState(passedRegNo || location.state?.regNo || "");
   const [student, setStudent] = useState(null);
   const [form, setForm] = useState({
     roomNumber: "",
@@ -34,6 +34,8 @@ const Outpass = ({regNo:passedRegNo}) => {
     forOd: "No",
     leavingDate: "",
     leavingTime: "",
+    parentsPermission: "",
+    remarks: "",
   });
 
   const fetchStudent = async (reg = regNo) => {
@@ -225,8 +227,33 @@ const Outpass = ({regNo:passedRegNo}) => {
                   }
                 />
               </div>
+              {/* Parent Permission */}
+              <div style={{ width: "95%" }}>
+                <label>PARENT PERMISSION</label>
+                <select
+                  style={inputStyle}
+                  onChange={(e) =>
+                    setForm({ ...form, parentsPermission: e.target.value })
+                  }
+                >
+                  <option value="">Select</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
 
-              
+              {/* Remarks */}
+              <div style={{ width: "95%" }}>
+                <label>REMARKS</label>
+                <input
+                  type="text"
+                  style={inputStyle}
+                  onChange={(e) =>
+                    setForm({ ...form, remarks: e.target.value })
+                  }
+                />
+              </div>
+
               <div style={{ display: "flex", gap: "30px" }}>
                 <div style={{ flex: 1 }}>
                   <label>LEAVING DATE</label>
@@ -272,15 +299,4 @@ const Outpass = ({regNo:passedRegNo}) => {
 
 export default Outpass;
 
-{/* <div style={{ width: "95%" }}>
-                <label>PARENTS PERMISSION (Write Yes / No / Any remark)</label>
-                <input
-                  type="text"
-                  placeholder="e.g., Yes, informed over call"
-                  style={inputStyle}
-                  onChange={(e) =>
-                    setForm({ ...form, parentsPermission: e.target.value })
-                  }
-                />
-              </div>
-               */}
+

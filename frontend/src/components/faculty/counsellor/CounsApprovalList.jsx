@@ -4,101 +4,141 @@ import axios from "axios";
 const CounsApprovalList = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
-const [students, setStudents] = useState([]);
-useEffect(() => {
-  const fetchOutpasses = async () => {
+  const [students, setStudents] = useState([]);
+  useEffect(() => {
+    const fetchOutpasses = async () => {
+      try {
+        const email = localStorage.getItem("facultyEmail");
+        if (!email) return;
+
+        // get facultyId
+        const facultyRes = await axios.get(
+          `http://localhost:5000/api/faculty/email/${email}`
+        );
+        const facultyId = facultyRes.data.f_id;
+
+        // fetch hosteller outpasses
+        const hostellerRes =
+          await axios.get(
+            `http://localhost:5000/api/outpass/counsellor/${facultyId}`
+          );
+        console.log("HOSTELLER DATA:", hostellerRes.data.outpasses);
+
+        const hostellerMapped = hostellerRes.data.outpasses.map((op, index) => {
+          console.log("OUTPASS DATA:", op);   // ✅ HERE
+
+          return {
+            sno: index + 1,
+            nof: op.regNo,
+            name: op.studentName,
+            outpassId: op.outpassId,
+            type: "HOSTELLER",
+            data: {
+              ...op,
+
+              // student table fields
+              studentName: op.studentName,
+              regNo: op.regNo,
+              section: op.student?.section,
+              gender: op.student?.gender,
+              year: op.student?.year,
+              branch: op.student?.branch,
+              yearCoordinator: op.student?.YearCoordinator?.faculty_name || "Not Assigned", email: op.student?.studentMail,
+              native: op.student?.native,
+
+              // counsellor
+              counsellor: op.Faculty?.faculty_name || "Not Assigned",
+
+              // extra fields
+              remarks: op.remarks,
+              parentsPermission: op.parentsPermission,
+            }
+          };
+        });
+        // fetch day scholar outpasses
+        const dayScholarRes =
+          await axios.get(
+            `http://localhost:5000/api/dayscholarOutpass/counsellor/${facultyId}`
+          );
+        console.log("🔥 RAW DayScholar API Response:", dayScholarRes.data);
+        console.log("🔥 RAW DayScholar Outpasses:", dayScholarRes.data.outpasses);
+        const dayScholarMapped = dayScholarRes.data.outpasses.map((op, index) => ({
+          sno: hostellerMapped.length + index + 1,
+          nof: op.regNo,
+          name: op.studentName,
+          outpassId: op.dayscholaroutpassId, // use correct PK
+          type: "DAYSCHOLAR",
+          data: {
+            ...op,
+            section: op.student?.section,
+            year: op.student?.year,
+            branch: op.student?.branch,
+            studentName: op.student?.studentName,
+            regNo: op.student?.regNo,
+            counsellor: op.Faculty?.faculty_name || "Not Assigned",
+            parentName: op.parentName,
+            parentNumber: op.parentNumber,
+            parentPermission: op.parentPermission,
+            remarks: op.remarks || "",
+
+            toDate: op.toDate,
+            leavingTime: op.leavingTime
+          },
+        }));
+        // merge both
+        setStudents([...hostellerMapped, ...dayScholarMapped]);
+      } catch (err) {
+        console.error("Failed to load outpasses", err);
+      }
+    };
+
+    fetchOutpasses();
+  }, []);
+  const handleApprove = async (student) => {
+    const url =
+      student.type === "HOSTELLER"
+        ? `http://localhost:5000/api/outpass/counsellor/update/${student.outpassId}`
+        : `http://localhost:5000/api/dayscholarOutpass/counsellor/update/${student.outpassId}`;
+
+    await axios.put(url, { action: "approve", updatedData: student.data, });
+
+    setStudents((prev) =>
+      prev.filter((s) => s.outpassId !== student.outpassId)
+    );
+  };
+  const handleApproveAll = async () => {
     try {
-      const email = localStorage.getItem("facultyEmail");
-      if (!email) return;
+      await Promise.all(
+        students.map((student) => {
+          const url =
+            student.type === "HOSTELLER"
+              ? `http://localhost:5000/api/outpass/counsellor/update/${student.outpassId}`
+              : `http://localhost:5000/api/dayscholarOutpass/counsellor/update/${student.outpassId}`;
 
-      // get facultyId
-      const facultyRes = await axios.get(
-        `http://localhost:5000/api/faculty/email/${email}`
-      );
-      const facultyId = facultyRes.data.f_id;
-
-      // fetch hosteller outpasses
-      const hostellerRes =
-      await axios.get(
-        `http://localhost:5000/api/outpass/counsellor/${facultyId}`
+          return axios.put(url, { action: "approve" });
+        })
       );
 
-      const hostellerMapped = hostellerRes.data.outpasses.map((op, index) => ({
-        sno: index + 1,
-        nof: op.regNo,
-        name: op.studentName,
-        outpassId: op.outpassId,
-        type: "HOSTELLER",
-      }));
-
-      // fetch day scholar outpasses
-      const dayScholarRes = 
-      await axios.get(
-        `http://localhost:5000/api/dayscholarOutpass/counsellor/${facultyId}`
-      );
-
-      const dayScholarMapped = dayScholarRes.data.outpasses.map((op, index) => ({
-        sno: hostellerMapped.length + index + 1,
-        nof: op.regNo,
-        name: op.studentName,
-        outpassId: op.dayscholaroutpassId, // use correct PK
-        type: "DAYSCHOLAR",
-      }));
-
-      // merge both
-      setStudents([...hostellerMapped, ...dayScholarMapped]);
-    } catch (err) {
-      console.error("Failed to load outpasses", err);
+      // clear all approved requests from UI
+      setStudents([]);
+    } catch (error) {
+      console.error("Approve all failed", error);
     }
   };
 
-  fetchOutpasses();
-}, []);
-const handleApprove = async (student) => {
-  const url =
-    student.type === "HOSTELLER"
-      ? `http://localhost:5000/api/outpass/counsellor/update/${student.outpassId}`
-      : `http://localhost:5000/api/dayscholarOutpass/counsellor/update/${student.outpassId}`;
 
-  await axios.put(url, { action: "approve" });
+  const handleReject = async (student) => {
+    const url =
+      student.type === "HOSTELLER"
+        ? `http://localhost:5000/api/outpass/counsellor/update/${student.outpassId}`
+        : `http://localhost:5000/api/dayscholarOutpass/counsellor/update/${student.outpassId}`;
 
-  setStudents((prev) =>
-    prev.filter((s) => s.outpassId !== student.outpassId)
-  );
-};
-const handleApproveAll = async () => {
-  try {
-    await Promise.all(
-      students.map((student) => {
-        const url =
-          student.type === "HOSTELLER"
-            ? `http://localhost:5000/api/outpass/counsellor/update/${student.outpassId}`
-            : `http://localhost:5000/api/dayscholarOutpass/counsellor/update/${student.outpassId}`;
+    await axios.put(url, { action: "reject" });
 
-        return axios.put(url, { action: "approve" });
-      })
+    setStudents((prev) =>
+      prev.filter((s) => s.outpassId !== student.outpassId)
     );
-
-    // clear all approved requests from UI
-    setStudents([]);
-  } catch (error) {
-    console.error("Approve all failed", error);
-  }
-};
-
-
-const handleReject = async (student) => {
-  const url =
-    student.type === "HOSTELLER"
-      ? `http://localhost:5000/api/outpass/counsellor/update/${student.outpassId}`
-      : `http://localhost:5000/api/dayscholarOutpass/counsellor/update/${student.outpassId}`;
-
-  await axios.put(url, { action: "reject" });
-
-  setStudents((prev) =>
-    prev.filter((s) => s.outpassId !== student.outpassId)
-  );
-};
+  };
 
 
   const handleViewForm = (student) => {
@@ -172,7 +212,7 @@ const handleReject = async (student) => {
             </thead>
             <tbody>
               {students.map((student) => {
-           
+
                 return (
                   <tr
                     key={student.sno}
@@ -180,11 +220,11 @@ const handleReject = async (student) => {
                       backgroundColor: "white",
                       borderRadius: "10px",
                       boxShadow: "0px 2px 6px rgba(0,0,0,0.1)",
-                      
+
                     }}
                   >
-                    <td style={{...cellStyle, borderTopLeftRadius: "10px", borderBottomLeftRadius: "10px"}}>{student.sno}</td>
-                    <td style={{...cellStyle}}>{student.name}</td>
+                    <td style={{ ...cellStyle, borderTopLeftRadius: "10px", borderBottomLeftRadius: "10px" }}>{student.sno}</td>
+                    <td style={{ ...cellStyle }}>{student.name}</td>
                     <td style={cellStyle}>{student.nof}</td>
                     <td style={cellStyle}>{student.type}</td>
                     <td style={cellStyle}>
@@ -201,7 +241,7 @@ const handleReject = async (student) => {
                       </button>
                       <button style={rejectBtn} onClick={() => handleReject(student)}>
                         REJECT
-                        </button>
+                      </button>
 
                     </td>
                   </tr>
@@ -212,7 +252,7 @@ const handleReject = async (student) => {
 
           {/* Approve All Button */}
           <div style={{ textAlign: "end", marginTop: "2%" }}>
-            <button style={approveAllBtn} onClick={()=>handleApproveAll()}>Approve All</button>
+            <button style={approveAllBtn} onClick={() => handleApproveAll()}>Approve All</button>
           </div>
         </div>
       </div>
@@ -261,11 +301,42 @@ const handleReject = async (student) => {
               ×
             </button>
 
-            {dayScholars.includes(selectedStudent.name) ? (
-              <DayScholarForm />
+            {selectedStudent.type === "DAYSCHOLAR" ? (
+              <DayScholarForm
+                data={selectedStudent.data}
+                setSelectedStudent={setSelectedStudent}
+                student={selectedStudent}
+                handleApprove={handleApprove}
+                handleReject={handleReject}
+                closePopup={closePopup}
+              />
             ) : (
-              <HostellerForm />
+              <HostellerForm data={selectedStudent.data} />
             )}
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "20px" }}>
+  
+  <button
+    style={approveBtn}
+    onClick={() => {
+      handleApprove(selectedStudent);
+      closePopup();
+    }}
+  >
+    APPROVE
+  </button>
+
+  <button
+    style={rejectBtn}
+    onClick={() => {
+      handleReject(selectedStudent);
+      closePopup();
+    }}
+  >
+    REJECT
+  </button>
+
+</div>
+
           </div>
         </div>
       )}
@@ -274,164 +345,345 @@ const handleReject = async (student) => {
 };
 
 /* 🏠 Fixed Hosteller Form (layout like 1st image) */
-const HostellerForm = () => (
-  <div style={{ display: "flex", flexDirection: "column", gap: "1.5vh" }}>
-    <h2 style={{ textAlign: "center", color: "#0d3b66" }}>Hosteller Outpass Form</h2>
+const HostellerForm = ({ data }) => {
+  const formatDate = (value) => {
+    if (!value) return "";
+    return new Date(value).toISOString().split("T")[0];
+  };
+  console.log(data);
 
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(4, 1fr)",
-        gap: "1.5vh 2vh",
-        alignItems: "center",
-      }}
-    >
-      {[
-        "Name",
-        "Year",
-        "Section",
-        "Gender",
-        "Registration Number",
-        "Counsellor",
-        "Email Address",
-        "Year Coordinator",
-        "Branch",
-        "No. of Days",
-        "From Date",
-        "To Date",
-        "Name of the Parent",
-        "Room No",
-        "Leaving Date",
-        "Leaving Time",
-        "Native",
-        "Reason for Leave",
-        "Parent's Mobile No",
-        "Parent's Permission",
-        "Remarks",
-      ].map((label) => (
-        <div
-          key={label}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gridColumn:
-              ["Reason for Leave", "Parent's Permission","Remarks"].includes(label)
-                ? "span 2"
-                : "auto",
-          }}
-        >
-          <label style={labelStyle}>{label}</label>
+  const formatTime = (value) => {
+    if (!value) return "";
+    return value.slice(0, 5);
+  };
+
+  const getValue = (label) => {
+    switch (label) {
+      case "Name": return data?.studentName || "";
+      case "Year": return data?.year || "";
+      case "Section": return data?.section || "";
+      case "Gender": return data?.gender || "";
+      case "Registration Number": return data?.regNo || "";
+      case "Counsellor": return data?.counsellor || "";
+      case "Email Address": return data?.email || "";
+      case "Year Coordinator": return data?.yearCoordinator || "";
+      case "Branch": return data?.branch || "";
+      case "No. of Days": return data?.noOfDays || "";
+      case "From Date": return formatDate(data?.fromDate);
+      case "To Date": return formatDate(data?.toDate);
+      case "Name of the Parent": return data?.parentName || "";
+      case "Room No": return data?.roomNumber || "";
+      case "Leaving Date": return formatDate(data?.leavingDate);
+      case "Leaving Time": return formatTime(data?.leavingTime);
+      case "Native": return data?.native || "";
+      case "Reason for Leave": return data?.reasonForLeave || "";
+      case "Parent's Mobile No": return data?.parentPhone || "";
+      case "Parent's Permission": return data?.parentsPermission || "";
+      case "Remarks": return data?.remarks || "";
+      default: return "";
+    }
+  };
+
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "1.5vh" }}>
+      <h2 style={{ textAlign: "center", color: "#0d3b66" }}>
+        Hosteller Outpass Form
+      </h2>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: "1.5vh 2vh",
+          alignItems: "center",
+        }}
+      >
+        {[
+          "Name",
+          "Year",
+          "Section",
+          "Gender",
+          "Registration Number",
+          "Counsellor",
+          "Email Address",
+          "Year Coordinator",
+          "Branch",
+          "No. of Days",
+          "From Date",
+          "To Date",
+          "Name of the Parent",
+          "Room No",
+          "Leaving Date",
+          "Leaving Time",
+          "Native",
+          "Reason for Leave",
+          "Parent's Mobile No",
+          "Parent's Permission",
+          "Remarks",
+        ].map((label) => (
+          <div
+            key={label}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gridColumn:
+                ["Reason for Leave", "Parent's Permission", "Remarks"].includes(label)
+                  ? "span 2"
+                  : "auto",
+            }}
+          >
+            <label style={labelStyle}>{label}</label>
+            <input
+              type={
+                label.includes("Date")
+                  ? "date"
+                  : label.includes("Time")
+                    ? "time"
+                    : "text"
+              }
+              value={getValue(label)}
+              style={inputStyle}
+              readOnly
+            />
+          </div>
+        ))}
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          marginTop: "1vh",
+          fontSize: "1.6vh",
+          gap: "0.8vh",
+        }}
+      >
+        <label>
           <input
-            type={
-              label.includes("Date")
-                ? "date"
-                : label.includes("Time")
-                ? "time"
-                : "text"
-            }
-            style={inputStyle}
-          />
-        </div>
-      ))}
+            type="checkbox"
+            checked={data?.obtainedOverPhone || false}
+            readOnly
+          />{" "}
+          Obtained Over Phone
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={data?.hasComeInPerson || false}
+            readOnly
+          />{" "}
+          Has Come in Person
+        </label>
+      </div>
     </div>
-
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        marginTop: "1vh",
-        fontSize: "1.6vh",
-        gap: "0.8vh",
-      }}
-    >
-      <label>
-        <input type="checkbox" /> Obtained Over Phone
-      </label>
-      <label>
-        <input type="checkbox" /> Has Come in Person
-      </label>
-    </div>
-
-   
-  </div>
-);
+  );
+};
 
 /* 🚌 Day Scholar Form (unchanged) */
-const DayScholarForm = () => (
+const DayScholarForm = ({ data, setSelectedStudent, student, handleApprove, handleReject, closePopup }) => {
+  const formatDate = (value) => {
+    if (!value) return "";
+    return new Date(value).toISOString().split("T")[0];
+  };
+
+  const formatTime = (value) => {
+    if (!value) return "";
+    return value.slice(0, 5);
+  };
+
+  return (
   <div style={{ display: "flex", gap: "5%", height: "100%" }}>
+
+    {/* LEFT SIDE */}
     <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+
       <label style={{ fontSize: "2vh" }}>NAME OF THE STUDENT</label>
-      <input type="text" style={inputField} />
+      <input
+        type="text"
+        style={inputField}
+        value={data.studentName || ""}
+        onChange={(e) =>
+          setSelectedStudent((prev) => ({
+            ...prev,
+            data: { ...prev.data, studentName: e.target.value },
+          }))
+        }
+      />
 
       <label style={{ fontSize: "2vh" }}>REGISTER NUMBER</label>
-      <input type="text" style={inputField} />
+      <input
+        type="text"
+        style={inputField}
+        value={data.regNo || ""}
+        onChange={(e) =>
+          setSelectedStudent((prev) => ({
+            ...prev,
+            data: { ...prev.data, regNo: e.target.value },
+          }))
+        }
+      />
 
       <label style={{ fontSize: "2vh" }}>BRANCH</label>
-      <input type="text" style={inputField} />
+      <input
+        type="text"
+        style={inputField}
+        value={data.branch || ""}
+        onChange={(e) =>
+          setSelectedStudent((prev) => ({
+            ...prev,
+            data: { ...prev.data, branch: e.target.value },
+          }))
+        }
+      />
 
       <div style={{ display: "flex", gap: "5%" }}>
         <div style={{ flex: 1 }}>
           <label style={{ fontSize: "2vh" }}>YEAR</label>
-          <select style={selectStyle}>
-            <option value="">SELECT</option>
-            <option value="I">I</option>
-            <option value="II">II</option>
-            <option value="III">III</option>
-            <option value="IV">IV</option>
-          </select>
+          <input
+            type="text"
+            style={inputField}
+            value={data.year || ""}
+            onChange={(e) =>
+              setSelectedStudent((prev) => ({
+                ...prev,
+                data: { ...prev.data, year: e.target.value },
+              }))
+            }
+          />
         </div>
         <div style={{ flex: 1 }}>
           <label style={{ fontSize: "2vh" }}>SECTION</label>
-          <select style={selectStyle}>
-            <option value="">SELECT</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-          </select>
+          <input
+            type="text"
+            style={inputField}
+            value={data.section || ""}
+            onChange={(e) =>
+              setSelectedStudent((prev) => ({
+                ...prev,
+                data: { ...prev.data, section: e.target.value },
+              }))
+            }
+          />
         </div>
       </div>
 
       <div style={{ display: "flex", gap: "5%" }}>
         <div style={{ flex: 1 }}>
           <label style={{ fontSize: "2vh" }}>DATE</label>
-          <input type="date" style={selectStyle} />
+          <input
+            type="date"
+            style={inputField}
+            value={formatDate(data.toDate)}
+            onChange={(e) =>
+              setSelectedStudent((prev) => ({
+                ...prev,
+                data: { ...prev.data, toDate: e.target.value },
+              }))
+            }
+          />
         </div>
         <div style={{ flex: 1 }}>
           <label style={{ fontSize: "2vh" }}>TIME</label>
-          <input type="time" style={selectStyle} />
+          <input
+            type="time"
+            style={inputField}
+            value={formatTime(data.leavingTime)}
+            onChange={(e) =>
+              setSelectedStudent((prev) => ({
+                ...prev,
+                data: { ...prev.data, leavingTime: e.target.value },
+              }))
+            }
+          />
         </div>
       </div>
 
       <label style={{ fontSize: "2vh" }}>PURPOSE OF LEAVING</label>
-      <input type="text" style={inputField} />
+      <input
+        type="text"
+        style={inputField}
+        value={data.reason || ""}
+        onChange={(e) =>
+          setSelectedStudent((prev) => ({
+            ...prev,
+            data: { ...prev.data, reason: e.target.value },
+          }))
+        }
+      />
     </div>
 
+    {/* RIGHT SIDE */}
     <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+
       <label style={{ fontSize: "2vh" }}>NAME OF THE COUNSELLOR</label>
-      <input type="text" style={inputField} />
+      <input
+        type="text"
+        style={inputField}
+        value={data.counsellor || ""}
+        onChange={(e) =>
+          setSelectedStudent((prev) => ({
+            ...prev,
+            data: { ...prev.data, counsellor: e.target.value },
+          }))
+        }
+      />
 
       <label style={{ fontSize: "2vh" }}>NAME OF THE PARENT</label>
-      <input type="text" style={inputField} />
+      <input
+        type="text"
+        style={inputField}
+        value={data.parentName || ""}
+        onChange={(e) =>
+          setSelectedStudent((prev) => ({
+            ...prev,
+            data: { ...prev.data, parentName: e.target.value },
+          }))
+        }
+      />
 
       <label style={{ fontSize: "2vh" }}>CONTACT NUMBER OF THE PARENT</label>
-      <input type="number" style={inputField} />
+      <input
+        type="text"
+        style={inputField}
+        value={data.parentNumber || ""}
+        onChange={(e) =>
+          setSelectedStudent((prev) => ({
+            ...prev,
+            data: { ...prev.data, parentNumber: e.target.value },
+          }))
+        }
+      />
 
       <label style={{ fontSize: "2vh" }}>PARENT PERMISSION</label>
-      <select style={inputField}>
-        <option value="">SELECT</option>
-        <option value="Phone">OBTAINED OVER PHONE</option>
-        <option value="InPerson">HAS COME IN PERSON</option>
-      </select>
+      <input
+        type="text"
+        style={inputField}
+        value={data.parentPermission || ""}
+        onChange={(e) =>
+          setSelectedStudent((prev) => ({
+            ...prev,
+            data: { ...prev.data, parentPermission: e.target.value },
+          }))
+        }
+      />
 
       <label style={{ fontSize: "2vh" }}>REMARKS</label>
-      <input type="text" style={inputField} />
-
-      <button style={submitBtn}>SUBMIT</button>
+      <input
+        type="text"
+        style={inputField}
+        value={data.remarks || ""}
+        onChange={(e) =>
+          setSelectedStudent((prev) => ({
+            ...prev,
+            data: { ...prev.data, remarks: e.target.value },
+          }))
+        }
+      />
     </div>
   </div>
 );
-
+};
 /* 🎨 Styles */
 const headerStyle = {
   backgroundColor: "white",
@@ -441,9 +693,10 @@ const headerStyle = {
   fontWeight: "bold",
 };
 
-const cellStyle = { padding: "14px 8px",   // 👈 this gives ~58px row height
+const cellStyle = {
+  padding: "14px 8px",   // 👈 this gives ~58px row height
   textAlign: "center",
-  };
+};
 const approveBtn = {
   fontWeight: "bold",
   padding: "5px 10px",
