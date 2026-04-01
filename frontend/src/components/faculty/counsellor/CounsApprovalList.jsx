@@ -25,7 +25,7 @@ const CounsApprovalList = () => {
         console.log("HOSTELLER DATA:", hostellerRes.data.outpasses);
 
         const hostellerMapped = hostellerRes.data.outpasses.map((op, index) => {
-          console.log("OUTPASS DATA:", op);   // ✅ HERE
+          console.log("OUTPASS DATA:", op);
 
           return {
             sno: index + 1,
@@ -39,20 +39,25 @@ const CounsApprovalList = () => {
               // student table fields
               studentName: op.studentName,
               regNo: op.regNo,
-              section: op.student?.section,
-              gender: op.student?.gender,
-              year: op.student?.year,
-              branch: op.student?.branch,
-              yearCoordinator: op.student?.YearCoordinator?.faculty_name || "Not Assigned", email: op.student?.studentMail,
-              native: op.student?.native,
+              section: op.student?.section || "",
+              gender: op.student?.gender || "",
+              year: op.student?.year || "",
+              branch: op.student?.branch || "",
+              yearCoordinator:
+                op.student?.YearCoordinator?.faculty_name || "Not Assigned",
+              email: op.student?.studentMail || "",
+              native: op.student?.native || "",
 
               // counsellor
               counsellor: op.Faculty?.faculty_name || "Not Assigned",
 
-              // extra fields
-              remarks: op.remarks,
-              parentsPermission: op.parentsPermission,
-            }
+              // ✅ IMPORTANT FIXES
+              remarks: op.remarks || "",
+
+              // ✅ CHECKBOX FIX (VERY IMPORTANT)
+              obtainedOverPhone: op.obtainedOverPhone ?? false,
+              hasComeInPerson: op.hasComeInPerson ?? false,
+            },
           };
         });
         // fetch day scholar outpasses
@@ -311,31 +316,34 @@ const CounsApprovalList = () => {
                 closePopup={closePopup}
               />
             ) : (
-              <HostellerForm data={selectedStudent.data} />
+              <HostellerForm
+                data={selectedStudent.data}
+                setSelectedStudent={setSelectedStudent}
+              />
             )}
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "20px" }}>
-  
-  <button
-    style={approveBtn}
-    onClick={() => {
-      handleApprove(selectedStudent);
-      closePopup();
-    }}
-  >
-    APPROVE
-  </button>
 
-  <button
-    style={rejectBtn}
-    onClick={() => {
-      handleReject(selectedStudent);
-      closePopup();
-    }}
-  >
-    REJECT
-  </button>
+              <button
+                style={approveBtn}
+                onClick={() => {
+                  handleApprove(selectedStudent);
+                  closePopup();
+                }}
+              >
+                APPROVE
+              </button>
 
-</div>
+              <button
+                style={rejectBtn}
+                onClick={() => {
+                  handleReject(selectedStudent);
+                  closePopup();
+                }}
+              >
+                REJECT
+              </button>
+
+            </div>
 
           </div>
         </div>
@@ -345,45 +353,41 @@ const CounsApprovalList = () => {
 };
 
 /* 🏠 Fixed Hosteller Form (layout like 1st image) */
-const HostellerForm = ({ data }) => {
+const HostellerForm = ({ data, setSelectedStudent }) => {
+
   const formatDate = (value) => {
     if (!value) return "";
     return new Date(value).toISOString().split("T")[0];
   };
-  console.log(data);
 
   const formatTime = (value) => {
     if (!value) return "";
     return value.slice(0, 5);
   };
 
-  const getValue = (label) => {
-    switch (label) {
-      case "Name": return data?.studentName || "";
-      case "Year": return data?.year || "";
-      case "Section": return data?.section || "";
-      case "Gender": return data?.gender || "";
-      case "Registration Number": return data?.regNo || "";
-      case "Counsellor": return data?.counsellor || "";
-      case "Email Address": return data?.email || "";
-      case "Year Coordinator": return data?.yearCoordinator || "";
-      case "Branch": return data?.branch || "";
-      case "No. of Days": return data?.noOfDays || "";
-      case "From Date": return formatDate(data?.fromDate);
-      case "To Date": return formatDate(data?.toDate);
-      case "Name of the Parent": return data?.parentName || "";
-      case "Room No": return data?.roomNumber || "";
-      case "Leaving Date": return formatDate(data?.leavingDate);
-      case "Leaving Time": return formatTime(data?.leavingTime);
-      case "Native": return data?.native || "";
-      case "Reason for Leave": return data?.reasonForLeave || "";
-      case "Parent's Mobile No": return data?.parentPhone || "";
-      case "Parent's Permission": return data?.parentsPermission || "";
-      case "Remarks": return data?.remarks || "";
-      default: return "";
-    }
-  };
-
+  // ✅ Field mapping (clean + editable)
+  const fields = [
+    { label: "Name", key: "studentName" },
+    { label: "Year", key: "year" },
+    { label: "Section", key: "section" },
+    { label: "Gender", key: "gender" },
+    { label: "Registration Number", key: "regNo" },
+    { label: "Counsellor", key: "counsellor" },
+    { label: "Email Address", key: "email" },
+    { label: "Year Coordinator", key: "yearCoordinator" },
+    { label: "Branch", key: "branch" },
+    { label: "No. of Days", key: "noOfDays" },
+    { label: "From Date", key: "fromDate", type: "date" },
+    { label: "To Date", key: "toDate", type: "date" },
+    { label: "Name of the Parent", key: "parentName" },
+    { label: "Room No", key: "roomNumber" },
+    { label: "Leaving Date", key: "leavingDate", type: "date" },
+    { label: "Leaving Time", key: "leavingTime", type: "time" },
+    { label: "Native", key: "native" },
+    { label: "Reason for Leave", key: "reasonForLeave" },
+    { label: "Parent's Mobile No", key: "parentPhone" },
+    { label: "Remarks", key: "remarks" }
+  ];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.5vh" }}>
@@ -396,90 +400,115 @@ const HostellerForm = ({ data }) => {
           display: "grid",
           gridTemplateColumns: "repeat(4, 1fr)",
           gap: "1.5vh 2vh",
-          alignItems: "center",
         }}
       >
-        {[
-          "Name",
-          "Year",
-          "Section",
-          "Gender",
-          "Registration Number",
-          "Counsellor",
-          "Email Address",
-          "Year Coordinator",
-          "Branch",
-          "No. of Days",
-          "From Date",
-          "To Date",
-          "Name of the Parent",
-          "Room No",
-          "Leaving Date",
-          "Leaving Time",
-          "Native",
-          "Reason for Leave",
-          "Parent's Mobile No",
-          "Parent's Permission",
-          "Remarks",
-        ].map((label) => (
+        {fields.map((field) => (
           <div
-            key={label}
+            key={field.key}
             style={{
               display: "flex",
               flexDirection: "column",
               gridColumn:
-                ["Reason for Leave", "Parent's Permission", "Remarks"].includes(label)
+                ["reasonForLeave", "remarks"].includes(field.key)
                   ? "span 2"
                   : "auto",
             }}
           >
-            <label style={labelStyle}>{label}</label>
+            <label style={labelStyle}>{field.label}</label>
+
             <input
-              type={
-                label.includes("Date")
-                  ? "date"
-                  : label.includes("Time")
-                    ? "time"
-                    : "text"
+              type={field.type || "text"}
+              value={
+                field.type === "date"
+                  ? formatDate(data[field.key])
+                  : field.type === "time"
+                    ? formatTime(data[field.key])
+                    : data[field.key] || ""
               }
-              value={getValue(label)}
               style={inputStyle}
-              readOnly
+              onChange={(e) =>
+                setSelectedStudent((prev) => ({
+                  ...prev,
+                  data: {
+                    ...prev.data,
+                    [field.key]: e.target.value,
+                  },
+                }))
+              }
             />
           </div>
         ))}
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          marginTop: "1vh",
-          fontSize: "1.6vh",
-          gap: "0.8vh",
-        }}
-      >
+      {/* ✅ Checkbox also editable */}
+      <div style={{ marginTop: "1vh" }}>
+        <label style={labelStyle}>Parent Permission</label>
+
         <label>
           <input
-            type="checkbox"
-            checked={data?.obtainedOverPhone || false}
-            readOnly
-          />{" "}
+            type="radio"
+            name="parentPermission"
+            value="OBTAINED_OVER_PHONE"
+            checked={data.parentsPermission === "OBTAINED_OVER_PHONE"}
+            onChange={(e) =>
+              setSelectedStudent((prev) => ({
+                ...prev,
+                data: {
+                  ...prev.data,
+                  parentsPermission: e.target.value,
+                },
+              }))
+            }
+          />
           Obtained Over Phone
         </label>
+
+        <br />
+
         <label>
           <input
-            type="checkbox"
-            checked={data?.hasComeInPerson || false}
-            readOnly
-          />{" "}
-          Has Come in Person
+            type="radio"
+            name="parentPermission"
+            value="HAS_COME_IN_PERSON"
+            checked={data.parentsPermission === "HAS_COME_IN_PERSON"}
+            onChange={(e) =>
+              setSelectedStudent((prev) => ({
+                ...prev,
+                data: {
+                  ...prev.data,
+                  parentsPermission: e.target.value,
+                },
+              }))
+            }
+          />
+          {" "}Has Come in Person
+        </label>
+
+        <br />
+
+        <label>
+          <input
+            type="radio"
+            name="parentPermission"
+            value="NOT_PERMITTED"
+            checked={data.parentsPermission === "NOT_PERMITTED"}
+            onChange={(e) =>
+              setSelectedStudent((prev) => ({
+                ...prev,
+                data: {
+                  ...prev.data,
+                  parentsPermission: e.target.value,
+                },
+              }))
+            }
+          />
+          {" "}Not Permitted
         </label>
       </div>
     </div>
+
   );
 };
-
 /* 🚌 Day Scholar Form (unchanged) */
 const DayScholarForm = ({ data, setSelectedStudent, student, handleApprove, handleReject, closePopup }) => {
   const formatDate = (value) => {
@@ -493,196 +522,196 @@ const DayScholarForm = ({ data, setSelectedStudent, student, handleApprove, hand
   };
 
   return (
-  <div style={{ display: "flex", gap: "5%", height: "100%" }}>
+    <div style={{ display: "flex", gap: "5%", height: "100%" }}>
 
-    {/* LEFT SIDE */}
-    <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      {/* LEFT SIDE */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
 
-      <label style={{ fontSize: "2vh" }}>NAME OF THE STUDENT</label>
-      <input
-        type="text"
-        style={inputField}
-        value={data.studentName || ""}
-        onChange={(e) =>
-          setSelectedStudent((prev) => ({
-            ...prev,
-            data: { ...prev.data, studentName: e.target.value },
-          }))
-        }
-      />
+        <label style={{ fontSize: "2vh" }}>NAME OF THE STUDENT</label>
+        <input
+          type="text"
+          style={inputField}
+          value={data.studentName || ""}
+          onChange={(e) =>
+            setSelectedStudent((prev) => ({
+              ...prev,
+              data: { ...prev.data, studentName: e.target.value },
+            }))
+          }
+        />
 
-      <label style={{ fontSize: "2vh" }}>REGISTER NUMBER</label>
-      <input
-        type="text"
-        style={inputField}
-        value={data.regNo || ""}
-        onChange={(e) =>
-          setSelectedStudent((prev) => ({
-            ...prev,
-            data: { ...prev.data, regNo: e.target.value },
-          }))
-        }
-      />
+        <label style={{ fontSize: "2vh" }}>REGISTER NUMBER</label>
+        <input
+          type="text"
+          style={inputField}
+          value={data.regNo || ""}
+          onChange={(e) =>
+            setSelectedStudent((prev) => ({
+              ...prev,
+              data: { ...prev.data, regNo: e.target.value },
+            }))
+          }
+        />
 
-      <label style={{ fontSize: "2vh" }}>BRANCH</label>
-      <input
-        type="text"
-        style={inputField}
-        value={data.branch || ""}
-        onChange={(e) =>
-          setSelectedStudent((prev) => ({
-            ...prev,
-            data: { ...prev.data, branch: e.target.value },
-          }))
-        }
-      />
+        <label style={{ fontSize: "2vh" }}>BRANCH</label>
+        <input
+          type="text"
+          style={inputField}
+          value={data.branch || ""}
+          onChange={(e) =>
+            setSelectedStudent((prev) => ({
+              ...prev,
+              data: { ...prev.data, branch: e.target.value },
+            }))
+          }
+        />
 
-      <div style={{ display: "flex", gap: "5%" }}>
-        <div style={{ flex: 1 }}>
-          <label style={{ fontSize: "2vh" }}>YEAR</label>
-          <input
-            type="text"
-            style={inputField}
-            value={data.year || ""}
-            onChange={(e) =>
-              setSelectedStudent((prev) => ({
-                ...prev,
-                data: { ...prev.data, year: e.target.value },
-              }))
-            }
-          />
+        <div style={{ display: "flex", gap: "5%" }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ fontSize: "2vh" }}>YEAR</label>
+            <input
+              type="text"
+              style={inputField}
+              value={data.year || ""}
+              onChange={(e) =>
+                setSelectedStudent((prev) => ({
+                  ...prev,
+                  data: { ...prev.data, year: e.target.value },
+                }))
+              }
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={{ fontSize: "2vh" }}>SECTION</label>
+            <input
+              type="text"
+              style={inputField}
+              value={data.section || ""}
+              onChange={(e) =>
+                setSelectedStudent((prev) => ({
+                  ...prev,
+                  data: { ...prev.data, section: e.target.value },
+                }))
+              }
+            />
+          </div>
         </div>
-        <div style={{ flex: 1 }}>
-          <label style={{ fontSize: "2vh" }}>SECTION</label>
-          <input
-            type="text"
-            style={inputField}
-            value={data.section || ""}
-            onChange={(e) =>
-              setSelectedStudent((prev) => ({
-                ...prev,
-                data: { ...prev.data, section: e.target.value },
-              }))
-            }
-          />
+
+        <div style={{ display: "flex", gap: "5%" }}>
+          <div style={{ flex: 1 }}>
+            <label style={{ fontSize: "2vh" }}>DATE</label>
+            <input
+              type="date"
+              style={inputField}
+              value={formatDate(data.toDate)}
+              onChange={(e) =>
+                setSelectedStudent((prev) => ({
+                  ...prev,
+                  data: { ...prev.data, toDate: e.target.value },
+                }))
+              }
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label style={{ fontSize: "2vh" }}>TIME</label>
+            <input
+              type="time"
+              style={inputField}
+              value={formatTime(data.leavingTime)}
+              onChange={(e) =>
+                setSelectedStudent((prev) => ({
+                  ...prev,
+                  data: { ...prev.data, leavingTime: e.target.value },
+                }))
+              }
+            />
+          </div>
         </div>
+
+        <label style={{ fontSize: "2vh" }}>PURPOSE OF LEAVING</label>
+        <input
+          type="text"
+          style={inputField}
+          value={data.reason || ""}
+          onChange={(e) =>
+            setSelectedStudent((prev) => ({
+              ...prev,
+              data: { ...prev.data, reason: e.target.value },
+            }))
+          }
+        />
       </div>
 
-      <div style={{ display: "flex", gap: "5%" }}>
-        <div style={{ flex: 1 }}>
-          <label style={{ fontSize: "2vh" }}>DATE</label>
-          <input
-            type="date"
-            style={inputField}
-            value={formatDate(data.toDate)}
-            onChange={(e) =>
-              setSelectedStudent((prev) => ({
-                ...prev,
-                data: { ...prev.data, toDate: e.target.value },
-              }))
-            }
-          />
-        </div>
-        <div style={{ flex: 1 }}>
-          <label style={{ fontSize: "2vh" }}>TIME</label>
-          <input
-            type="time"
-            style={inputField}
-            value={formatTime(data.leavingTime)}
-            onChange={(e) =>
-              setSelectedStudent((prev) => ({
-                ...prev,
-                data: { ...prev.data, leavingTime: e.target.value },
-              }))
-            }
-          />
-        </div>
+      {/* RIGHT SIDE */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+
+        <label style={{ fontSize: "2vh" }}>NAME OF THE COUNSELLOR</label>
+        <input
+          type="text"
+          style={inputField}
+          value={data.counsellor || ""}
+          onChange={(e) =>
+            setSelectedStudent((prev) => ({
+              ...prev,
+              data: { ...prev.data, counsellor: e.target.value },
+            }))
+          }
+        />
+
+        <label style={{ fontSize: "2vh" }}>NAME OF THE PARENT</label>
+        <input
+          type="text"
+          style={inputField}
+          value={data.parentName || ""}
+          onChange={(e) =>
+            setSelectedStudent((prev) => ({
+              ...prev,
+              data: { ...prev.data, parentName: e.target.value },
+            }))
+          }
+        />
+
+        <label style={{ fontSize: "2vh" }}>CONTACT NUMBER OF THE PARENT</label>
+        <input
+          type="text"
+          style={inputField}
+          value={data.parentNumber || ""}
+          onChange={(e) =>
+            setSelectedStudent((prev) => ({
+              ...prev,
+              data: { ...prev.data, parentNumber: e.target.value },
+            }))
+          }
+        />
+
+        <label style={{ fontSize: "2vh" }}>PARENT PERMISSION</label>
+        <input
+          type="text"
+          style={inputField}
+          value={data.parentPermission || ""}
+          onChange={(e) =>
+            setSelectedStudent((prev) => ({
+              ...prev,
+              data: { ...prev.data, parentPermission: e.target.value },
+            }))
+          }
+        />
+
+        <label style={{ fontSize: "2vh" }}>REMARKS</label>
+        <input
+          type="text"
+          style={inputField}
+          value={data.remarks || ""}
+          onChange={(e) =>
+            setSelectedStudent((prev) => ({
+              ...prev,
+              data: { ...prev.data, remarks: e.target.value },
+            }))
+          }
+        />
       </div>
-
-      <label style={{ fontSize: "2vh" }}>PURPOSE OF LEAVING</label>
-      <input
-        type="text"
-        style={inputField}
-        value={data.reason || ""}
-        onChange={(e) =>
-          setSelectedStudent((prev) => ({
-            ...prev,
-            data: { ...prev.data, reason: e.target.value },
-          }))
-        }
-      />
     </div>
-
-    {/* RIGHT SIDE */}
-    <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-
-      <label style={{ fontSize: "2vh" }}>NAME OF THE COUNSELLOR</label>
-      <input
-        type="text"
-        style={inputField}
-        value={data.counsellor || ""}
-        onChange={(e) =>
-          setSelectedStudent((prev) => ({
-            ...prev,
-            data: { ...prev.data, counsellor: e.target.value },
-          }))
-        }
-      />
-
-      <label style={{ fontSize: "2vh" }}>NAME OF THE PARENT</label>
-      <input
-        type="text"
-        style={inputField}
-        value={data.parentName || ""}
-        onChange={(e) =>
-          setSelectedStudent((prev) => ({
-            ...prev,
-            data: { ...prev.data, parentName: e.target.value },
-          }))
-        }
-      />
-
-      <label style={{ fontSize: "2vh" }}>CONTACT NUMBER OF THE PARENT</label>
-      <input
-        type="text"
-        style={inputField}
-        value={data.parentNumber || ""}
-        onChange={(e) =>
-          setSelectedStudent((prev) => ({
-            ...prev,
-            data: { ...prev.data, parentNumber: e.target.value },
-          }))
-        }
-      />
-
-      <label style={{ fontSize: "2vh" }}>PARENT PERMISSION</label>
-      <input
-        type="text"
-        style={inputField}
-        value={data.parentPermission || ""}
-        onChange={(e) =>
-          setSelectedStudent((prev) => ({
-            ...prev,
-            data: { ...prev.data, parentPermission: e.target.value },
-          }))
-        }
-      />
-
-      <label style={{ fontSize: "2vh" }}>REMARKS</label>
-      <input
-        type="text"
-        style={inputField}
-        value={data.remarks || ""}
-        onChange={(e) =>
-          setSelectedStudent((prev) => ({
-            ...prev,
-            data: { ...prev.data, remarks: e.target.value },
-          }))
-        }
-      />
-    </div>
-  </div>
-);
+  );
 };
 /* 🎨 Styles */
 const headerStyle = {

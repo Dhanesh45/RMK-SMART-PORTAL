@@ -34,8 +34,6 @@ const Outpass = ({ regNo: passedRegNo }) => {
     forOd: "No",
     leavingDate: "",
     leavingTime: "",
-    parentsPermission: "",
-    remarks: "",
   });
 
   const fetchStudent = async (reg = regNo) => {
@@ -64,7 +62,6 @@ const Outpass = ({ regNo: passedRegNo }) => {
       alert("❌ Failed to submit");
     }
   };
-
   return (
     <div
       style={{
@@ -224,32 +221,6 @@ const Outpass = ({ regNo: passedRegNo }) => {
                   style={inputStyle}
                   onChange={(e) =>
                     setForm({ ...form, reasonForLeave: e.target.value })
-                  }
-                />
-              </div>
-              {/* Parent Permission */}
-              <div style={{ width: "95%" }}>
-                <label>PARENT PERMISSION</label>
-                <select
-                  style={inputStyle}
-                  onChange={(e) =>
-                    setForm({ ...form, parentsPermission: e.target.value })
-                  }
-                >
-                  <option value="">Select</option>
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
-                </select>
-              </div>
-
-              {/* Remarks */}
-              <div style={{ width: "95%" }}>
-                <label>REMARKS</label>
-                <input
-                  type="text"
-                  style={inputStyle}
-                  onChange={(e) =>
-                    setForm({ ...form, remarks: e.target.value })
                   }
                 />
               </div>

@@ -28,6 +28,8 @@ exports.getStudentByRegNo = async (req, res) => {
  * ================================ */
 exports.createOutpass = async (req, res) => {
   try {
+    console.log("BODY DATA 👉", req.body);   // 👈 ADD THIS
+
     const {
       regNo,
       roomNumber,
@@ -41,6 +43,7 @@ exports.createOutpass = async (req, res) => {
       leavingTime,
       remarks,
     } = req.body;
+
 
     // Find student by regNo (OLD FLOW)
     const student = await Student.findOne({ where: { regNo } });
@@ -78,14 +81,15 @@ exports.createOutpass = async (req, res) => {
       parentName: student.parentName,
       parentPhone: student.parentPhone,
 
-      facultyId,  // <-- NEW
+      facultyId,
 
       roomNumber,
       noOfDays,
       fromDate,
       toDate,
       reasonForLeave,
-      parentsPermission,
+      parentsPermission: parentsPermission || "NOT_PERMITTED",   // ✅ ONLY THIS
+
       forOd,
       leavingDate,
       leavingTime,
@@ -167,15 +171,36 @@ exports.getOutpassesForCounsellor = async (req, res) => {
 exports.updateCstatus = async (req, res) => {
   try {
     const { outpassId } = req.params;
-    const { action } = req.body;
+    const { action, updatedData } = req.body;
 
     if (!["approve", "reject"].includes(action))
       return res.status(400).json({ message: "Invalid action" });
 
     const outpass = await Outpass.findByPk(outpassId);
-    if (!outpass) return res.status(404).json({ message: "Outpass not found" });
+    if (!outpass)
+      return res.status(404).json({ message: "Outpass not found" });
 
+    // ✅ Update status
     outpass.cstatus = action === "approve" ? 1 : -1;
+
+    // ✅ UPDATE EXTRA FIELDS (THIS WAS MISSING)
+    if (updatedData) {
+      outpass.remarks = updatedData.remarks || null;
+
+      const validPermissions = [
+        "OBTAINED_OVER_PHONE",
+        "HAS_COME_IN_PERSON",
+        "NOT_PERMITTED"
+      ];
+
+      if (
+        updatedData.parentsPermission &&
+        validPermissions.includes(updatedData.parentsPermission)
+      ) {
+        outpass.parentsPermission = updatedData.parentsPermission;
+      }
+    }
+
     await outpass.save();
 
     return res.json({ message: `Outpass ${action}d`, outpass });
