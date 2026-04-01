@@ -1,49 +1,76 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./SEdit.css";
+import SView from "../studentedit/SView.jsx";
 
 const SEdit = ({ selectedView, setSelectedView }) => {
   const [students, setStudents] = useState([]);
   const [search, setSearch] = useState("");
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   useEffect(() => {
     fetchStudents();
   }, []);
 
   const fetchStudents = async () => {
-  try {
-    const faculty = JSON.parse(localStorage.getItem("facultyData"));
+    try {
+      const faculty = JSON.parse(localStorage.getItem("facultyData"));
 
-    console.log("Logged in faculty data:", faculty);
+      console.log("Logged in faculty data:", faculty);
 
-    const f_id = faculty?.id;
+      const f_id = faculty?.id;
 
-    console.log("Logged in YC ID:", f_id);
+      console.log("Logged in YC ID:", f_id);
 
-    if (!f_id) {
-      console.error("Faculty ID not found");
-      return;
+      if (!f_id) {
+        console.error("Faculty ID not found");
+        return;
+      }
+
+      const res = await axios.get(
+        `http://localhost:5000/api/student/year-coordinator/${f_id}`,
+      );
+
+      const formatted = res.data.map((s) => ({
+        id: s.studentId,
+        name: s.studentName,
+        regNo: s.regNo,
+        email: s.studentMail,
+      }));
+
+      setStudents(formatted);
+    } catch (error) {
+      console.error("❌ Error fetching students:", error);
     }
+  };
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/student/${id}`);
 
-    const res = await axios.get(
-      `http://localhost:5000/api/student/year-coordinator/${f_id}`
+      setStudents((prev) => prev.filter((s) => s.id !== id));
+    } catch (error) {
+      console.error("❌ Delete failed:", error);
+    }
+  };
+ const handleSave = async (updatedStudent) => {
+  try {
+    await axios.put(
+      `http://localhost:5000/api/student/${updatedStudent.id}`,
+      updatedStudent
     );
 
-    const formatted = res.data.map((s) => ({
-      id: s.studentId,
-      name: s.studentName,
-      regNo: s.regNo,
-      email: s.studentMail,
-    }));
+    setStudents((prev) =>
+      prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s))
+    );
 
-    setStudents(formatted);
+    setSelectedStudent(null);
   } catch (error) {
-    console.error("❌ Error fetching students:", error);
+    console.error("❌ Update failed:", error);
   }
 };
 
   const filtered = students.filter((s) =>
-    s.regNo.toLowerCase().includes(search.toLowerCase())
+    s.regNo.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -93,8 +120,19 @@ const SEdit = ({ selectedView, setSelectedView }) => {
                     <td>{s.regNo}</td>
                     <td>{s.email}</td>
                     <td>
-                      <button className="delete-btn">DELETE</button>
-                      <button className="edit-btn">EDIT</button>
+                      <button
+                        className="delete-btn"
+                        onClick={() => handleDelete(s.id)}
+                      >
+                        DELETE
+                      </button>
+
+                      <button
+                        className="edit-btn"
+                        onClick={() => setSelectedStudent(s)}
+                      >
+                        EDIT
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -102,6 +140,13 @@ const SEdit = ({ selectedView, setSelectedView }) => {
             </table>
           </div>
         </div>
+      )}
+      {selectedStudent && (
+        <SView
+          student={selectedStudent}
+          onClose={() => setSelectedStudent(null)}
+          onSave={handleSave}
+        />
       )}
     </div>
   );

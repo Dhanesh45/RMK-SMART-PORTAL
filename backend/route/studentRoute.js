@@ -5,6 +5,8 @@ const {
   loginStudent,
   getStudentsByCounsellor,
   getStudentsByYearCoordinator,
+  deleteStudentByYearCoordinator,
+  updateStudentByYearCoordinator,
   deleteStudent,
   updateStudent
 } = require("../controller/studentController");
@@ -26,7 +28,8 @@ router.get("/counsellor/:f_id", getStudentsByCounsellor);
 router.delete("/:id", deleteStudent);
 
 router.put("/:id", updateStudent);
-
+router.delete("/:studentId", deleteStudentByYearCoordinator);
+router.put("/:studentId", updateStudentByYearCoordinator);
 
 
 
