@@ -214,9 +214,9 @@
                   name="student_mail"
                   value={formData.student_mail}
                   onChange={(e) => {
-                    const v = e.target.value;
+                    const v = e.target.value; 
                     if (
-                      /^[A-Za-z0-9._%+-]*(@rmkec\.ac\.in)?$/.test(v) ||
+                      /^[A-Za-z0-9._%+@-]*$(@rmkec\.ac\.in)?$/.test(v) ||
                       v === ""
                     )
                       handleChange(e);
