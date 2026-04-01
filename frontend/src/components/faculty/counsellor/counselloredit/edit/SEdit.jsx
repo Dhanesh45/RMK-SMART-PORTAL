@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import "./SEdit.css";
 import SView from "../view/SView";
-import SAdd from "../add/SAdd";
 import axios from "axios";
 import { useEffect } from "react";
 
@@ -11,7 +10,6 @@ const SEdit = ({ selectedView, setSelectedView }) => {
   const [students, setStudents] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [isAddOpen, setIsAddOpen] = useState(false);
 
   useEffect(() => {
   const fetchStudents = async () => {
@@ -24,12 +22,26 @@ const SEdit = ({ selectedView, setSelectedView }) => {
       );
 
       // Map backend → frontend format
-      const formatted = res.data.map((s) => ({
-        id: s.studentId,
-        name: s.studentName,
-        regNo: s.regNo,
-        email: s.studentMail,
-      }));
+  const formatted = res.data.map((s) => ({
+  id: s.studentId,
+  name: s.studentName,
+  regNo: s.regNo,
+  email: s.studentMail,
+
+  year: s.year,
+  branch: s.branch,
+  section: s.section,
+
+  gender: s.gender,
+  accommodation: s.accommodation,
+  parentName: s.parentName,
+  parentPhone: s.parentPhone,
+  native: s.native,
+
+  counsellor: s.counsellor,
+  yearCoordinator: s.yearCoordinator,
+  hod: s.hod,
+}));
 
       setStudents(formatted);
     } catch (err) {
@@ -56,11 +68,11 @@ const SEdit = ({ selectedView, setSelectedView }) => {
   }
 };
 
- const handleSave = async (updated) => {
+const handleSave = async (updated) => {
   try {
     await axios.put(
       `http://localhost:5000/api/student/${updated.id}`,
-      updated
+      updated // ✅ send full data
     );
 
     setStudents(students.map((s) => (s.id === updated.id ? updated : s)));
@@ -69,37 +81,6 @@ const SEdit = ({ selectedView, setSelectedView }) => {
   }
 };
 
-  const handleAdd = async () => {
-  try {
-    const facultyData = JSON.parse(localStorage.getItem("facultyData"));
-
-    const payload = {
-      student_mail: formData.email,
-      password: "123456", // temp
-      regNo: formData.regNo,
-      year: formData.year,
-      branch: formData.branch,
-      student_name: formData.name,
-      gender: formData.gender,
-      accommodation: "Dayscholar",
-      parent_name: "N/A",
-      parent_phone: "0000000000",
-      native: "N/A",
-      counsellor: facultyData.mail, // 👈 IMPORTANT (email mapping)
-      year_coordinator: formData.yearCoordinator,
-      hod: "hod@email.com",
-      section: formData.section,
-    };
-
-    await axios.post("http://localhost:5000/api/student/register", payload);
-
-    onAdd(formData);
-    onClose();
-  } catch (err) {
-    console.error(err);
-    alert("Add failed");
-  }
-};
 
   return (
     <div className="cedit-page">
@@ -115,9 +96,7 @@ const SEdit = ({ selectedView, setSelectedView }) => {
           onChange={(e) => setSearch(e.target.value)}
         />
 
-        <button className="edit-btn" onClick={() => setIsAddOpen(true)}>
-          ADD
-        </button>
+        
       </div>
 
       <h2 className="title">STUDENT DETAILS</h2>
@@ -174,12 +153,6 @@ const SEdit = ({ selectedView, setSelectedView }) => {
         />
       )}
 
-      {isAddOpen && (
-        <SAdd
-          onClose={() => setIsAddOpen(false)}
-          onAdd={handleAdd}
-        />
-      )}
     </div>
   );
 };

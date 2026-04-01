@@ -13,6 +13,11 @@
 }
 
 .modal {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal {
+  
   
   background: #fff;
   padding: 3% 4%;
