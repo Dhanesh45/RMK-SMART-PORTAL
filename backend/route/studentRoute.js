@@ -1,5 +1,13 @@
 const express = require("express");
-const { registerStudent, getAllStudents ,loginStudent } = require("../controller/studentController");
+const { 
+  registerStudent, 
+  getAllStudents, 
+  loginStudent,
+  getStudentsByCounsellor,
+  deleteStudent,
+  updateStudent
+} = require("../controller/studentController");
+console.log("✅ studentRoute loaded");
 
 const router = express.Router();
 
@@ -11,5 +19,13 @@ router.get("/all", getAllStudents);
 
 //Dhanesh Work
 router.post("/login", loginStudent);
+
+router.get("/counsellor/:f_id", getStudentsByCounsellor);
+
+router.delete("/:id", deleteStudent);
+
+router.put("/:id", updateStudent);
+
+
 
 module.exports = router;
