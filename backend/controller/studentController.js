@@ -239,3 +239,35 @@ exports.updateStudent = async (req, res) => {
   }
 };
 
+
+exports.getStudentsByYearCoordinator = async (req, res) => {
+  try {
+    const { f_id } = req.params;
+
+    const students = await Student.findAll({
+      where: { yearCoordinator: f_id },
+      attributes: [
+        "studentId",
+        "studentName",
+        "regNo",
+        "studentMail",
+        "year",
+        "branch",
+        "section",
+        "gender",
+        "accommodation",
+        "parentName",
+        "parentPhone",
+        "native",
+        "counsellor",
+        "yearCoordinator",
+        "hod",
+      ],
+    });
+
+    res.status(200).json(students);
+  } catch (error) {
+    console.error("❌ Error fetching year coordinator students:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};

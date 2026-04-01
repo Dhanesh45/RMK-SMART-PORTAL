@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "./SEdit.css";
 import SView from "../../../../counsellor/counselloredit/view/SView";
-import SAdd from "../../../../counsellor/counselloredit/add/SAdd";
+
 
 const initialStudents = [
   {

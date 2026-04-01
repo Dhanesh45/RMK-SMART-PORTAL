@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import CEdit from "../counselloredit/edit/CEdit.jsx";
-import SEdit from "../studentedit/edit/SEdit.jsx";
+import SEdit from "../studentedit/SEdit.jsx";
 
 const YearCoordinatorEdit = () => {
   const [selectedView, setSelectedView] = useState("counsellor");
