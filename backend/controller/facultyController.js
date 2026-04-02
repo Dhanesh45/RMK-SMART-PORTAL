@@ -87,23 +87,26 @@ exports.getFacultyByBranchAndRole = async (req, res) => {
   try {
     const { branch, role } = req.params;
 
-    // Map frontend role to DB role
     const roleMap = {
       counsellor: "Counsellor",
       year_coordinator: "Year Coordinator",
       hod: "Head of the Department",
     };
 
-    const dbRole = roleMap[role]; // maps 'year_coordinator' -> 'Year Coordinator'
-
-    if (!dbRole) return res.status(400).json({ message: "Invalid role" });
+    const dbRole = roleMap[role];
 
     const faculty = await Faculty.findAll({
       where: {
         faculty_branch: branch,
         role: dbRole,
       },
-      attributes: ["f_id", "faculty_name", "mail"],
+      attributes: [
+        "f_id",
+        "faculty_name",
+        "mail",
+        "faculty_branch",
+        "password",
+      ],
     });
 
     res.status(200).json(faculty);
@@ -127,7 +130,13 @@ exports.getFacultyByIds = async (req, res) => {
       where: {
         f_id: idArray,
       },
-      attributes: ["f_id", "faculty_name", "mail", "faculty_branch"],
+      attributes: [
+  "f_id",
+  "faculty_name",
+  "mail",
+  "faculty_branch",
+  "password",
+]
     });
 
     res.status(200).json(faculty);
@@ -139,14 +148,20 @@ exports.getFacultyByIds = async (req, res) => {
 // ✅ Add counsellor
 exports.addFaculty = async (req, res) => {
   try {
-    const { faculty_name, faculty_branch, mail, role } = req.body;
+    const {
+      faculty_name,
+      faculty_branch,
+      mail,
+      role,
+      password,
+    } = req.body;
 
     const faculty = await Faculty.create({
       faculty_name,
       faculty_branch,
       mail,
       role,
-      password: "123456", // default password
+      password, // ✅ store entered password
     });
 
     res.status(201).json(faculty);
@@ -166,6 +181,7 @@ exports.updateFaculty = async (req, res) => {
         faculty_name: req.body.name,
         faculty_branch: req.body.branch,
         mail: req.body.email,
+        password: req.body.password, // ✅ IMPORTANT
       },
       {
         where: { f_id: id },
@@ -178,8 +194,6 @@ exports.updateFaculty = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
-// ✅ Delete faculty
 exports.deleteFaculty = async (req, res) => {
   try {
     const { id } = req.params;
@@ -188,10 +202,11 @@ exports.deleteFaculty = async (req, res) => {
       where: { f_id: id },
     });
 
-    res.status(200).json({ message: "Faculty deleted" });
+    res.status(200).json({ message: "Faculty deleted successfully" });
   } catch (err) {
     console.error("❌ deleteFaculty error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
