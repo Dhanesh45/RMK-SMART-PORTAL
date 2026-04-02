@@ -36,6 +36,18 @@ const SEdit = ({ selectedView, setSelectedView }) => {
         name: s.studentName,
         regNo: s.regNo,
         email: s.studentMail,
+
+        year: s.year,
+        gender: s.gender,
+        branch: s.branch,
+        counsellor: s.counsellor,
+        yearCoordinator: s.yearCoordinator,
+        hod: s.hod,
+        section: s.section,
+        accommodation: s.accommodation,
+        parentName: s.parentName,
+        parentPhone: s.parentPhone,
+        native: s.native,
       }));
 
       setStudents(formatted);
@@ -52,22 +64,22 @@ const SEdit = ({ selectedView, setSelectedView }) => {
       console.error("❌ Delete failed:", error);
     }
   };
- const handleSave = async (updatedStudent) => {
-  try {
-    await axios.put(
-      `http://localhost:5000/api/student/${updatedStudent.id}`,
-      updatedStudent
-    );
+  const handleSave = async (updatedStudent) => {
+    try {
+      await axios.put(
+        `http://localhost:5000/api/student/${updatedStudent.id}`,
+        updatedStudent,
+      );
 
-    setStudents((prev) =>
-      prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s))
-    );
+      setStudents((prev) =>
+        prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)),
+      );
 
-    setSelectedStudent(null);
-  } catch (error) {
-    console.error("❌ Update failed:", error);
-  }
-};
+      setSelectedStudent(null);
+    } catch (error) {
+      console.error("❌ Update failed:", error);
+    }
+  };
 
   const filtered = students.filter((s) =>
     s.regNo.toLowerCase().includes(search.toLowerCase()),
