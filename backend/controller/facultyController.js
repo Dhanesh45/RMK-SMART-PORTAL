@@ -148,13 +148,7 @@ exports.getFacultyByIds = async (req, res) => {
 // ✅ Add counsellor
 exports.addFaculty = async (req, res) => {
   try {
-    const {
-      faculty_name,
-      faculty_branch,
-      mail,
-      role,
-      password,
-    } = req.body;
+    const { faculty_name, faculty_branch, mail, role, password } = req.body;
 
     const faculty = await Faculty.create({
       faculty_name,
@@ -166,9 +160,14 @@ exports.addFaculty = async (req, res) => {
 
     res.status(201).json(faculty);
   } catch (err) {
-    console.error("❌ addFaculty error:", err);
-    res.status(500).json({ message: "Server error" });
-  }
+  console.error("❌ addFaculty FULL error:", err);
+
+  return res.status(500).json({
+    message: "Server error",
+    error: err.message,
+    sqlMessage: err.parent?.sqlMessage,
+  });
+}
 };
 
 // ✅ Update faculty

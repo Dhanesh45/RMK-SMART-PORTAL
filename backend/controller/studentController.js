@@ -360,3 +360,35 @@ exports.getStudentsByHod = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+exports.getStudentsByBranch = async (req, res) => {
+  try {
+    const { branch } = req.params;
+
+    const students = await Student.findAll({
+      where: {
+        branch: branch,   // ✅ CORRECT FIELD
+      },
+      attributes: [
+        "studentId",
+        "studentName",
+        "regNo",
+        "studentMail",
+        "year",
+        "branch",
+        "section",
+        "counsellor",
+        "yearCoordinator",
+        "hod",
+      ],
+    });
+
+    res.status(200).json(students);
+  } catch (err) {
+    console.error("❌ getStudentsByBranch FULL ERROR:", err);
+    res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
+  }
+};

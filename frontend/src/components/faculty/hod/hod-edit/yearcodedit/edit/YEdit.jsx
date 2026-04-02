@@ -59,16 +59,33 @@ const YEdit = ({ selectedView, setSelectedView }) => {
     fetchCoordinators();
   };
 
-  const handleAdd = async (newCoordinator) => {
-    await axios.post("http://localhost:5000/api/faculty/add", {
-      faculty_name: newCoordinator.name,
-      faculty_branch: newCoordinator.branch,
-      mail: newCoordinator.email,
-      role: "Year Coordinator",
-    });
+ const handleAdd = async (newCoordinator) => {
+  try {
+    const res = await axios.post(
+      "http://localhost:5000/api/faculty/add",
+      {
+        faculty_name: newCoordinator.name,
+        faculty_branch: newCoordinator.branch,
+        mail: newCoordinator.email,
+        password: newCoordinator.password, // ✅ FIX
+        role: "Year Coordinator",
+      }
+    );
 
-    fetchCoordinators();
-  };
+    const added = {
+      id: res.data.f_id,
+      name: res.data.faculty_name,
+      branch: res.data.faculty_branch,
+      year: newCoordinator.year,
+      email: res.data.mail,
+      password: res.data.password,
+    };
+
+    setCoordinators((prev) => [...prev, added]);
+  } catch (err) {
+    console.error("❌ Error adding coordinator:", err);
+  }
+};
 
   return (
     <div className="yedit-page">

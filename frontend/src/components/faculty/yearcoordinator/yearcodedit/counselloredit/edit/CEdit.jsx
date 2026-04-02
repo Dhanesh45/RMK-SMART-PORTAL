@@ -19,44 +19,40 @@ const CEdit = ({ selectedView, setSelectedView }) => {
       const email = localStorage.getItem("facultyEmail");
 
       if (!email) {
-        console.error("❌ No facultyEmail found");
+        console.error("❌ facultyEmail missing in localStorage");
         return;
       }
 
-      // ✅ Get logged-in Year Coordinator
+      // ✅ Get logged-in year coordinator
       const facultyRes = await axios.get(
         `http://localhost:5000/api/faculty/email/${email}`
       );
 
-      const facultyId = facultyRes.data.f_id;
+      const branch = facultyRes.data.branch;
 
-      // ✅ Get students handled by this year coordinator
-      const studentRes = await axios.get(
-        `http://localhost:5000/api/student/year-coordinator/${facultyId}`
-      );
-
-      const students = studentRes.data;
-
-      if (!students.length) {
-        setCounsellors([]);
+      if (!branch) {
+        console.error("❌ Branch not found");
         return;
       }
 
-      // ✅ Unique counsellor ids from student table
-      const counsellorIds = [
-        ...new Set(students.map((s) => s.counsellor).filter(Boolean)),
-      ];
-
-      // ✅ Get counsellor details from faculty table
+      // ✅ Get all counsellors of same branch
       const counsellorRes = await axios.get(
-        `http://localhost:5000/api/faculty/by-ids?ids=${counsellorIds.join(",")}`
+        `http://localhost:5000/api/faculty/by-branch-role/${branch}/counsellor`
       );
+
+      // ✅ Get students of branch for count
+      const studentRes = await axios.get(
+        `http://localhost:5000/api/student/branch/${branch}`
+      );
+
+      const students = studentRes.data;
 
       const finalCounsellors = counsellorRes.data.map((c) => ({
         id: c.f_id,
         name: c.faculty_name,
         email: c.mail,
         branch: c.faculty_branch,
+        password: c.password || "",
         noOfStudents: students.filter(
           (s) => Number(s.counsellor) === Number(c.f_id)
         ).length,
@@ -72,41 +68,47 @@ const CEdit = ({ selectedView, setSelectedView }) => {
     c.name.toLowerCase().includes(search.toLowerCase())
   );
 
- const handleDelete = async (id) => {
-  try {
-    await axios.delete(`http://localhost:5000/api/faculty/${id}`);
-    fetchCounsellors();
-  } catch (error) {
-    console.error("❌ Delete failed:", error);
-  }
-};
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/faculty/${id}`);
+      fetchCounsellors();
+    } catch (error) {
+      console.error("❌ Delete failed:", error);
+    }
+  };
 
   const handleSave = async (updated) => {
-  try {
-    await axios.put(
-      `http://localhost:5000/api/faculty/${updated.id}`,
-      updated
-    );
-    fetchCounsellors();
-  } catch (error) {
-    console.error("❌ Update failed:", error);
-  }
-};
+    try {
+      await axios.put(
+        `http://localhost:5000/api/faculty/${updated.id}`,
+        updated
+      );
+      fetchCounsellors();
+      setSelectedCounsellor(null);
+    } catch (error) {
+      console.error("❌ Update failed:", error);
+    }
+  };
 
   const handleAdd = async (newCounsellor) => {
-  try {
-    await axios.post("http://localhost:5000/api/faculty/add", {
-      faculty_name: newCounsellor.name,
-      faculty_branch: newCounsellor.branch,
-      mail: newCounsellor.email,
-      role: "Counsellor",
-    });
+    try {
+      await axios.post("http://localhost:5000/api/faculty/add", {
+        faculty_name: newCounsellor.name,
+        faculty_branch: newCounsellor.branch,
+        mail: newCounsellor.email,
+        password: newCounsellor.password,
+        role: "Counsellor",
+      });
 
-    fetchCounsellors();
-  } catch (error) {
-    console.error("❌ Add failed:", error);
-  }
-};
+      fetchCounsellors();
+      setIsAddOpen(false);
+    } catch (err) {
+      console.error(
+        "❌ Add counsellor error:",
+        err.response?.data || err.message
+      );
+    }
+  };
 
   return (
     <div className="cedit-page">

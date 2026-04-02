@@ -91,6 +91,7 @@ const CView = ({ coordinator, onClose, onSave }) => {
               name="password"
               value={formData.password}
               onChange={handleChange}
+              disabled={!!coordinator} // Disable password field when editing
             />
           </div>
 

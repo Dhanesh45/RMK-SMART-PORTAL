@@ -1,8 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./CView.css";
 
 const CView = ({ student, onClose, onSave }) => {
-  const [formData, setFormData] = useState(student);
+  const [formData, setFormData] = useState({
+    id: "",
+    name: "",
+    branch: "",
+    email: "",
+    password: "",
+  });
+
+  useEffect(() => {
+    if (student) {
+      setFormData(student);
+    }
+  }, [student]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -14,13 +26,15 @@ const CView = ({ student, onClose, onSave }) => {
 
   const handleSave = () => {
     onSave(formData);
-    onClose();
   };
 
   return (
     <div className="modal-overlay">
       <div className="modal-container">
-        <button onClick={onClose} className="modal-close-btn">&times;</button>
+        <button onClick={onClose} className="modal-close-btn">
+          &times;
+        </button>
+
         <h2 className="modal-title">Counsellor Information</h2>
 
         <form className="modal-form">
@@ -29,37 +43,26 @@ const CView = ({ student, onClose, onSave }) => {
             <input
               type="text"
               name="name"
-              value={formData.name || ""}
+              value={formData.name}
               onChange={handleChange}
             />
           </div>
 
-          <div className="form-row">
-            <div className="form-field">
-              <label>Department</label>
-              <select
-                name="branch"
-                value={formData.branch || ""}
-                onChange={handleChange}
-              >
-                <option value="">Select Department</option>
-                <option value="CSE">CSE</option>
-                <option value="ECE">ECE</option>
-                <option value="EEE">EEE</option>
-                <option value="MECH">MECH</option>
-                <option value="CIVIL">CIVIL</option>
-                <option value="IT">IT</option>
-              </select>
-            </div>
-
-            <div className="form-field">
-              <label>No. of Students</label>
-              <input
-                type="number"
-                value={formData.noOfStudents || ""}
-                readOnly
-              />
-            </div>
+          <div className="form-field">
+            <label>Department</label>
+            <select
+              name="branch"
+              value={formData.branch}
+              onChange={handleChange}
+            >
+              <option value="">Select Department</option>
+              <option value="CSE">CSE</option>
+              <option value="ECE">ECE</option>
+              <option value="EEE">EEE</option>
+              <option value="MECH">MECH</option>
+              <option value="CIVIL">CIVIL</option>
+              <option value="IT">IT</option>
+            </select>
           </div>
 
           <div className="form-field">
@@ -67,9 +70,14 @@ const CView = ({ student, onClose, onSave }) => {
             <input
               type="email"
               name="email"
-              value={formData.email || ""}
+              value={formData.email}
               onChange={handleChange}
             />
+          </div>
+
+          <div className="form-field">
+            <label>Password</label>
+            <input type="text" value={formData.password} disabled />
           </div>
 
           <div className="modal-actions">
