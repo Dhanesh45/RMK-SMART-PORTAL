@@ -112,4 +112,86 @@ exports.getFacultyByBranchAndRole = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+// ✅ Get multiple faculty by ids
+exports.getFacultyByIds = async (req, res) => {
+  try {
+    const { ids } = req.query;
+
+    if (!ids) {
+      return res.status(400).json({ message: "Faculty ids required" });
+    }
+
+    const idArray = ids.split(",").map(Number);
+
+    const faculty = await Faculty.findAll({
+      where: {
+        f_id: idArray,
+      },
+      attributes: ["f_id", "faculty_name", "mail", "faculty_branch"],
+    });
+
+    res.status(200).json(faculty);
+  } catch (err) {
+    console.error("❌ getFacultyByIds error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+// ✅ Add counsellor
+exports.addFaculty = async (req, res) => {
+  try {
+    const { faculty_name, faculty_branch, mail, role } = req.body;
+
+    const faculty = await Faculty.create({
+      faculty_name,
+      faculty_branch,
+      mail,
+      role,
+      password: "123456", // default password
+    });
+
+    res.status(201).json(faculty);
+  } catch (err) {
+    console.error("❌ addFaculty error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// ✅ Update faculty
+exports.updateFaculty = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await Faculty.update(
+      {
+        faculty_name: req.body.name,
+        faculty_branch: req.body.branch,
+        mail: req.body.email,
+      },
+      {
+        where: { f_id: id },
+      }
+    );
+
+    res.status(200).json({ message: "Faculty updated" });
+  } catch (err) {
+    console.error("❌ updateFaculty error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// ✅ Delete faculty
+exports.deleteFaculty = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await Faculty.destroy({
+      where: { f_id: id },
+    });
+
+    res.status(200).json({ message: "Faculty deleted" });
+  } catch (err) {
+    console.error("❌ deleteFaculty error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 

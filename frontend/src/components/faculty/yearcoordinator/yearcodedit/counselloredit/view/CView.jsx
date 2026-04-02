@@ -6,8 +6,8 @@ const CView = ({ student, onClose, onSave }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
     }));
   };
@@ -21,14 +21,15 @@ const CView = ({ student, onClose, onSave }) => {
     <div className="modal-overlay">
       <div className="modal-container">
         <button onClick={onClose} className="modal-close-btn">&times;</button>
-        <h2 className="modal-title">Counselor Information</h2>
+        <h2 className="modal-title">Counsellor Information</h2>
+
         <form className="modal-form">
           <div className="form-field">
             <label>Full Name</label>
             <input
               type="text"
               name="name"
-              value={formData.name}
+              value={formData.name || ""}
               onChange={handleChange}
             />
           </div>
@@ -38,7 +39,7 @@ const CView = ({ student, onClose, onSave }) => {
               <label>Department</label>
               <select
                 name="branch"
-                value={formData.branch}
+                value={formData.branch || ""}
                 onChange={handleChange}
               >
                 <option value="">Select Department</option>
@@ -50,13 +51,13 @@ const CView = ({ student, onClose, onSave }) => {
                 <option value="IT">IT</option>
               </select>
             </div>
+
             <div className="form-field">
               <label>No. of Students</label>
               <input
                 type="number"
-                name="noOfStudents"
                 value={formData.noOfStudents || ""}
-                onChange={handleChange}
+                readOnly
               />
             </div>
           </div>
@@ -66,10 +67,9 @@ const CView = ({ student, onClose, onSave }) => {
             <input
               type="email"
               name="email"
-              value={formData.email}
+              value={formData.email || ""}
               onChange={handleChange}
             />
-            <span className="verified">✔ verified</span>
           </div>
 
           <div className="modal-actions">
