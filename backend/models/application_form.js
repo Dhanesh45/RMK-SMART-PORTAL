@@ -101,8 +101,4 @@ const ApplicationForm = sequelize.define(
   }
 );
 
-// Associations
-Student.hasMany(ApplicationForm, { foreignKey: "sid" });
-ApplicationForm.belongsTo(Student, { foreignKey: "sid" });
-
 module.exports = ApplicationForm;
