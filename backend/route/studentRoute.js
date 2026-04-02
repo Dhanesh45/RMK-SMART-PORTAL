@@ -4,6 +4,7 @@ const {
   getAllStudents, 
   loginStudent,
   getStudentsByCounsellor,
+  getStudentsByHod,
   getStudentsByYearCoordinator,
   deleteStudentByYearCoordinator,
   updateStudentByYearCoordinator,
@@ -32,11 +33,12 @@ router.delete("/:studentId", deleteStudentByYearCoordinator);
 router.put("/:studentId", updateStudentByYearCoordinator);
 
 
-
 router.get(
   "/year-coordinator/:f_id",
   getStudentsByYearCoordinator
 );
+router.get("/hod/:f_id", getStudentsByHod);
+
 
 
 module.exports = router;
