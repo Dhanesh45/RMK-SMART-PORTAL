@@ -1,8 +1,8 @@
 const db = require("../models");
 
-const ApplicationForm = db.applicationForm;
+const ApplicationForm = db.ApplicationForm;
 
-const Student = db.student;
+const Student = db.Student;
 /* STUDENT GET */
 const getStudentByRegNo = async (req, res) => {
   try {
@@ -23,10 +23,65 @@ const getStudentByRegNo = async (req, res) => {
 /* CREATE BONAFIDE */
 const createBonafide = async (req, res) => {
   try {
-    const data = req.body;
+    const {
+      regNo,
+      reason,
+      semester,
+      fatherName,
+      houseno,
+      age,
+      street,
+      area,
+      city,
+      state,
+      pincode,
+      date_of_birth,
+      fees_detail_year,
+      boarding,
+      category,
+      type_of_application,
+    } = req.body;
 
-    await ApplicationForm.create(data);
+    /* FIND STUDENT */
+    const student = await Student.findOne({
+      where: { regNo },
+    });
 
+    console.log("REQ BODY:", req.body);
+
+    console.log("STUDENT:", student);
+
+    console.log("SID:", student?.studentId);
+
+    if (!student) {
+      return res.status(404).json({
+        message: "Student not found",
+      });
+    }
+
+    /* CREATE APPLICATION */
+    await ApplicationForm.create({
+      sid: student.studentId,
+
+      reason,
+      semester,
+      fatherName,
+      houseno,
+      age,
+      street,
+      area,
+      city,
+      state,
+      pincode,
+      date_of_birth,
+      fees_detail_year,
+      boarding,
+      category,
+      type_of_application,
+
+      hstatus: 0,
+      osstatus: 0,
+    });
     res.json({
       message: "Application submitted",
     });
@@ -36,7 +91,6 @@ const createBonafide = async (req, res) => {
     res.status(500).json("Error");
   }
 };
-
 /* HOD VIEW */
 const getHodApplications = async (req, res) => {
   try {

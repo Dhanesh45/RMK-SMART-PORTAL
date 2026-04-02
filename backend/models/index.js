@@ -10,9 +10,9 @@ const db = {};
 
 db.sequelize = sequelize;
 
-db.student = Student;
-db.faculty = Faculty;
-db.applicationForm = ApplicationForm;
+db.Student = Student;
+db.Faculty = Faculty;
+db.ApplicationForm = ApplicationForm;
 
 /* ASSOCIATIONS */
 
