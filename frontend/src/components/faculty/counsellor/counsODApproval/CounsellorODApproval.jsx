@@ -91,7 +91,7 @@ const handleApproveAll = async () => {
     console.error("Approve all failed", error);
   }
 };
-  // 🔹 REJECT
+ 
   const handleReject = async (student) => {
     const url =
       student.type === "HOSTELLER"
