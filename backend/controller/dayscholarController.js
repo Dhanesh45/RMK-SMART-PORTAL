@@ -21,7 +21,7 @@ const getStudentByRegNo = async (req, res) => {
 const createDayScholarOutpass = async (req, res) => {
   try {
     // Destructure all needed fields from the request body
-    const { regNo, reason, fromDate, toDate, leavingTime} =
+    const { regNo, reason, fromDate, toDate, leavingTime } =
       req.body;
 
     const student = await Student.findOne({ where: { regNo } });
@@ -69,7 +69,7 @@ const createDayScholarOutpass = async (req, res) => {
       ystatus: 0,
       hstatus: 0,
       // Optional: Use remarks to save the 'toDate' since your model doesn't have a dedicated 'toDate' column
-      remarks:null,
+      remarks: null,
 
       // NOTE: Fields like studentName, regNo, year, branch, section, and counsellor
       // are NOT columns in the DayscholarsOutpass model and should not be included here.
@@ -123,23 +123,45 @@ const getOutpassesForCounsellor = async (req, res) => {
 const updateCstatus = async (req, res) => {
   try {
     const { dayscholaroutpassId } = req.params;
-    const { action } = req.body;
+    const { action, updatedData } = req.body;
 
     if (!["approve", "reject"].includes(action))
       return res.status(400).json({ message: "Invalid action" });
 
     const outpass = await DayScholarOutpass.findByPk(dayscholaroutpassId);
-    if (!outpass) return res.status(404).json({ message: "Outpass not found" });
+    if (!outpass)
+      return res.status(404).json({ message: "Outpass not found" });
 
+    // ✅ Status update
     outpass.cstatus = action === "approve" ? 1 : -1;
+
+    // ✅ NEW: update parentPermission + remarks
+    if (updatedData) {
+      const validPermissions = [
+        "OBTAINED_OVER_PHONE",
+        "HAS_COME_IN_PERSON",
+        "NOT_PERMITTED",
+      ];
+
+      if (
+        updatedData.parentPermission &&
+        validPermissions.includes(updatedData.parentPermission)
+      ) {
+        outpass.parentPermission = updatedData.parentPermission;
+      }
+
+      outpass.remarks = updatedData.remarks || null;
+    }
+
     await outpass.save();
 
     return res.json({ message: `Outpass ${action}d`, outpass });
   } catch (err) {
     console.error("updateCstatus error:", err);
-    return res
-      .status(500)
-      .json({ message: "Server error", error: err.message });
+    return res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
   }
 };
 const getOutpassesForStudent = async (req, res) => {

@@ -51,7 +51,7 @@ const Outpass = ({ regNo: passedRegNo }) => {
     }
   }, []);
 
-  const handleSubmit = async () => {
+ const handleSubmit = async () => {
     try {
       await axios.post("http://localhost:5000/api/outpass", {
         regNo,

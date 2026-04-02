@@ -54,9 +54,9 @@ const CounsApprovalList = () => {
               // ✅ IMPORTANT FIXES
               remarks: op.remarks || "",
 
-              // ✅ CHECKBOX FIX (VERY IMPORTANT)
-              obtainedOverPhone: op.obtainedOverPhone ?? false,
-              hasComeInPerson: op.hasComeInPerson ?? false,
+
+              parentsPermission: op.parentsPermission || "NOT_PERMITTED",
+
             },
           };
         });
@@ -83,7 +83,7 @@ const CounsApprovalList = () => {
             counsellor: op.Faculty?.faculty_name || "Not Assigned",
             parentName: op.parentName,
             parentNumber: op.parentNumber,
-            parentPermission: op.parentPermission,
+            parentPermission: op.parentPermission || "NOT_PERMITTED",
             remarks: op.remarks || "",
 
             toDate: op.toDate,
@@ -99,13 +99,84 @@ const CounsApprovalList = () => {
 
     fetchOutpasses();
   }, []);
+
+
+  const validateStudentData = (student) => {
+    if (!student || !student.data) {
+      alert("No student selected for validation.");
+      return false;
+    }
+
+    const data = student.data;
+    const type = student.type;
+
+    // required fields mapping
+    const requiredFields = {
+      HOSTELLER: [
+        "studentName",
+        "regNo",
+        "section",
+        "year",
+        "branch",
+        "counsellor",
+        "parentsPermission", // radio
+        "remarks",
+      ],
+      DAYSCHOLAR: [
+        "studentName",
+        "regNo",
+        "section",
+        "year",
+        "branch",
+        "counsellor",
+        "parentPermission", // radio
+        "parentName",
+        "parentNumber",
+        "remarks",
+      ],
+    };
+
+    const missingFields = requiredFields[type].filter(
+      (field) =>
+        !data[field] || (typeof data[field] === "string" && data[field].trim() === "")
+    );
+
+    if (missingFields.length > 0) {
+      alert(
+        "Please fill all required fields before approving.\nMissing: " +
+        missingFields.join(", ")
+      );
+      return false;
+    }
+
+    return true;
+  };
+
+
   const handleApprove = async (student) => {
+    // ✅ Validate before sending
+    if (!validateStudentData(student)) return;
+
     const url =
       student.type === "HOSTELLER"
         ? `http://localhost:5000/api/outpass/counsellor/update/${student.outpassId}`
         : `http://localhost:5000/api/dayscholarOutpass/counsellor/update/${student.outpassId}`;
 
-    await axios.put(url, { action: "approve", updatedData: student.data, });
+    console.log("SENDING DATA:", student.data);
+
+    await axios.put(url, {
+      action: "approve",
+      updatedData:
+        student.type === "HOSTELLER"
+          ? {
+            parentsPermission: student.data.parentsPermission, // ✅ correct
+            remarks: student.data.remarks,
+          }
+          : {
+            parentPermission: student.data.parentPermission,   // ✅ correct
+            remarks: student.data.remarks,
+          },
+    });
 
     setStudents((prev) =>
       prev.filter((s) => s.outpassId !== student.outpassId)
@@ -241,7 +312,15 @@ const CounsApprovalList = () => {
                       </button>
                     </td>
                     <td style={cellStyle}>
-                      <button style={approveBtn} onClick={() => handleApprove(student)}>
+                      <button
+                        style={approveBtn}
+                        onClick={() => {
+                          if (validateStudentData(selectedStudent)) { // check all fields
+                            handleApprove(selectedStudent);
+                            closePopup();
+                          }
+                        }}
+                      >
                         APPROVE
                       </button>
                       <button style={rejectBtn} onClick={() => handleReject(student)}>
@@ -254,11 +333,6 @@ const CounsApprovalList = () => {
               })}
             </tbody>
           </table>
-
-          {/* Approve All Button */}
-          <div style={{ textAlign: "end", marginTop: "2%" }}>
-            <button style={approveAllBtn} onClick={() => handleApproveAll()}>Approve All</button>
-          </div>
         </div>
       </div>
 
@@ -326,8 +400,10 @@ const CounsApprovalList = () => {
               <button
                 style={approveBtn}
                 onClick={() => {
-                  handleApprove(selectedStudent);
-                  closePopup();
+                  if (validateStudentData(selectedStudent)) {  // ✅ validate popup student
+                    handleApprove(selectedStudent);
+                    closePopup();
+                  }
                 }}
               >
                 APPROVE
@@ -453,10 +529,7 @@ const HostellerForm = ({ data, setSelectedStudent }) => {
             onChange={(e) =>
               setSelectedStudent((prev) => ({
                 ...prev,
-                data: {
-                  ...prev.data,
-                  parentsPermission: e.target.value,
-                },
+                data: { ...prev.data, parentsPermission: e.target.value },
               }))
             }
           />
@@ -658,18 +731,65 @@ const DayScholarForm = ({ data, setSelectedStudent, student, handleApprove, hand
           }
         />
 
-        <label style={{ fontSize: "2vh" }}>NAME OF THE PARENT</label>
-        <input
-          type="text"
-          style={inputField}
-          value={data.parentName || ""}
-          onChange={(e) =>
-            setSelectedStudent((prev) => ({
-              ...prev,
-              data: { ...prev.data, parentName: e.target.value },
-            }))
-          }
-        />
+        <label style={{ fontSize: "2vh" }}>PARENT PERMISSION</label>
+
+        <label>
+          <input
+            type="radio"
+            name="parentPermission"
+            value="OBTAINED_OVER_PHONE"
+            checked={data.parentPermission === "OBTAINED_OVER_PHONE"}
+            onChange={(e) =>
+              setSelectedStudent((prev) => ({
+                ...prev,
+                data: { ...prev.data, parentPermission: e.target.value },
+              }))
+            }
+          />
+          {" "}Obtained Over Phone
+        </label>
+
+        <br />
+
+        <label>
+          <input
+            type="radio"
+            name="parentPermission"
+            value="HAS_COME_IN_PERSON"
+            checked={data.parentPermission === "HAS_COME_IN_PERSON"}
+            onChange={(e) =>
+              setSelectedStudent((prev) => ({
+                ...prev,
+                data: {
+                  ...prev.data,
+                  parentPermission: e.target.value,
+                },
+              }))
+            }
+          />
+          {" "}Has Come in Person
+        </label>
+
+        <br />
+
+        <label>
+          <input
+            type="radio"
+            name="parentPermission"
+            value="NOT_PERMITTED"
+            checked={data.parentPermission === "NOT_PERMITTED"}
+            onChange={(e) =>
+              setSelectedStudent((prev) => ({
+                ...prev,
+                data: {
+                  ...prev.data,
+                  parentPermission: e.target.value,
+                },
+              }))
+            }
+          />
+          {" "}Not Permitted
+        </label>
 
         <label style={{ fontSize: "2vh" }}>CONTACT NUMBER OF THE PARENT</label>
         <input
@@ -680,19 +800,6 @@ const DayScholarForm = ({ data, setSelectedStudent, student, handleApprove, hand
             setSelectedStudent((prev) => ({
               ...prev,
               data: { ...prev.data, parentNumber: e.target.value },
-            }))
-          }
-        />
-
-        <label style={{ fontSize: "2vh" }}>PARENT PERMISSION</label>
-        <input
-          type="text"
-          style={inputField}
-          value={data.parentPermission || ""}
-          onChange={(e) =>
-            setSelectedStudent((prev) => ({
-              ...prev,
-              data: { ...prev.data, parentPermission: e.target.value },
             }))
           }
         />
