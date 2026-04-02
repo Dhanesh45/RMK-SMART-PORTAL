@@ -48,7 +48,7 @@ router.put("/approve/od/:od_id", updateCstatushosod);
  * COUNSELLOR APPROVE / REJECT OUTPASS
  * ===============================
  */
-router.put("/approve/outpass/:outpassId", updateCstatusOdOut);
+//router.put("/approve/outpass/:outpassId", updateCstatusOdOut);
 
 /**
  * ===============================
@@ -74,7 +74,7 @@ router.get(
  * ===============================
  */
 router.get(
-  "/year-coordinator/outpass/:facultyId",
+  "/year-coordinator/outpass/:facultyId",///outpass/counsellor/:facultyId
   getODOutpassForYearCoordinator
 );
 

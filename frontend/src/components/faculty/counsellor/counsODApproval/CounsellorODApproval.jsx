@@ -108,7 +108,17 @@ const handleApproveAll = async () => {
   return (
     <div style={{ width: "100vw", height: "100vh", overflow: "hidden", display: "flex", flexDirection: "column" }}>
       <div style={{ flex: 1, backgroundColor: "rgba(238, 238, 238, 0.5)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: "2%" }}>
-        <div style={{ width: "90%", height: "10vh", display: "flex", justifyContent: "flex-end" }} />
+        <h1
+          style={{
+            color: "rgba(14,73,71,1)",
+            fontSize: "2.2vh",
+            fontWeight: "bolder",
+      
+          }}
+        >
+          COUNSELLOR OD APPROVAL LIST
+        </h1>
+        <div style={{ width: "90%", height: "10vh", display: "flex", justifyContent: "flex-start" }} />
 
         <div style={{ width: "90%", height: "65vh", backgroundColor: "rgba(217, 217, 217, 1)", border: "0.4% solid rgba(217, 217, 217,1)", borderRadius: "1%", padding: "0.8%", boxSizing: "border-box", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
           <div style={{ display: "grid", gridTemplateColumns: "8% 18% 20% 20% 17% 17%", backgroundColor: "white", fontWeight: "bold", textAlign: "center", padding: "0.8%", borderRadius: "0.5vh", marginBottom: "0.8%" }}>

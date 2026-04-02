@@ -163,64 +163,41 @@ const updateCstatushosod = async (req, res) => {
 
     const newStatus = action === "approve" ? 1 : -1;
 
-    // ✅ Update OD status
+    // ✅ Update OD status (NO CHANGE)
     hostod.cstatus = newStatus;
     await hostod.save({ transaction });
 
-    // ✅ Sync Outpass status automatically
+    // ✅ Sync Outpass status (NO CHANGE)
     await Outpass.update(
       { cstatus: newStatus },
       { where: { outpassId: hostod.outpass_id }, transaction }
     );
 
-    await transaction.commit();
+    // 🔥 NEW LOGIC: TRANSFER OWNERSHIP ONLY IF APPROVED
+    if (action === "approve") {
+      // 👉 Get student to find year coordinator
+      const student = await Student.findByPk(hostod.student_id, { transaction });
+
+      if (student && student.yearCoordinator) {
+        hostod.facultyId = Number(student.yearCoordinator);
+        hostod.ystatus = 0; // reset year coordinator status
+      } else {
+        console.warn(`Student ${hostod.studentId} has no year coordinator assigned`);
+      }
+      await Outpass.update({facultyId: hostod.facultyId, ystatus: 0}, 
+        { where: { outpassId: hostod.outpass_id }, transaction  });
+      await hostod.save({ transaction });
+    }
+     await transaction.commit();
+   
+   
 
     return res.json({
-      message: `OD ${action}d successfully (Outpass synced)`,
+      message: `OD ${action}d successfully (Outpass synced + forwarded to Year Coordinator)`,
     });
   } catch (err) {
     await transaction.rollback();
     console.error("updateCstatushosod error:", err);
-    return res.status(500).json({ message: "Server error", error: err.message });
-  }
-};
-
-const updateCstatusOdOut = async (req, res) => {
-  try {
-    const { outpassId } = req.params;
-    const { action } = req.body;
-
-    if (!["approve", "reject"].includes(action))
-      return res.status(400).json({ message: "Invalid action" });
-
-    // ✅ Check linked OD
-    const od = await ODForm.findOne({
-      where: { outpass_id: outpassId },
-    });
-
-    if (!od)
-      return res.status(404).json({ message: "Linked OD not found" });
-
-    // ❌ Block outpass approval if OD not approved
-    if (action === "approve" && od.cstatus !== 1) {
-      return res.status(400).json({
-        message: "Cannot approve outpass before OD approval",
-      });
-    }
-
-    const OdOut = await Outpass.findByPk(outpassId);
-    if (!OdOut)
-      return res.status(404).json({ message: "Outpass not found" });
-
-    OdOut.cstatus = action === "approve" ? 1 : -1;
-    await OdOut.save();
-
-    return res.json({
-      message: `Outpass ${action}d successfully`,
-      OdOut,
-    });
-  } catch (err) {
-    console.error("updateCstatusOdOut error:", err);
     return res.status(500).json({ message: "Server error", error: err.message });
   }
 };
@@ -353,7 +330,7 @@ module.exports = { createODWithOutpass,
   getHostellerODForCounsellor, 
   getODoutpassforCounsellor, 
   updateCstatushosod,
-   updateCstatusOdOut,
+
   getODForYearCoordinator,
   getODOutpassForYearCoordinator,
   forwardODToYearCoordinator,
