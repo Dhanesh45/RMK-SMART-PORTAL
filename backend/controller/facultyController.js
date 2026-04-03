@@ -87,23 +87,26 @@ exports.getFacultyByBranchAndRole = async (req, res) => {
   try {
     const { branch, role } = req.params;
 
-    // Map frontend role to DB role
     const roleMap = {
       counsellor: "Counsellor",
       year_coordinator: "Year Coordinator",
       hod: "Head of the Department",
     };
 
-    const dbRole = roleMap[role]; // maps 'year_coordinator' -> 'Year Coordinator'
-
-    if (!dbRole) return res.status(400).json({ message: "Invalid role" });
+    const dbRole = roleMap[role];
 
     const faculty = await Faculty.findAll({
       where: {
         faculty_branch: branch,
         role: dbRole,
       },
-      attributes: ["f_id", "faculty_name", "mail"],
+      attributes: [
+        "f_id",
+        "faculty_name",
+        "mail",
+        "faculty_branch",
+        "password",
+      ],
     });
 
     res.status(200).json(faculty);
@@ -112,4 +115,97 @@ exports.getFacultyByBranchAndRole = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+// ✅ Get multiple faculty by ids
+exports.getFacultyByIds = async (req, res) => {
+  try {
+    const { ids } = req.query;
+
+    if (!ids) {
+      return res.status(400).json({ message: "Faculty ids required" });
+    }
+
+    const idArray = ids.split(",").map(Number);
+
+    const faculty = await Faculty.findAll({
+      where: {
+        f_id: idArray,
+      },
+      attributes: [
+  "f_id",
+  "faculty_name",
+  "mail",
+  "faculty_branch",
+  "password",
+]
+    });
+
+    res.status(200).json(faculty);
+  } catch (err) {
+    console.error("❌ getFacultyByIds error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+// ✅ Add counsellor
+exports.addFaculty = async (req, res) => {
+  try {
+    const { faculty_name, faculty_branch, mail, role, password } = req.body;
+
+    const faculty = await Faculty.create({
+      faculty_name,
+      faculty_branch,
+      mail,
+      role,
+      password, // ✅ store entered password
+    });
+
+    res.status(201).json(faculty);
+  } catch (err) {
+  console.error("❌ addFaculty FULL error:", err);
+
+  return res.status(500).json({
+    message: "Server error",
+    error: err.message,
+    sqlMessage: err.parent?.sqlMessage,
+  });
+}
+};
+
+// ✅ Update faculty
+exports.updateFaculty = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await Faculty.update(
+      {
+        faculty_name: req.body.name,
+        faculty_branch: req.body.branch,
+        mail: req.body.email,
+        password: req.body.password, // ✅ IMPORTANT
+      },
+      {
+        where: { f_id: id },
+      }
+    );
+
+    res.status(200).json({ message: "Faculty updated" });
+  } catch (err) {
+    console.error("❌ updateFaculty error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+exports.deleteFaculty = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await Faculty.destroy({
+      where: { f_id: id },
+    });
+
+    res.status(200).json({ message: "Faculty deleted successfully" });
+  } catch (err) {
+    console.error("❌ deleteFaculty error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 

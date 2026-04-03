@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import "./CView.css";
+import "../../../../yearcoordinator/yearcodedit/counselloredit/view/CView.css";
 
-const CView = ({ student, onClose, onSave }) => {
+const CView = ({ coordinator, onClose, onSave }) => {
   const [formData, setFormData] = useState({
     id: "",
     name: "",
@@ -11,10 +11,18 @@ const CView = ({ student, onClose, onSave }) => {
   });
 
   useEffect(() => {
-    if (student) {
-      setFormData(student);
-    }
-  }, [student]);
+  console.log("POPUP RECEIVED:", coordinator);
+
+  if (coordinator) {
+    setFormData({
+      id: coordinator.id,
+      name: coordinator.name || "",
+      branch: coordinator.branch || "",
+      email: coordinator.email || "",
+      password: coordinator.password || "",
+    });
+  }
+}, [coordinator]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,6 +34,7 @@ const CView = ({ student, onClose, onSave }) => {
 
   const handleSave = () => {
     onSave(formData);
+    onClose();
   };
 
   return (
@@ -37,7 +46,7 @@ const CView = ({ student, onClose, onSave }) => {
 
         <h2 className="modal-title">Counsellor Information</h2>
 
-        <form className="modal-form">
+        <div className="modal-form">
           <div className="form-field">
             <label>Full Name</label>
             <input
@@ -57,16 +66,16 @@ const CView = ({ student, onClose, onSave }) => {
             >
               <option value="">Select Department</option>
               <option value="CSE">CSE</option>
+              <option value="IT">IT</option>
               <option value="ECE">ECE</option>
               <option value="EEE">EEE</option>
               <option value="MECH">MECH</option>
               <option value="CIVIL">CIVIL</option>
-              <option value="IT">IT</option>
             </select>
           </div>
 
           <div className="form-field">
-            <label>Email ID</label>
+            <label>Email</label>
             <input
               type="email"
               name="email"
@@ -77,18 +86,24 @@ const CView = ({ student, onClose, onSave }) => {
 
           <div className="form-field">
             <label>Password</label>
-            <input type="text" value={formData.password} disabled />
+            <input
+              type="text"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              disabled={!!coordinator} // Disable password field when editing
+            />
           </div>
 
           <div className="modal-actions">
-            <button type="button" className="discard-btn" onClick={onClose}>
-              Discard changes
+            <button className="discard-btn" onClick={onClose}>
+              Cancel
             </button>
-            <button type="button" className="save-btn" onClick={handleSave}>
-              Save changes
+            <button className="save-btn" onClick={handleSave}>
+              Save
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

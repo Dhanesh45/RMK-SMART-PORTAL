@@ -1,27 +1,34 @@
 import React, { useState } from "react";
-import "../view/CView.css"; // ✅ reuse same styling as CView for exact look
+import "../view/CView.css";
 
 const CAdd = ({ onClose, onAdd }) => {
   const [formData, setFormData] = useState({
     name: "",
     branch: "",
-    noOfStudents: "",
     email: "",
+    password: "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
+
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
     }));
   };
 
   const handleAdd = () => {
-    if (!formData.name || !formData.branch || !formData.email) {
-      alert("Please fill all required fields!");
+    if (
+      !formData.name ||
+      !formData.branch ||
+      !formData.email ||
+      !formData.password
+    ) {
+      alert("Please fill all required fields");
       return;
     }
+
     onAdd(formData);
     onClose();
   };
@@ -29,58 +36,77 @@ const CAdd = ({ onClose, onAdd }) => {
   return (
     <div className="modal-overlay">
       <div className="modal-container">
-        <button onClick={onClose} className="modal-close-btn">&times;</button>
-        <h2 className="modal-title">Add New Counselor</h2>
+        <button onClick={onClose} className="modal-close-btn">
+          &times;
+        </button>
+
+        <h2 className="modal-title">Add New Counsellor</h2>
+
         <form className="modal-form">
-          <div className="form-field">
-            <label>Full Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-            />
-          </div>
+          {/* ✅ 2-column layout */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "20px",
+            }}
+          >
+            {/* LEFT */}
+            <div>
+              <div className="form-field">
+                <label>Full Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                />
+              </div>
 
-          <div className="form-row">
-            <div className="form-field">
-              <label>Department</label>
-              <select
-                name="branch"
-                value={formData.branch}
-                onChange={handleChange}
-              >
-                <option value="">Select Department</option>
-                <option value="CSE">CSE</option>
-                <option value="ECE">ECE</option>
-                <option value="EEE">EEE</option>
-                <option value="MECH">MECH</option>
-                <option value="CIVIL">CIVIL</option>
-                <option value="IT">IT</option>
-              </select>
+              <div className="form-field">
+                <label>Email ID</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+              </div>
             </div>
-            <div className="form-field">
-              <label>No. of Students</label>
-              <input
-                type="number"
-                name="noOfStudents"
-                value={formData.noOfStudents}
-                onChange={handleChange}
-              />
+
+            {/* RIGHT */}
+            <div>
+              <div className="form-field">
+                <label>Department</label>
+                <select
+                  name="branch"
+                  value={formData.branch}
+                  onChange={handleChange}
+                >
+                  <option value="">Select Department</option>
+                  <option value="CSE">CSE</option>
+                  <option value="ECE">ECE</option>
+                  <option value="EEE">EEE</option>
+                  <option value="MECH">MECH</option>
+                  <option value="CIVIL">CIVIL</option>
+                  <option value="IT">IT</option>
+                </select>
+              </div>
+
+              <div className="form-field">
+                <label>Password</label>
+                <input
+                  type="text"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                />
+              </div>
             </div>
           </div>
 
-          <div className="form-field">
-            <label>Email ID</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="modal-actions">
+          {/* ✅ Buttons bottom */}
+          <div className="modal-actions" style={{ marginTop: "20px" }}>
             <button type="button" className="discard-btn" onClick={onClose}>
               Cancel
             </button>

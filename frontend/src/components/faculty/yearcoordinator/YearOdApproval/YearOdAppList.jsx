@@ -1,259 +1,281 @@
-import React, { useState } from "react";
-import OutpassView from "./YearOutpassView";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import YearodView from "./YearOdView";
 
 const YearOdAppList = () => {
-  const [showPopup, setShowPopup] = useState(false); // Control popup
-  const [activeForm, setActiveForm] = useState(""); // "outpass" or "onduty"
+  const [showPopup, setShowPopup] = useState(false);
+  const [records, setRecords] = useState([]);
+  const [selectedData, setSelectedData] = useState(null);
 
-  const students = [
-    { sno: 1, nof: 20, name: "Nandhini" },
-    { sno: 2, nof: 20, name: "Shobana" },
-    { sno: 3, nof: 20, name: "Saravanan" },
-    { sno: 4, nof: 20, name: "Vijayaraj" },
-    { sno: 5, nof: 20, name: "Akila" },
-    { sno: 6, nof: 20, name: "Rajitha" },
-    { sno: 7, nof: 20, name: "Akila" },
-    { sno: 8, nof: 20, name: "Rajitha" },
-    { sno: 9, nof: 20, name: "Akila" },
-    { sno: 10, nof: 20, name: "Rajitha" },
-  ];
+  /* ============================
+     FETCH YC OD
+  ============================ */
+  useEffect(() => {
+    const fetchYCOD = async () => {
+      try {
+        const email = localStorage.getItem("facultyEmail");
+        if (!email) return;
+
+        const facultyRes = await axios.get(
+          `http://localhost:5000/api/faculty/email/${email}`
+        );
+        const facultyId = facultyRes.data.f_id;
+
+        const [hostellerRes, dayscholarRes] = await Promise.all([
+          axios.get(
+            `http://localhost:5000/api/od/year-coordinator/${facultyId}`
+          ),
+          axios.get(
+            `http://localhost:5000/api/dayscholar-od/year-coordinator/${facultyId}`
+          ),
+        ]);
+
+        const hostellerMapped = (hostellerRes.data?.ods || []).map(
+          (od, index) => ({
+            sno: index + 1,
+            od_id: od.od_id,
+            studentName: od.studentName,
+            regNo: od.regNo,
+            type: "HOSTELLER",
+            odData: od,
+          })
+        );
+
+        const dayscholarMapped = (dayscholarRes.data?.ods || []).map(
+          (od, index) => ({
+            sno: hostellerMapped.length + index + 1,
+            od_id: od.od_id,
+            studentName: od.studentName,
+            regNo: od.regNo,
+            type: "DAYSCHOLAR",
+            odData: od,
+          })
+        );
+
+        setRecords([...hostellerMapped, ...dayscholarMapped]);
+      } catch (err) {
+        console.error("Fetch error", err);
+      }
+    };
+
+    fetchYCOD();
+  }, []);
+
+  /* ============================ */
+ const handleApprove = async (item) => {
+  try {
+    const url =
+      item.type === "HOSTELLER"
+        ? `http://localhost:5000/api/od/year-coordinator/approve/od/${item.od_id}`
+        : `http://localhost:5000/api/dayscholar-od/ystatus/${item.od_id}`;
+
+    await axios.put(url, { action: "approve" });
+
+    setRecords((prev) => prev.filter((r) => r.od_id !== item.od_id));
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const handleReject = async (item) => {
+  try {
+    const url =
+      item.type === "HOSTELLER"
+        ? `http://localhost:5000/api/od/year-coordinator/approve/od/${item.od_id}`
+        : `http://localhost:5000/api/dayscholar-od/ystatus/${item.od_id}`;
+
+    await axios.put(url, { action: "reject" });
+
+    setRecords((prev) => prev.filter((r) => r.od_id !== item.od_id));
+  } catch (err) {
+    console.error(err);
+  }
+};
+  const handleApproveAll = async () => {
+  try {
+    await Promise.all(
+      records.map((item) => {
+        const url =
+          item.type === "HOSTELLER"
+            ? `http://localhost:5000/api/od/year-coordinator/approve/od/${item.od_id}`
+            : `http://localhost:5000/api/dayscholar-od/ystatus/${item.od_id}`;
+
+        return axios.put(url, { action: "approve" });
+      })
+    );
+
+    setRecords([]);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   return (
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      
-
-      {/* Content Section */}
+    <div style={{ width: "100%", padding: "2%" }}>
       <div
         style={{
-          flex: 1,
-          backgroundColor: "rgba(238, 238, 238, 0.5)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          paddingTop: "2%",
+          width: "100%",
+          background: "#e0e0e0",
+          padding: "2%",
+          borderRadius: "10px",
         }}
       >
-        {/* Dropdown */}
-        <div
-          style={{
-            width: "90%",
-            display: "flex",
-            justifyContent: "flex-end",
-            height:"10vh"
-          }}
-        >
-          
-        </div>
+        {/* TABLE */}
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ background: "#f5f5f5", textAlign: "center" }}>
+              <th style={{ width: "10%" }}>S.NO</th>
+              <th style={{ width: "15%" }}>NAME</th>
+              <th style={{ width: "20%" }}>REG.NO</th>
+              <th style={{ width: "20%" }}>Coordinator Name</th>
+              <th style={{ width: "15%" }}>FORM DETAILS</th>
+              <th style={{ width: "20%" }}>VALIDATION</th>
+            </tr>
+          </thead>
 
-        {/* Table Container */}
+          <tbody>
+            {records.length === 0 ? (
+              <tr>
+                <td colSpan="6" style={{ padding: "20px", textAlign: "center" }}>
+                  No records found
+                </td>
+              </tr>
+            ) : (
+              records.map((r) => (
+                <tr
+                  key={r.od_id}
+                  style={{
+                    textAlign: "center",
+                    background: "#ffffff",
+                    height: "60px",
+                  }}
+                >
+                  <td>{r.sno}</td>
+                  <td>{r.studentName}</td>
+                  <td>{r.regNo}</td>
+                  <td>{r.coordinator || "-"}</td>
+
+                  {/* VIEW */}
+                  <td>
+                    <button
+                      style={{
+                        padding: "6px 12px",
+                        background: "#3f4a6b",
+                        fontWeight: "bold",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "20px",
+                        cursor: "pointer",
+                        fontSize: "12px",
+                        whiteSpace: "nowrap",
+                      }}
+                      onClick={() => {
+                        setSelectedData(r.odData);
+                        setShowPopup(true);
+                      }}
+                    >
+                      VIEW FORM
+                    </button>
+                  </td>
+
+                  {/* ACTIONS */}
+                  <td>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        gap: "10px",
+                      }}
+                    >
+                      <button
+                        style={{
+                          padding: "5px 10px",
+                          background: "#3f4a6b",
+                          color: "#fff",
+                          border: "none",
+                          borderRadius: "5px",
+                          fontWeight: "bold",
+                          cursor: "pointer",
+                          fontSize: "12px",
+                          whiteSpace: "nowrap",
+                        }}
+                        onClick={() => handleApprove(r)}
+                      >
+                        APPROVE
+                      </button>
+
+                      <button
+                        style={{
+                          padding: "5px 10px",
+                          background: "#d9534f",
+                          color: "#fff",
+                          border: "none",
+                          fontWeight: "bold",
+                          borderRadius: "5px",
+                          cursor: "pointer",
+                          fontSize: "12px",
+                          whiteSpace: "nowrap",
+                        }}
+                        onClick={() => handleReject(r)}
+                      >
+                        REJECT
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+
+        {/* FOOTER BUTTONS */}
         <div
           style={{
-            width: "90%",
-            height: "65vh",
-            backgroundColor: "rgba(217, 217, 217, 1)",
-            border: "0.4% solid rgba(217, 217, 217,1)",
-            borderRadius: "1%",
-            padding: "0.8%",
-            boxSizing: "border-box",
+            width: "100%",
             display: "flex",
-            flexDirection: "column",
             justifyContent: "space-between",
+            marginTop: "20px",
           }}
         >
-          {/* Table Header */}
-          <div
+          <button
             style={{
-              display: "grid",
-              gridTemplateColumns: "8% 18% 20% 20% 17% 17%",
-              backgroundColor: "white",
+              padding: "10px 20px",
+              background: "#3f4a6b",
+              color: "#fff",
+              borderRadius: "30px",
+              border: "none",
               fontWeight: "bold",
-              textAlign: "center",
-              padding: "0.8%",
-              borderRadius: "0.5vh",
-              marginBottom: "0.8%",
+              cursor: "pointer",
             }}
           >
-            <div>S.NO</div>
-            <div>NAME</div>
-            <div>REG.NO</div>
-            <div>OUTPASS DETAILS</div>
-            <div>ONDUTY DETAILS</div>
-            <div>VALIDATION</div>
-          </div>
+            Request Access
+          </button>
 
-          {/* Table Body */}
-          <div style={{ flex: 1, overflowY: "auto" }}>
-            {students.map((student) => (
-              <div
-                key={student.sno}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "8% 18% 20% 20% 17% 17%",
-                  alignItems: "center",
-                  backgroundColor: "white",
-                  borderRadius: "1vh",
-                  padding: "0.8%",
-                  marginBottom: "0.8%",
-                  boxShadow: "0% 0.3% 0.6% rgba(0,0,0,0.15)",
-                }}
-              >
-                <div style={cardCell}>{student.sno}</div>
-                <div style={cardCell}>{student.name}</div>
-                <div style={cardCell}>{student.nof}</div>
-                <div style={cardCell}>
-                  <button
-                    style={formBtn}
-                    onClick={() => {
-                      setShowPopup(true);
-                      setActiveForm("outpass");
-                    }}
-                  >
-                    OUTPASS
-                  </button>
-                </div>
-                <div style={cardCell}>
-                  <button
-                    style={formBtn}
-                    onClick={() => {
-                      setShowPopup(true);
-                      setActiveForm("onduty");
-                    }}
-                  >
-                    ONDUTY
-                  </button>
-                </div>
-                <div style={cardCell}>
-                  <button style={approveBtn}>APPROVE</button>
-                  <button style={rejectBtn}>REJECT</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Bottom Buttons */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "end",
-            margin: "auto",
-            width: "90%",
-          }}
-        >
-          <button style={bottomBtn}>Approve All</button>
+          <button
+            style={{
+              padding: "10px 20px",
+              background: "#3f4a6b",
+              color: "#fff",
+              borderRadius: "30px",
+              border: "none",
+              fontWeight: "bold",
+              cursor: "pointer",
+            }}
+            onClick={handleApproveAll}
+          >
+            Approve All
+          </button>
         </div>
       </div>
 
-      {/* Conditional Popup */}
-      {showPopup && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0,0,0,0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 9999,
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "10px",
-              width: "80%",
-              height: "90%",
-              overflowY: "auto",
-              padding: "1%",
-              position: "relative",
-              boxShadow: "0 0 10px rgba(0,0,0,0.3)",
-            }}
-          >
-            <button
-              onClick={() => setShowPopup(false)}
-              style={{
-                position: "absolute",
-                top: "10px",
-                right: "20px",
-                backgroundColor: "#d9534f",
-                color: "white",
-                border: "none",
-                borderRadius: "50%",
-                width: "35px",
-                height: "35px",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-            >
-              ✕
-            </button>
-
-            {/* Conditional Rendering with clean popup */}
-            {activeForm === "outpass" && <OutpassView isPopup={true} />}
-            {activeForm === "onduty" && <YearodView isPopup={true} />}
-          </div>
+      {/* POPUP */}
+      {showPopup && selectedData && (
+        <div style={{ marginTop: "2%" }}>
+          <YearodView data={selectedData} />
         </div>
       )}
     </div>
   );
-};
-
-// Common Styles
-const cardCell = { textAlign: "center", fontSize: "90%" };
-
-const formBtn = {
-  fontWeight: "bold",
-  padding: "0.7% 5%",
-  color: "white",
-  backgroundColor: "#3b4b75",
-  border: "none",
-  borderRadius: "8%",
-  cursor: "pointer",
-  alignItems: "center",
-};
-
-const approveBtn = {
-  fontWeight: "bold",
-  padding: "1% 3%",
-  color: "white",
-  backgroundColor: "#3b4b75",
-  border: "none",
-  borderRadius: "12%",
-  marginRight: "1%",
-  cursor: "pointer",
-};
-
-const rejectBtn = {
-  fontWeight: "bold",
-  padding: "1% 2%",
-  color: "white",
-  backgroundColor: "#d9534f",
-  border: "none",
-  borderRadius: "8%",
-  cursor: "pointer",
-};
-
-const bottomBtn = {
-  backgroundColor: "#3b4b75",
-  color: "white",
-  border: "none",
-  padding: "1% 3%",
-  borderRadius: "8%",
-  cursor: "pointer",
-  fontSize: "100%",
-  fontWeight: "bold",
 };
 
 export default YearOdAppList;

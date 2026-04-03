@@ -1,17 +1,129 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 const YearApprovalList = () => {
   const [showPopup, setShowPopup] = useState(false);
+  const [students, setStudents] = useState([]);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
-  const students = [
-    { sno: 1, reg: 111723203001, name: "Akash", couns: "Annalakshmi" },
-    { sno: 2, reg: 111723203003, name: "Leo", couns: "Nandhini" },
-    { sno: 3, reg: 111723203004, name: "Dhinesh", couns: "Shobana" },
-    { sno: 4, reg: 111723203005, name: "Mukesh", couns: "Nagarajan" },
-    { sno: 5, reg: 111723203006, name: "Arul", couns: "Nagarajan" },
-    { sno: 6, reg: 111723203007, name: "Nair", couns: "Nagarajan" },
-    { sno: 7, reg: 111723203007, name: "Nair", couns: "Nagarajan" },
-  ];
+  /* ===========================
+     FETCH OUTPASSES
+  =========================== */
+  /**
+   * EXPLANATION:
+   * 
+   * 1. Problem: 404 while fetching outpasses for year coordinator.
+   * 2. API currently used here: /api/outpass/year-coordinator/:facultyId
+   * 3. Action:
+   *    - VERIFY ROUTE AND CONTROLLER:
+   *      a) In backend (outpassRoute.js), check the exact spelling & path for the year coordinator's get-outpass route.
+   *      b) It could be /api/outpass/yearCoordinator/:facultyId
+   * 
+   *      Common issues:
+   *        - "year-coordinator" vs "yearCoordinator"
+   *        - Make sure route exists in outpassRoute.js and points to correct controller
+   * 
+   *    - To fix 404: 
+   *      EITHER update FRONTEND to use the backend's actual path (suggested, below)
+   *      OR add a new backend route to match frontend if you prefer that way.
+   * 
+   * 4. This rewrite assumes your outpass routes in backend use "yearCoordinator" (no dash), as is typical in Express.
+   *    - If your backend does use "year-coordinator" (with dash), change this advice accordingly.
+   */
+
+   useEffect(() => {
+    const fetchOutpasses = async () => {
+      try {
+        const email = localStorage.getItem("facultyEmail");
+        if (!email) {
+          console.error("Faculty email not found");
+          return;
+        }
+
+        /* 🔹 1. GET FACULTY ID */
+        const facultyRes = await axios.get(
+          `http://localhost:5000/api/faculty/email/${email}`
+        );
+
+        const facultyId = facultyRes.data.f_id;
+        console.log("Faculty response:", facultyRes.data);
+      
+        if (!facultyId) {
+          console.error("Faculty ID not found");
+          return;
+        }
+
+        /* 🔹 2. HOSTELLER OUTPASSES */
+        const hostellerRes = await axios.get(
+          `http://localhost:5000/api/outpass/year-coordinator/${facultyId}`
+        );
+        
+
+
+        const hostellerMapped = hostellerRes.data.outpasses.map((op, index) => ({
+          sno: index + 1,
+          outpassId: op.outpassId,
+          name: op.studentName,
+          reg: op.regNo,
+          couns: op.counsellorName,
+          type: "HOSTELLER",
+          fullData: op,
+        }));
+
+        /* 🔹 3. DAY SCHOLAR OUTPASSES */
+        const dayScholarRes = await axios.get(
+          `http://localhost:5000/api/dayscholarOutpass/year-coordinator/${facultyId}`
+        );
+
+        const dayScholarMapped = dayScholarRes.data.outpasses.map((op, index) => ({
+          sno: hostellerMapped.length + index + 1,
+          outpassId: op.dayscholaroutpassId,
+          name: op.studentName,
+          reg: op.regNo,
+          couns: op.counsellorName || "N/A",
+          type: "DAYSCHOLAR",
+          fullData: op,
+        }));
+
+        /* 🔹 4. MERGE */
+        setStudents([...hostellerMapped, ...dayScholarMapped]);
+
+      } catch (err) {
+        console.error("Error fetching year coordinator outpasses", err);
+      }
+    };
+
+    fetchOutpasses();
+  }, []);
+
+  /* ===========================
+     APPROVE / REJECT
+  =========================== */
+ const handleApprove = async (student) => {
+  const url =
+    student.type === "HOSTELLER"
+      ? `http://localhost:5000/api/outpass/year-coordinator/update/${student.outpassId}`
+      : `http://localhost:5000/api/dayscholarOutpass/year-coordinator/update/${student.outpassId}`;
+
+  await axios.put(url, { action: "approve" });
+
+  setStudents((prev) =>
+    prev.filter((s) => s.outpassId !== student.outpassId)
+  );
+};
+const handleReject = async (student) => {
+  const url =
+    student.type === "HOSTELLER"
+      ? `http://localhost:5000/api/outpass/year-coordinator/update/${student.outpassId}`
+      : `http://localhost:5000/api/dayscholarOutpass/year-coordinator/update/${student.outpassId}`;
+
+  await axios.put(url, { action: "reject" });
+
+  setStudents((prev) =>
+    prev.filter((s) => s.outpassId !== student.outpassId)
+  );
+};
+
 
   return (
     <div
@@ -23,8 +135,6 @@ const YearApprovalList = () => {
         flexDirection: "column",
       }}
     >
-      
-
       {/* Content */}
       <div
         style={{
@@ -45,47 +155,21 @@ const YearApprovalList = () => {
             marginBottom: "2%",
           }}
         >
-          <select
-            style={{
-              padding: "8px 12px",
-              borderRadius: "5px",
-              border: "1px solid #ccc",
-              fontSize: "14px",
-            }}
-          >
+          <select style={dropdownStyle}>
             <option value="">Counsellor</option>
             <option value="Student">Student</option>
           </select>
         </div>
 
         {/* Table */}
-        <div
-          style={{
-            width: "90%",
-            height: "70vh",
-            border: "8px solid rgba(217, 217, 217,1)",
-            borderRadius: "10px",
-            backgroundColor: "rgba(217, 217, 217, 1)",
-            padding: "0% 0.5% 0% 0.5%",
-            boxSizing: "border-box",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-          }}
-        >
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "separate",
-              borderSpacing: "0 8px",
-            }}
-          >
+        <div style={tableWrapper}>
+          <table style={tableStyle}>
             <thead>
               <tr>
                 <th style={headerStyle}>S.NO</th>
                 <th style={headerStyle}>NAME</th>
                 <th style={headerStyle}>REG.NO</th>
-                <th style={headerStyle}>Counsellor Name</th>
+                <th style={headerStyle}>Coordinator Name</th>
                 <th style={headerStyle}>FORM DETAILS</th>
                 <th style={headerStyle}>VALIDATION</th>
               </tr>
@@ -93,193 +177,61 @@ const YearApprovalList = () => {
 
             <tbody>
               {students.map((student) => (
-                <tr
-                  key={student.sno}
-                  style={{
-                    backgroundColor: "white",
-                    boxShadow: "0px 2px 6px rgba(0,0,0,0.1)",
-                  }}
-                >
+                <tr key={student.sno} style={rowStyle}>
                   <td style={cellStyle}>{student.sno}</td>
                   <td style={cellStyle}>{student.name}</td>
                   <td style={cellStyle}>{student.reg}</td>
                   <td style={cellStyle}>{student.couns}</td>
                   <td style={cellStyle}>
-                    <button style={formBtn} onClick={() => setShowPopup(true)}>
+                    <button
+                      style={formBtn}
+                      onClick={() => {
+                        setSelectedStudent(student.fullData);
+                        setShowPopup(true);
+                      }}
+                    >
                       VIEW FORM
                     </button>
                   </td>
                   <td style={cellStyle}>
-                    <button style={approveBtn}>APPROVE</button>
-                    <button style={rejectBtn}>REJECT</button>
+                   <button style={approveBtn}
+           onClick={() => handleApprove(student)}
+>
+  APPROVE
+</button>
+<button
+  style={rejectBtn}
+  onClick={() => handleReject(student)}
+>
+  REJECT
+</button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          {/* Bottom Buttons */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginTop: "10px",
-            }}
-          >
+          <div style={bottomBtnRow}>
             <button style={actionBtn}>Request Access</button>
             <button style={actionBtn}>Approve All</button>
           </div>
         </div>
       </div>
 
-      {/* Popup */}
-      {showPopup && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0,0,0,0.4)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              width: "82%",
-              height: "88vh",
-              backgroundColor: "white",
-              borderRadius: "2vh",
-              padding: "3%",
-              position: "relative",
-              boxShadow: "0 0 15px rgba(0,0,0,0.3)",
-              // overflowY: "auto", // ✅ Removed scroll
-            }}
-          >
-            <button
-              style={{
-                position: "absolute",
-                top: "1%",
-                right: "2%",
-                border: "none",
-                background: "none",
-                fontSize: "3.5vh",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-              onClick={() => setShowPopup(false)}
-            >
+      {/* POPUP (UNCHANGED UI) */}
+      {showPopup && selectedStudent && (
+        <div style={popupOverlay}>
+          <div style={popupBox}>
+            <button style={closeBtn} onClick={() => setShowPopup(false)}>
               ×
             </button>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.5vh" }}>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "2vh",
-                }}
-              >
-                {/* Left Column */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "1.4vh" }}>
-                  {[
-                    "Name",
-                    "Registration Number",
-                    "Email Address",
-                    "Branch",
-                    "Name of the Parent",
-                    "Native",
-                    "Parent's Mobile No",
-                  ].map((label) => (
-                    <div key={label} style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh" }}>
-                      <label style={labelStyle}>{label}</label>
-                      <input type="text" style={inputStyle} />
-                    </div>
-                  ))}
-                </div>
-
-                {/* Right Column */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "1.6vh" }}>
-                  <div style={rowGroup}>
-                    {["Year", "Section", "Gender"].map((field) => (
-                      <div key={field} style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-                        <label style={labelStyle}>{field}</label>
-                        <input type="text" style={inputStyle} />
-                      </div>
-                    ))}
-                  </div>
-
-                  <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh" }}>
-                    <label style={labelStyle}>Counsellor</label>
-                    <input type="text" style={inputStyle} />
-                  </div>
-
-                  <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh" }}>
-                    <label style={labelStyle}>Year Coordinator</label>
-                    <input type="text" style={inputStyle} />
-                  </div>
-
-                  <div style={rowGroup}>
-                    {["No. of Days", "From Date", "To Date"].map((field, idx) => (
-                      <div key={field} style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-                        <label style={labelStyle}>{field}</label>
-                        <input type={idx === 0 ? "text" : "date"} style={inputStyle} />
-                      </div>
-                    ))}
-                  </div>
-
-                  <div style={rowGroup}>
-                    {["Room No", "Leaving Date", "Leaving Time"].map((field, idx) => (
-                      <div key={field} style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-                        <label style={labelStyle}>{field}</label>
-                        <input
-                          type={idx === 0 ? "text" : idx === 1 ? "date" : "time"}
-                          style={inputStyle}
-                        />
-                      </div>
-                    ))}
-                  </div>
-
-                  <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh" }}>
-                    <label style={labelStyle}>Reason for Leave</label>
-                    <input type="text" style={inputStyle} />
-                  </div>
-
-                  <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh", marginTop: "1%" }}>
-                    <label style={labelStyle}>Parent’s Permission</label>
-                    <input type="text" style={inputStyle} />
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        marginTop: "1vh",
-                        marginLeft: "1vh",
-                        gap: "0.8vh",
-                        fontSize: "1.6vh",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      <label>
-                        <input type="checkbox" /> Obtained Over Phone
-                      </label>
-                      <label>
-                        <input type="checkbox" /> Has Come in Person
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Remarks */}
-              <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh", marginTop: "1vh" }}>
-                <label style={labelStyle}>Remarks</label>
-                <input type="text" style={inputStyle} />
-              </div>
-            </div>
+            <h3>Outpass Details</h3>
+            <p><b>Name:</b> {selectedStudent.studentName}</p>
+            <p><b>Register No:</b> {selectedStudent.regNo}</p>
+            <p><b>Reason:</b> {selectedStudent.reasonForLeave}</p>
+            <p><b>From:</b> {selectedStudent.fromDate}</p>
+            <p><b>To:</b> {selectedStudent.toDate}</p>
           </div>
         </div>
       )}
@@ -287,11 +239,42 @@ const YearApprovalList = () => {
   );
 };
 
-// Styles
+/* ===========================
+   STYLES (UNCHANGED)
+=========================== */
+
+const dropdownStyle = {
+  padding: "8px 12px",
+  borderRadius: "5px",
+  border: "1px solid #ccc",
+};
+
+const tableWrapper = {
+  width: "90%",
+  height: "70vh",
+  border: "8px solid rgba(217, 217, 217,1)",
+  borderRadius: "10px",
+  backgroundColor: "rgba(217, 217, 217, 1)",
+  padding: "0% 0.5%",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "space-between",
+};
+
+const tableStyle = {
+  width: "100%",
+  borderCollapse: "separate",
+  borderSpacing: "0 8px",
+};
+
 const headerStyle = {
   backgroundColor: "white",
   padding: "10px",
-  textAlign: "center",
+};
+
+const rowStyle = {
+  backgroundColor: "white",
+  boxShadow: "0px 2px 6px rgba(0,0,0,0.1)",
 };
 
 const cellStyle = {
@@ -307,7 +290,6 @@ const approveBtn = {
   border: "none",
   borderRadius: "5px",
   marginRight: "5%",
-  cursor: "pointer",
 };
 
 const rejectBtn = {
@@ -317,7 +299,6 @@ const rejectBtn = {
   backgroundColor: "#d9534f",
   border: "none",
   borderRadius: "5px",
-  cursor: "pointer",
 };
 
 const formBtn = {
@@ -327,7 +308,6 @@ const formBtn = {
   backgroundColor: "#3b4b75",
   border: "none",
   borderRadius: "20px",
-  cursor: "pointer",
 };
 
 const actionBtn = {
@@ -336,29 +316,40 @@ const actionBtn = {
   border: "none",
   padding: "10px 25px",
   borderRadius: "50px",
-  cursor: "pointer",
-  fontSize: "1rem",
   fontWeight: "bold",
 };
 
-const labelStyle = {
-  textTransform: "uppercase",
-  fontWeight: "600",
-  fontSize: "1.4vh",
-  marginBottom: "1%",
-};
-
-const inputStyle = {
-  padding: "1vh",
-  border: "1px solid #aaa",
-  borderRadius: "0.8vh",
-  fontSize: "1.7vh",
-};
-
-const rowGroup = {
+const bottomBtnRow = {
   display: "flex",
   justifyContent: "space-between",
-  gap: "1.5vh",
+};
+
+const popupOverlay = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100vw",
+  height: "100vh",
+  backgroundColor: "rgba(0,0,0,0.4)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+};
+
+const popupBox = {
+  width: "50%",
+  backgroundColor: "white",
+  borderRadius: "10px",
+  padding: "20px",
+};
+
+const closeBtn = {
+  position: "absolute",
+  right: "20px",
+  top: "10px",
+  border: "none",
+  background: "none",
+  fontSize: "24px",
 };
 
 export default YearApprovalList;

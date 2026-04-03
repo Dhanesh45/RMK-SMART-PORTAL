@@ -163,20 +163,37 @@ const updateCstatushosod = async (req, res) => {
 
     const newStatus = action === "approve" ? 1 : -1;
 
-    // ✅ Update OD status
+    // ✅ Update OD status (NO CHANGE)
     hostod.cstatus = newStatus;
     await hostod.save({ transaction });
 
-    // ✅ Sync Outpass status automatically
+    // ✅ Sync Outpass status (NO CHANGE)
     await Outpass.update(
       { cstatus: newStatus },
       { where: { outpassId: hostod.outpass_id }, transaction }
     );
 
-    await transaction.commit();
+    // 🔥 NEW LOGIC: TRANSFER OWNERSHIP ONLY IF APPROVED
+    if (action === "approve") {
+      // 👉 Get student to find year coordinator
+      const student = await Student.findByPk(hostod.student_id, { transaction });
+
+      if (student && student.yearCoordinator) {
+        hostod.facultyId = Number(student.yearCoordinator);
+        hostod.ystatus = 0; // reset year coordinator status
+      } else {
+        console.warn(`Student ${hostod.studentId} has no year coordinator assigned`);
+      }
+      await Outpass.update({facultyId: hostod.facultyId, ystatus: 0}, 
+        { where: { outpassId: hostod.outpass_id }, transaction  });
+      await hostod.save({ transaction });
+    }
+     await transaction.commit();
+   
+   
 
     return res.json({
-      message: `OD ${action}d successfully (Outpass synced)`,
+      message: `OD ${action}d successfully (Outpass synced + forwarded to Year Coordinator)`,
     });
   } catch (err) {
     await transaction.rollback();
@@ -185,48 +202,136 @@ const updateCstatushosod = async (req, res) => {
   }
 };
 
-const updateCstatusOdOut = async (req, res) => {
+
+// 8️⃣ YEAR COORDINATOR – VIEW OD (Counsellor Approved)
+const getODForYearCoordinator = async (req, res) => {
   try {
-    const { outpassId } = req.params;
-    const { action } = req.body;
+    const { facultyId } = req.params;
 
-    if (!["approve", "reject"].includes(action))
-      return res.status(400).json({ message: "Invalid action" });
-
-    // ✅ Check linked OD
-    const od = await ODForm.findOne({
-      where: { outpass_id: outpassId },
+    const ods = await ODForm.findAll({
+      where: {
+        facultyId: Number(facultyId),
+        cstatus: 1,   // counsellor approved
+        ystatus: 0    // pending YC
+      },
+      order: [["date", "DESC"]],
     });
 
-    if (!od)
-      return res.status(404).json({ message: "Linked OD not found" });
-
-    // ❌ Block outpass approval if OD not approved
-    if (action === "approve" && od.cstatus !== 1) {
-      return res.status(400).json({
-        message: "Cannot approve outpass before OD approval",
-      });
-    }
-
-    const OdOut = await Outpass.findByPk(outpassId);
-    if (!OdOut)
-      return res.status(404).json({ message: "Outpass not found" });
-
-    OdOut.cstatus = action === "approve" ? 1 : -1;
-    await OdOut.save();
-
-    return res.json({
-      message: `Outpass ${action}d successfully`,
-      OdOut,
-    });
+    res.json({ ods });
   } catch (err) {
-    console.error("updateCstatusOdOut error:", err);
-    return res.status(500).json({ message: "Server error", error: err.message });
+    console.error("getODForYearCoordinator error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
+//9️⃣ YEAR CO-ORDINATOR – VIEW OUTPASS FOR OD
+const getODOutpassForYearCoordinator = async (req, res) => {
+  try {
+    const { facultyId } = req.params;
+
+    const outpasses = await Outpass.findAll({
+      where: {
+        facultyId: Number(facultyId),  // ✅ FIXED
+        cstatus: 1,
+        ystatus: 0,
+        forOd: true
+      },
+      order: [["dateOfApplication", "DESC"]],
+    });
+
+    res.json({ outpasses });
+  } catch (err){
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+// 🔟 FORWARD OD + OUTPASS TO YEAR COORDINATOR
+// 🔟 FORWARD OD + OUTPASS TO YEAR COORDINATOR
+const forwardODToYearCoordinator = async (req, res) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    const { od_id } = req.params;
+    const { yearCoordinatorFacultyId } = req.body;
+
+    if (!yearCoordinatorFacultyId)
+      return res.status(400).json({ message: "YC facultyId required" });
+
+    const od = await ODForm.findByPk(od_id, { transaction });
+    if (!od) return res.status(404).json({ message: "OD not found" });
+
+    if (od.cstatus !== 1)
+      return res.status(400).json({ message: "OD not approved by counsellor" });
+
+    // ✅ MOVE OWNERSHIP TO YEAR COORDINATOR
+    od.facultyId = Number(yearCoordinatorFacultyId);
+    od.ystatus = 0;
+    await od.save({ transaction });
+
+    // ✅ VERY IMPORTANT: update outpass facultyId also
+    await Outpass.update(
+      {
+        facultyId: Number(yearCoordinatorFacultyId),
+        ystatus: 0
+      },
+      {
+        where: { outpassId: od.outpass_id },
+        transaction
+      }
+    );
+
+    await transaction.commit();
+    res.json({ message: "OD & Outpass forwarded to Year Coordinator" });
+
+  } catch (err) {
+    await transaction.rollback();
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// 1️⃣1️⃣ YEAR COORDINATOR APPROVE / REJECT OD
+const updateYstatusOD = async (req, res) => {
+  const transaction = await sequelize.transaction();
+
+  try {
+    const { od_id } = req.params;
+    const { action } = req.body;
+
+    if (!["approve", "reject"].includes(action)) {
+      return res.status(400).json({ message: "Invalid action" });
+    }
+
+    const od = await ODForm.findByPk(od_id, { transaction });
+    if (!od) return res.status(404).json({ message: "OD not found" });
+
+    const status = action === "approve" ? 1 : -1;
+
+    od.ystatus = status;
+    await od.save({ transaction });
+
+    await Outpass.update(
+      { ystatus: status },
+      { where: { outpassId: od.outpass_id }, transaction }
+    );
+
+    await transaction.commit();
+    res.json({ message: `OD ${action}d by Year Coordinator` });
+
+  } catch (err) {
+    await transaction.rollback();
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
 
 module.exports = { createODWithOutpass, 
   getHostellerODForCounsellor, 
   getODoutpassforCounsellor, 
   updateCstatushosod,
-   updateCstatusOdOut }; 
+
+  getODForYearCoordinator,
+  getODOutpassForYearCoordinator,
+  forwardODToYearCoordinator,
+  updateYstatusOD };
