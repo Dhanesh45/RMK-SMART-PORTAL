@@ -1,145 +1,153 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
-// Main Component
 const HodBonafideApproval = () => {
-  const studentsData = [
-    { sno: 1, reg: 111723203001, name: "Akash", couns: "Bonafide" },
-    { sno: 2, reg: 111723203003, name: "Leo", couns: "Fee Receipt" },
-    { sno: 3, reg: 111723203004, name: "Dhinesh", couns: "Bonafide" },
-    { sno: 4, reg: 111723203005, name: "Mukesh", couns: "Fee Receipt" },
-    { sno: 5, reg: 111723203006, name: "Arul", couns: "Fee Receipt" },
-    { sno: 6, reg: 111723203007, name: "Nair", couns: "Bonafide" },
-    { sno: 7, reg: 111723203008, name: "John", couns: "Bonafide" },
-  ];
-
-  const [filterType, setFilterType] = useState("");
+  const [studentsData, setStudentsData] = useState([]);
   const [filterReg, setFilterReg] = useState("");
   const [showPopup, setShowPopup] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+
+  useEffect(() => {
+    fetchApplications();
+  }, []);
+
+  const fetchApplications = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/bonafide/hod/all");
+
+      setStudentsData(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const approve = async (id) => {
+    if (!window.confirm("Approve this application?")) return;
+
+    try {
+      await axios.put(`http://localhost:5000/api/bonafide/hod/approve/${id}`);
+
+      setStudentsData(studentsData.filter((s) => s.ap_id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const reject = async (id) => {
+    if (!window.confirm("Reject this application?")) return;
+
+    try {
+      await axios.put(`http://localhost:5000/api/bonafide/hod/reject/${id}`);
+
+      setStudentsData(studentsData.filter((s) => s.ap_id !== id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const approveAll = async () => {
+    if (studentsData.length === 0) return;
+
+    if (!window.confirm("Approve ALL applications?")) return;
+
+    try {
+      await axios.put("http://localhost:5000/api/bonafide/hod/approve-all");
+
+      fetchApplications(); // refresh list
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const rejectAll = async () => {
+    if (studentsData.length === 0) return;
+
+    if (!window.confirm("Reject ALL applications?")) return;
+
+    try {
+      await axios.put("http://localhost:5000/api/bonafide/hod/reject-all");
+
+      fetchApplications(); // refresh
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const filteredStudents = studentsData.filter(
     (student) =>
-      (filterType === "" || student.couns === filterType) &&
-      (filterReg === "" ||
-        student.reg.toString().includes(filterReg.toString()))
+      filterReg === "" ||
+      student.Student?.regNo?.toString().includes(filterReg),
   );
 
   return (
-    <div
-      style={{
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      
-
-      {/* Content */}
-      <div
-        style={{
-          flex: 1,
-          backgroundColor: "rgba(238, 238, 238, 0.5)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          paddingTop: "1%",
-        }}
-      >
-        {/* Filter Section */}
-        <div
-          style={{
-            width: "90%",
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
-            gap: "10px",
-            marginBottom: "2%",
-          }}
-        >
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            style={{
-              padding: "1% 2%",
-              borderRadius: "1vh",
-              border: "1px solid #ccc",
-              fontSize: "2vh",
-            }}
-          >
-            <option value="">All Types</option>
-            <option value="Bonafide">Bonafide</option>
-            <option value="Fee Receipt">Fee Receipt</option>
-          </select>
-
+    <div style={container}>
+      <div style={content}>
+        <div style={filterBox}>
           <input
             type="text"
             placeholder="Search Reg No"
             value={filterReg}
             onChange={(e) => setFilterReg(e.target.value)}
-            style={{
-              padding: "1% 2%",
-              borderRadius: "1vh",
-              border: "1px solid #ccc",
-              fontSize: "2vh",
-            }}
+            style={search}
           />
         </div>
 
-        {/* Table */}
-        <div
-          style={{
-            width: "90%",
-            height: "65vh",
-            backgroundColor: "#D9D9D9",
-            marginRight: "auto",
-            marginLeft: "auto",
-            borderRadius: "20px",
-            overflowY: "auto",
-            boxShadow: "0 0 5px rgba(0,0,0,0.2)",
-            padding: "0px 10px 3px 10px",
-            borderTop: "8px solid #D9D9D9",
-          }}
-        >
-          <table
-            style={{
-              width: "100%",
-              height: "100%",
-              borderCollapse: "separate",
-              borderSpacing: "0 8px",
-            }}
-          >
+        <div style={tableBox}>
+          <table style={table}>
             <thead>
               <tr>
                 <th style={headerStyle}>S.NO</th>
+
                 <th style={headerStyle}>NAME</th>
+
                 <th style={headerStyle}>REG.NO</th>
+
                 <th style={headerStyle}>TYPE</th>
-                <th style={headerStyle}>FORM DETAILS</th>
-                <th style={headerStyle}>VALIDATION</th>
+
+                <th style={headerStyle}>FORM</th>
+
+                <th style={headerStyle}>ACTION</th>
               </tr>
             </thead>
+
             <tbody>
-              {filteredStudents.map((student) => (
-                <tr
-                  key={student.sno}
-                  style={{
-                    backgroundColor: "white",
-                    boxShadow: "0px 2px 6px rgba(0,0,0,0.1)",
-                  }}
-                >
-                  <td style={cellStyle}>{student.sno}</td>
-                  <td style={cellStyle}>{student.name}</td>
-                  <td style={cellStyle}>{student.reg}</td>
-                  <td style={cellStyle}>{student.couns}</td>
+              {filteredStudents.map((student, index) => (
+                <tr key={student.ap_id} style={row}>
+                  <td style={cellStyle}>{index + 1}</td>
+
+                  <td style={cellStyle}>{student.student?.studentName}</td>
+
+                  <td style={cellStyle}>{student.student?.regNo}</td>
+
+                  <td style={cellStyle}>Bonafide</td>
+
                   <td style={cellStyle}>
-                    <button style={formBtn} onClick={() => setShowPopup(true)}>
-                      VIEW FORM
+                    <button
+                      style={formBtn}
+                      onClick={() => {
+                        setSelectedStudent(student);
+
+                        setShowPopup(true);
+                      }}
+                    >
+                      VIEW
                     </button>
                   </td>
+
                   <td style={cellStyle}>
-                    <button style={approveBtn}>APPROVE</button>
-                    <button style={rejectBtn}>REJECT</button>
+                    <button
+                      style={approveBtn}
+                      onClick={() => approve(student.ap_id)}
+                    >
+                      APPROVE
+                    </button>
+
+                    <button
+                      style={rejectBtn}
+                      onClick={() => reject(student.ap_id)}
+                    >
+                      REJECT
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -147,177 +155,81 @@ const HodBonafideApproval = () => {
           </table>
         </div>
 
-        {/* Bottom Button */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "flex-end",
-            width: "90%",
-            alignItems: "flex-end",
-            height: "10%",
-          }}
-        >
-          <button
-            style={{
-              backgroundColor: "#3b4b75",
-              color: "white",
-              border: "none",
-              padding: "0.75% 2% ",
-              borderRadius: "25px",
-              cursor: "pointer",
-              fontSize: "1.2rem",
-              fontWeight: "bold",
-            }}
-          >
-            Approve All
+        {/* Bottom Buttons */}
+
+        <div style={bottomBar}>
+          <button style={approveAllBtn} onClick={approveAll}>
+            APPROVE ALL
+          </button>
+
+          <button style={rejectAllBtn} onClick={rejectAll}>
+            REJECT ALL
           </button>
         </div>
       </div>
 
       {/* Popup */}
-      {showPopup && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100vw",
-            height: "100vh",
-            backgroundColor: "rgba(0,0,0,0.4)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              width: "82%",
-              height: "88vh",
-              backgroundColor: "white",
-              borderRadius: "2vh",
-              padding: "3%",
-              position: "relative",
-              boxShadow: "0 0 15px rgba(0,0,0,0.3)",
-            }}
-          >
-            <button
-              style={{
-                position: "absolute",
-                top: "1%",
-                right: "2%",
-                border: "none",
-                background: "none",
-                fontSize: "3.5vh",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-              onClick={() => setShowPopup(false)}
-            >
+
+      {showPopup && selectedStudent && (
+        <div style={popupBg}>
+          <div style={popup}>
+            <button style={closeBtn} onClick={() => setShowPopup(false)}>
               ×
             </button>
 
-            {/* Popup Form Fields */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.5vh" }}>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "2vh",
-                }}
-              >
-                {/* Left Column */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "1.4vh" }}>
-                  {[
-                    "Name",
-                    "Registration Number",
-                    "Email Address",
-                    "Branch",
-                    "Name of the Parent",
-                    "Native",
-                    "Parent's Mobile No",
-                  ].map((label) => (
-                    <div key={label} style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh" }}>
-                      <label style={labelStyle}>{label}</label>
-                      <input type="text" style={inputStyle} />
-                    </div>
-                  ))}
-                </div>
+            <div style={grid}>
+              <div>
+                <p>
+                  <b>Name :</b>
+                  {selectedStudent.student?.studentName}
+                </p>
 
-                {/* Right Column */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "1.6vh" }}>
-                  <div style={rowGroup}>
-                    {["Year", "Section", "Gender"].map((field) => (
-                      <div key={field} style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-                        <label style={labelStyle}>{field}</label>
-                        <input type="text" style={inputStyle} />
-                      </div>
-                    ))}
-                  </div>
+                <p>
+                  <b>Reg No :</b>
+                  {selectedStudent.student?.regNo}
+                </p>
 
-                  <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh" }}>
-                    <label style={labelStyle}>Counsellor</label>
-                    <input type="text" style={inputStyle} />
-                  </div>
+                <p>
+                  <b>Department :</b>
+                  {selectedStudent.student?.branch}
+                </p>
 
-                  <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh" }}>
-                    <label style={labelStyle}>Year Coordinator</label>
-                    <input type="text" style={inputStyle} />
-                  </div>
+                <p>
+                  <b>Semester :</b>
+                  {selectedStudent.semester}
+                </p>
 
-                  <div style={rowGroup}>
-                    {["No. of Days", "From Date", "To Date"].map((field, idx) => (
-                      <div key={field} style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-                        <label style={labelStyle}>{field}</label>
-                        <input type={idx === 0 ? "text" : "date"} style={inputStyle} />
-                      </div>
-                    ))}
-                  </div>
-
-                  <div style={rowGroup}>
-                    {["Room No", "Leaving Date", "Leaving Time"].map((field, idx) => (
-                      <div key={field} style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-                        <label style={labelStyle}>{field}</label>
-                        <input type={idx === 0 ? "text" : idx === 1 ? "date" : "time"} style={inputStyle} />
-                      </div>
-                    ))}
-                  </div>
-
-                  <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh" }}>
-                    <label style={labelStyle}>Reason for Leave</label>
-                    <input type="text" style={inputStyle} />
-                  </div>
-
-                  <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh", marginTop: "1%" }}>
-                    <label style={labelStyle}>Parent’s Permission</label>
-                    <input type="text" style={inputStyle} />
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        marginTop: "1vh",
-                        marginLeft: "1vh",
-                        gap: "0.8vh",
-                        fontSize: "1.6vh",
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      <label>
-                        <input type="checkbox" /> Obtained Over Phone
-                      </label>
-                      <label>
-                        <input type="checkbox" /> Has Come in Person
-                      </label>
-                    </div>
-                  </div>
-                </div>
+                <p>
+                  <b>Father :</b>
+                  {selectedStudent.fatherName}
+                </p>
               </div>
 
-              {/* Remarks */}
-              <div style={{ display: "flex", flexDirection: "column", fontSize: "1.6vh", marginTop: "1vh" }}>
-                <label style={labelStyle}>Remarks</label>
-                <input type="text" style={inputStyle} />
+              <div>
+                <p>
+                  <b>Reason :</b>
+                  {selectedStudent.reason}
+                </p>
+
+                <p>
+                  <b>City :</b>
+                  {selectedStudent.city}
+                </p>
+
+                <p>
+                  <b>State :</b>
+                  {selectedStudent.state}
+                </p>
+
+                <p>
+                  <b>Pincode :</b>
+                  {selectedStudent.pincode}
+                </p>
+
+                <p>
+                  <b>Category :</b>
+                  {selectedStudent.category}
+                </p>
               </div>
             </div>
           </div>
@@ -327,70 +239,160 @@ const HodBonafideApproval = () => {
   );
 };
 
-// Styles
+const container = {
+  width: "100vw",
+  height: "100vh",
+  display: "flex",
+  flexDirection: "column",
+};
+
+const content = {
+  flex: 1,
+  backgroundColor: "rgba(238,238,238,0.5)",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  paddingTop: "1%",
+};
+
+const filterBox = {
+  width: "90%",
+  display: "flex",
+  justifyContent: "flex-end",
+  marginBottom: "2%",
+};
+
+const search = {
+  padding: "8px",
+  borderRadius: "6px",
+  border: "1px solid #ccc",
+};
+
+const tableBox = {
+  width: "90%",
+  height: "65vh",
+  backgroundColor: "#D9D9D9",
+  borderRadius: "20px",
+  overflowY: "auto",
+  boxShadow: "0 0 5px rgba(0,0,0,0.2)",
+  padding: "10px",
+};
+
+const table = {
+  width: "100%",
+  borderCollapse: "separate",
+  borderSpacing: "0 8px",
+};
+
 const headerStyle = {
   backgroundColor: "white",
-  position: "sticky",
-  top: 0,
-  zIndex: 1,
-  padding: "0.75%",
+  padding: "10px",
   textAlign: "center",
 };
 
+const row = {
+  backgroundColor: "white",
+  boxShadow: "0px 2px 6px rgba(0,0,0,0.1)",
+};
+
 const cellStyle = {
-  padding: "0.7%",
+  padding: "10px",
   textAlign: "center",
 };
 
 const approveBtn = {
   fontWeight: "bold",
-  padding: "1% 2%",
+  padding: "8px 12px",
   color: "white",
   backgroundColor: "#3b4b75",
   border: "none",
-  borderRadius: "1vh",
-  marginRight: "5%",
+  borderRadius: "6px",
+  marginRight: "5px",
   cursor: "pointer",
 };
 
 const rejectBtn = {
   fontWeight: "bold",
-  padding: "1% 2%",
+  padding: "8px 12px",
   color: "white",
   backgroundColor: "#d9534f",
   border: "none",
-  borderRadius: "1vh",
+  borderRadius: "6px",
   cursor: "pointer",
 };
 
 const formBtn = {
   fontWeight: "bold",
-  padding: "2% 4%",
+  padding: "8px 15px",
   color: "white",
   backgroundColor: "#3b4b75",
   border: "none",
-  borderRadius: "3vh",
+  borderRadius: "20px",
   cursor: "pointer",
 };
 
-const labelStyle = {
-  textTransform: "uppercase",
-  fontWeight: "600",
-  fontSize: "1.4vh",
-  marginBottom: "1%",
-};
-
-const inputStyle = {
-  padding: "1vh",
-  border: "1px solid #aaa",
-  borderRadius: "0.8vh",
-  fontSize: "1.7vh",
-};
-
-const rowGroup = {
+const bottomBar = {
+  width: "90%",
   display: "flex",
-  justifyContent: "space-between",
-  gap: "1.5vh",
+  justifyContent: "flex-end",
+  marginTop: "15px",
+  gap: "10px",
+};
+
+const approveAllBtn = {
+  backgroundColor: "#1E2E4F",
+  color: "white",
+  border: "none",
+  padding: "10px 20px",
+  borderRadius: "20px",
+  fontWeight: "bold",
+  cursor: "pointer",
+};
+
+const rejectAllBtn = {
+  backgroundColor: "#c62828",
+  color: "white",
+  border: "none",
+  padding: "10px 20px",
+  borderRadius: "20px",
+  fontWeight: "bold",
+  cursor: "pointer",
+};
+
+const popupBg = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  backgroundColor: "rgba(0,0,0,0.4)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+};
+
+const popup = {
+  width: "60%",
+  background: "white",
+  borderRadius: "10px",
+  padding: "30px",
+  boxShadow: "0 0 15px rgba(0,0,0,0.3)",
+};
+
+const grid = {
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: "20px",
+};
+
+const closeBtn = {
+  position: "absolute",
+  top: "10px",
+  right: "20px",
+  border: "none",
+  background: "none",
+  fontSize: "25px",
+  cursor: "pointer",
 };
 
 export default HodBonafideApproval;
