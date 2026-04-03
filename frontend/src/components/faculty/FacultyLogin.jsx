@@ -19,19 +19,21 @@ const [password, setPassword] = useState("");
   }
 
   try {
-    const res = await axios.post("http://localhost:5000/api/faculty/login", {
-      email,
-      password,
-      role,
-    });
+  const res = await axios.post("http://localhost:5000/api/faculty/login", {
+    email,
+    password,
+    role,
+  });
 
-    // save role for routing
-     localStorage.setItem("facultyEmail", email);
-    localStorage.setItem("facultyRole", role);
-    localStorage.setItem("facultyData", JSON.stringify(res.data.faculty));
+  localStorage.setItem("facultyEmail", email);
+  localStorage.setItem("facultyRole", role);
+  localStorage.setItem("facultyData", JSON.stringify(res.data.faculty));
 
-    navigate("/FacultyMain");
-  } catch (error) {
+  // ✅ IMPORTANT FIX
+  localStorage.setItem("f_id", res.data.faculty.id);
+
+  navigate("/FacultyMain");
+} catch (error) {
     if (error.response) {
       alert(error.response.data.message);
     } else {

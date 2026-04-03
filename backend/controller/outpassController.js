@@ -182,6 +182,20 @@ exports.updateCstatus = async (req, res) => {
 
     // ✅ Update status
     outpass.cstatus = action === "approve" ? 1 : -1;
+    
+    // ✅ When counselor approves, automatically forward to Year Coordinator
+    if (action === "approve") {
+      // Fetch the student to get their year coordinator ID
+      const student = await Student.findByPk(outpass.studentId);
+      if (student && student.yearCoordinator) {
+        // Update facultyId to year coordinator's ID so they can see it
+        outpass.facultyId = Number(student.yearCoordinator);
+        outpass.ystatus = 0; // Set to pending for year coordinator
+      } else {
+        console.warn(`Student ${outpass.studentId} has no year coordinator assigned`);
+      }
+    }
+    
 
     // ✅ UPDATE EXTRA FIELDS (THIS WAS MISSING)
     if (updatedData) {
@@ -225,6 +239,188 @@ exports.getOutpassesForStudent = async (req, res) => {
     return res.json({ outpasses });
   } catch (err) {
     console.error("getOutpassesForStudent error:", err);
+    return res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+/** ================================
+ * 6️⃣ YEAR COORDINATOR VIEW OUTPASSES
+ * ================================ */
+exports.getOutpassesForYearCoordinator = async (req, res) => {
+  try {
+    const outpasses = await Outpass.findAll({
+      where: {
+        cstatus: 1,   // counsellor approved
+        ystatus: 0    // pending for year coordinator
+      },
+      order: [["dateOfApplication", "DESC"]],
+    });
+
+    res.status(200).json({ outpasses });
+  } catch (error) {
+    console.error("getOutpassesForYearCoordinator error:", error);
+    res.status(500).json({ message: "Error fetching outpasses" });
+  }
+};
+
+/** =========================================
+ * 7️⃣ ASSIGN YEAR COORDINATOR AFTER COUNSELLOR
+ * ========================================= */
+exports.assignYearCoordinator = async (req, res) => {
+  try {
+    const { outpassId } = req.params;
+    const { yearCoordinatorFacultyId } = req.body;
+
+    if (!yearCoordinatorFacultyId) {
+      return res.status(400).json({
+        message: "yearCoordinatorFacultyId is required",
+      });
+    }
+
+    const outpass = await Outpass.findByPk(outpassId);
+    if (!outpass) {
+      return res.status(404).json({ message: "Outpass not found" });
+    }
+
+    // ✅ Ensure counsellor already approved
+    if (outpass.cstatus !== 1) {
+      return res.status(400).json({
+        message: "Outpass not approved by counsellor yet",
+      });
+    }
+
+    // ✅ MOVE OWNERSHIP TO YEAR COORDINATOR
+    outpass.facultyId = Number(yearCoordinatorFacultyId);
+    outpass.ystatus = 0; // pending with YC
+
+    await outpass.save();
+
+    return res.json({
+      message: "Outpass forwarded to Year Coordinator",
+      outpass,
+    });
+
+  } catch (err) {
+    console.error("assignYearCoordinator error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.getYearCoordinatorOutpasses = async (req, res) => {
+  try {
+    const { facultyId } = req.params;
+
+    if (!facultyId) {
+      return res.status(400).json({ message: "facultyId is required" });
+    }
+
+    const outpasses = await Outpass.findAll({
+      where: {
+        facultyId: Number(facultyId),  // ✅ USE IT HERE
+        cstatus: 1,
+        ystatus: 0,
+      },
+      include: [
+        {
+          model: Student,
+          attributes: ["studentName", "regNo"],
+        },
+        {
+          model: Faculty,
+          attributes: ["faculty_name"],
+        },
+      ],
+      order: [["dateOfApplication", "DESC"]],
+    });
+
+    const formatted = outpasses.map((op) => ({
+      outpassId: op.outpassId,
+      studentName: op.studentName,
+      regNo: op.regNo,
+      counsellorName: op.Faculty?.faculty_name || "N/A",
+      fromDate: op.fromDate,
+      toDate: op.toDate,
+      reasonForLeave: op.reasonForLeave,
+    }));
+
+    res.json({ outpasses: formatted });
+  } catch (error) {
+    console.error("getYearCoordinatorOutpasses error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+/** ================================
+ * 8️⃣ YEAR COORDINATOR APPROVE / REJECT
+ * ================================ */
+// exports.updateYstatus = async (req, res) => {
+//   try {
+//     const { outpassId } = req.params;
+//     const { action } = req.body;
+
+//     if (!["approve", "reject"].includes(action)) {
+//       return res.status(400).json({ message: "Invalid action" });
+//     }
+
+//     const outpass = await Outpass.findByPk(outpassId);
+//     if (!outpass) {
+//       return res.status(404).json({ message: "Outpass not found" });
+//     }
+
+//     if (action === "approve") {
+//       outpass.ystatus = 1;
+
+//       // ✅ Forward to HOD after year coordinator approval
+//       // const student = await Student.findByPk(outpass.studentId);
+//       // outpass.facultyId = student.hodId; // or next authority
+
+//     } else {
+//       outpass.ystatus = -1;
+//     }
+
+//     await outpass.save();
+//     res.json({ message: "Year coordinator action completed", outpass });
+
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Server error" });
+//   }
+// };
+
+
+
+exports.updateYstatus = async (req, res) => {
+  try {
+    const { outpassId } = req.params;
+    const { action } = req.body;
+
+    if (!["approve", "reject"].includes(action))
+      return res.status(400).json({ message: "Invalid action" });
+
+    const outpass = await Outpass.findByPk(outpassId);
+    if (!outpass) return res.status(404).json({ message: "Outpass not found" });
+
+    outpass.ystatus = action === "approve" ? 1 : -1;
+    
+    // ✅ When counselor approves, automatically forward to Year Coordinator
+    if (action === "approve") {
+      // Fetch the student to get their year coordinator ID
+      const student = await Student.findByPk(outpass.studentId);
+      if (student && student.hod) {
+        // Update facultyId to hod's ID so they can see it
+        outpass.facultyId = Number(student.hod);
+        outpass.hstatus = 0; // Set to pending for year coordinator
+      } else {
+        console.warn(`Student ${outpass.studentId} has no year coordinator assigned`);
+      }
+    }
+    
+    await outpass.save();
+
+    return res.json({ message: `Outpass ${action}d`, outpass });
+  } catch (err) {
+    console.error("updateCstatus error:", err);
     return res.status(500).json({ message: "Server error", error: err.message });
   }
 };

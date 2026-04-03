@@ -255,7 +255,7 @@ const CounsApprovalList = () => {
             margin: "2vh 0",
           }}
         >
-          COUNSELLOR APPROVAL LIST
+          COUNSELLOR OUTPASS APPROVAL LIST
         </h1>
 
         <div

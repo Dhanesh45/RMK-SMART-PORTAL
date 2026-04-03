@@ -1,47 +1,89 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import "./SEdit.css";
-import SView from "../../../../counsellor/counselloredit/view/SView";
-import SAdd from "../../../../counsellor/counselloredit/add/SAdd";
-
-const initialStudents = [
-  {
-    id: 1,
-    name: "AKASH",
-    regNo: "111723203001",
-    email: "230329.it@rmkec.ac.in",
-  },
-  {
-    id: 2,
-    name: "HARISH",
-    regNo: "111723203002",
-    email: "harish269005@gmail.com",
-  },
-  { id: 3, name: "ABISHEK", regNo: "111723203003", email: "abishek@gmail.com" },
-  { id: 4, name: "ABINAYA", regNo: "111723203004", email: "abinaya@gmail.com" },
-];
+import SView from "../studentedit/SView.jsx";
 
 const SEdit = ({ selectedView, setSelectedView }) => {
-  const [students, setStudents] = useState(initialStudents);
+  const [students, setStudents] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [isAddOpen, setIsAddOpen] = useState(false);
+
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  const fetchStudents = async () => {
+    try {
+      const faculty = JSON.parse(localStorage.getItem("facultyData"));
+
+      console.log("Logged in faculty data:", faculty);
+
+      const f_id = faculty?.id;
+
+      console.log("Logged in YC ID:", f_id);
+
+      if (!f_id) {
+        console.error("Faculty ID not found");
+        return;
+      }
+
+      const res = await axios.get(
+        `http://localhost:5000/api/student/year-coordinator/${f_id}`,
+      );
+
+      const formatted = res.data.map((s) => ({
+        id: s.studentId,
+        name: s.studentName,
+        regNo: s.regNo,
+        email: s.studentMail,
+
+        year: s.year,
+        gender: s.gender,
+        branch: s.branch,
+        counsellor: s.counsellor,
+        yearCoordinator: s.yearCoordinator,
+        hod: s.hod,
+        section: s.section,
+        accommodation: s.accommodation,
+        parentName: s.parentName,
+        parentPhone: s.parentPhone,
+        native: s.native,
+      }));
+
+      setStudents(formatted);
+    } catch (error) {
+      console.error("❌ Error fetching students:", error);
+    }
+  };
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/student/${id}`);
+
+      setStudents((prev) => prev.filter((s) => s.id !== id));
+    } catch (error) {
+      console.error("❌ Delete failed:", error);
+    }
+  };
+  const handleSave = async (updatedStudent) => {
+    try {
+      await axios.put(
+        `http://localhost:5000/api/student/${updatedStudent.id}`,
+        updatedStudent,
+      );
+
+      setStudents((prev) =>
+        prev.map((s) => (s.id === updatedStudent.id ? updatedStudent : s)),
+      );
+
+      setSelectedStudent(null);
+    } catch (error) {
+      console.error("❌ Update failed:", error);
+    }
+  };
 
   const filtered = students.filter((s) =>
-    s.regNo.toLowerCase().includes(search.toLowerCase())
+    s.regNo.toLowerCase().includes(search.toLowerCase()),
   );
-
-  const handleDelete = (id) => {
-    setStudents(students.filter((s) => s.id !== id));
-  };
-
-  const handleSave = (updated) => {
-    setStudents(students.map((s) => (s.id === updated.id ? updated : s)));
-  };
-
-  const handleAdd = (newStudent) => {
-    const newId = students.length + 1;
-    setStudents([...students, { id: newId, ...newStudent }]);
-  };
 
   return (
     <div className="cedit-page">
@@ -54,7 +96,6 @@ const SEdit = ({ selectedView, setSelectedView }) => {
           value={selectedView}
         >
           <option value="student">Student</option>
-         
           <option value="counsellor">Counsellor</option>
         </select>
 
@@ -64,10 +105,6 @@ const SEdit = ({ selectedView, setSelectedView }) => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-
-        <button className="edit-btn" onClick={() => setIsAddOpen(true)}>
-          ADD
-        </button>
       </div>
 
       <h2 className="title">STUDENT DETAILS</h2>
@@ -101,6 +138,7 @@ const SEdit = ({ selectedView, setSelectedView }) => {
                       >
                         DELETE
                       </button>
+
                       <button
                         className="edit-btn"
                         onClick={() => setSelectedStudent(s)}
@@ -115,19 +153,11 @@ const SEdit = ({ selectedView, setSelectedView }) => {
           </div>
         </div>
       )}
-
       {selectedStudent && (
         <SView
           student={selectedStudent}
           onClose={() => setSelectedStudent(null)}
           onSave={handleSave}
-        />
-      )}
-
-      {isAddOpen && (
-        <SAdd
-          onClose={() => setIsAddOpen(false)}
-          onAdd={handleAdd}
         />
       )}
     </div>
