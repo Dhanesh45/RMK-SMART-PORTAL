@@ -1,135 +1,239 @@
 import { Button } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import OfficeStaffViewForm from "./OfficeStaffViewForm";
 
 const OfficeStaffApproval = () => {
   const [open, setOpen] = useState(false);
+
   const [selectedStudent, setSelectedStudent] = useState(null);
 
-  const students = [
-    { sno: 1, regno: 111723203001, name: "Akash", formType: "Bonafide Certificate" },
-    { sno: 2, regno: 111723203002, name: "Abishek", formType: "Bonafide Certificate" },
-    { sno: 3, regno: 111723203003, name: "Abinaya", formType: "Bonafide Certificate" },
-    { sno: 4, regno: 111723203004, name: "Adithya Baba", formType: "Bonafide Certificate" },
-    { sno: 5, regno: 111723203005, name: "Ajith", formType: "Bonafide Certificate" },
-    { sno: 6, regno: 111723203005, name: "Ajith", formType: "Bonafide Certificate" },
-    { sno: 7, regno: 111723203005, name: "Ajith", formType: "Bonafide Certificate" },
-    { sno: 8, regno: 111723203005, name: "Ajith", formType: "Bonafide Certificate" },
-  ];
+  const [students, setStudents] = useState([]);
 
+  /* FETCH DATA */
+  useEffect(() => {
+    fetchOfficeApplications();
+  }, []);
+
+  const fetchOfficeApplications = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/bonafide/office/all",
+      );
+
+      setStudents(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  /* POPUP */
   const handleOpen = (student) => {
     setSelectedStudent(student);
+
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
+
     setSelectedStudent(null);
   };
 
+  /* APPROVE */
+  const approve = async (id) => {
+
+    try {
+      await axios.put(
+        `http://localhost:5000/api/bonafide/office/approve/${id}`,
+      );
+
+      fetchOfficeApplications();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  /* REJECT */
+  const reject = async (id) => {
+    if (!window.confirm("Reject application?")) return;
+
+    try {
+      await axios.put(`http://localhost:5000/api/bonafide/office/reject/${id}`);
+
+      fetchOfficeApplications();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
-    
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "flex-start", marginTop: "1%" }}>
-        <div
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "flex-start",
+        marginTop: "1%",
+      }}
+    >
+      <div
+        style={{
+          width: "85%",
+
+          backgroundColor: "rgba(238,238,238,0.5)",
+
+          borderRadius: "1.5vh",
+
+          padding: "1%",
+
+          overflow: "hidden",
+        }}
+      >
+        <h1
           style={{
-            width: "85%",
-            backgroundColor: "rgba(238, 238, 238, 0.5)",
-            borderRadius: "1.5vh",
-            padding: "1%",
-            overflow: "hidden",
+            color: "rgba(49,72,122,1)",
+
+            fontSize: "2.5vh",
+
+            fontWeight: "bolder",
+
+            textAlign: "center",
+
+            marginBottom: "1%",
           }}
         >
-          <h1
+          APPROVAL LIST
+        </h1>
+
+        <div
+          style={{
+            width: "100%",
+
+            maxHeight: "70vh",
+
+            overflowY: "auto",
+          }}
+        >
+          <table
             style={{
-              color: "rgba(49, 72, 122, 1)",
-              fontSize: "2.5vh",
-              fontWeight: "bolder",
-              textAlign: "center",
-              marginBottom: "1%",
+              borderCollapse: "collapse",
+
+              width: "100%",
             }}
           >
-            APPROVAL LIST
-          </h1>
+            <thead>
+              <tr
+                style={{
+                  backgroundColor: "#f5f5f5",
 
-          {/* Table Container */}
-          <div style={{ width: "100%", maxHeight: "70vh", overflowY: "auto" }}>
-            <table style={{ borderCollapse: "collapse", width: "100%" }}>
-              <thead>
-                <tr style={{ backgroundColor: "#f5f5f5", position: "sticky", top: 0, zIndex: 2 }}>
-                  <th style={{ padding: "1%", fontSize: "1.9vh" }}>S.NO</th>
-                  <th style={{ padding: "1%", fontSize: "1.9vh" }}>NAME</th>
-                  <th style={{ padding: "1%", fontSize: "1.9vh" }}>REGISTER NUMBER</th>
-                  <th style={{ padding: "1%", fontSize: "1.9vh" }}>FORM TYPE</th>
-                  <th style={{ padding: "1%", fontSize: "1.9vh" }}>FORM DETAILS</th>
-                  <th style={{ padding: "1%", fontSize: "1.9vh" }}>VALIDATION</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.map((student) => (
-                  <tr key={student.sno} style={{ backgroundColor: "white", borderBottom: "1px solid #ddd" }}>
-                    <td style={{ padding: "0.8%", textAlign: "center", fontSize: "1.8vh" }}>{student.sno}</td>
-                    <td style={{ padding: "0.8%", textAlign: "center", fontSize: "1.8vh" }}>{student.name}</td>
-                    <td style={{ padding: "0.8%", textAlign: "center", fontSize: "1.8vh" }}>{student.regno}</td>
-                    <td style={{ padding: "0.8%", textAlign: "center", fontSize: "1.8vh" }}>{student.formType}</td>
-                    <td style={{ padding: "0.8%", textAlign: "center" }}>
+                  position: "sticky",
+
+                  top: 0,
+
+                  zIndex: 2,
+                }}
+              >
+                <th style={{ padding: "1%" }}>S.NO</th>
+
+                <th style={{ padding: "1%" }}>NAME</th>
+
+                <th style={{ padding: "1%" }}>REGISTER NUMBER</th>
+
+                <th style={{ padding: "1%" }}>FORM TYPE</th>
+
+                <th style={{ padding: "1%" }}>FORM DETAILS</th>
+
+                <th style={{ padding: "1%" }}>VALIDATION</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {students.map((student, index) => (
+                <tr
+                  key={student.ap_id}
+                  style={{
+                    backgroundColor: "white",
+                    borderBottom: "1px solid #ddd",
+                  }}
+                >
+                  <td style={{ textAlign: "center" }}>{index + 1}</td>
+
+                  <td style={{ textAlign: "center" }}>
+                    {student.student?.studentName}
+                  </td>
+
+                  <td style={{ textAlign: "center" }}>
+                    {student.student?.regNo}
+                  </td>
+
+                  <td style={{ textAlign: "center" }}>Bonafide Certificate</td>
+
+                  <td style={{ textAlign: "center" }}>
+                    <Button
+                      variant="contained"
+                      onClick={() => handleOpen(student)}
+                      sx={{
+                        backgroundColor: "rgba(49,72,122,1)",
+
+                        textTransform: "none",
+                      }}
+                    >
+                      VIEW FORM
+                    </Button>
+                  </td>
+
+                  <td style={{ textAlign: "center" }}>
+                    <div
+                      style={{
+                        display: "flex",
+
+                        justifyContent: "center",
+
+                        gap: "10px",
+                      }}
+                    >
                       <Button
                         variant="contained"
-                        size="medium"
-                        onClick={() => handleOpen(student)}
-                        sx={{
-                          backgroundColor: "rgba(49, 72, 122, 1)",
-                          fontSize: "1.6vh",
-                          borderRadius: "1vh",
+                        onClick={() => approve(student.ap_id)}
+                        style={{
+                          backgroundColor: "#1E2E4F",
+
+                          color: "white",
+
                           textTransform: "none",
-                          padding: "0.4vh 1.5vh",
                         }}
                       >
-                        VIEW FORM
+                        Approve
                       </Button>
-                    </td>
-                    <td style={{ padding: "0.8%", textAlign: "center" }}>
-                      <div style={{ display: "flex", justifyContent: "center", gap: "10%" }}>
-                        <Button
-                          variant="contained"
-                          size="medium"
-                          style={{
-                            backgroundColor: "#1E2E4F",
-                            color: "white",
-                            textTransform: "none",
-                            fontSize: "1.6vh",
-                            borderRadius: "1vh",
-                            padding: "0.4vh 1.5vh",
-                          }}
-                        >
-                          Approve
-                        </Button>
-                        <Button
-                          variant="contained"
-                          size="medium"
-                          style={{
-                            backgroundColor: "red",
-                            color: "white",
-                            textTransform: "none",
-                            fontSize: "1.6vh",
-                            borderRadius: "1vh",
-                            padding: "0.4vh 1.5vh",
-                          }}
-                        >
-                          Reject
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
 
-          {/* Popup Dialog */}
-          <OfficeStaffViewForm open={open} handleClose={handleClose} student={selectedStudent} />
+                      <Button
+                        variant="contained"
+                        onClick={() => reject(student.ap_id)}
+                        style={{
+                          backgroundColor: "red",
+
+                          color: "white",
+
+                          textTransform: "none",
+                        }}
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+
+        <OfficeStaffViewForm
+          open={open}
+          handleClose={handleClose}
+          student={selectedStudent}
+        />
       </div>
-    
+    </div>
   );
 };
 

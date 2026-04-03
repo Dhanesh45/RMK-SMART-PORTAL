@@ -87,7 +87,12 @@ const Outpass = sequelize.define(
       field: "Reason for leave",
     },
     parentsPermission: {
-      type: DataTypes.ENUM("Yes", "No"),
+      type: DataTypes.ENUM(
+        "OBTAINED_OVER_PHONE",
+        "HAS_COME_IN_PERSON",
+        "NOT_PERMITTED"
+      ),
+      allowNull: true,
       field: "Parents permission",
     },
     remarks: {

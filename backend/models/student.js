@@ -1,7 +1,7 @@
 // models/student.js
 const { DataTypes } = require("sequelize");
 const sequelize = require("../db");
-
+const Faculty = require("./faculty");
 const Student = sequelize.define(
   "student",
   {
@@ -92,6 +92,10 @@ hod: {
     timestamps: false,
   }
 );
-
+// 🔥 Year Coordinator association
+Student.belongsTo(Faculty, {
+  foreignKey: "yearCoordinator",
+  as: "YearCoordinator",
+});
 
 module.exports = Student;

@@ -64,7 +64,7 @@ app.use("/api/faculty", facultyRoute);
     await sequelize.authenticate();
     console.log("✅ MySQL connected successfully!");
 
-    await sequelize.sync({ alter:true});
+    await sequelize.sync();
     console.log("✅ All models synchronized successfully.");
   } catch (error) {
     console.error("❌ DB connection error:", error.message);

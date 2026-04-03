@@ -57,7 +57,7 @@ const DayscholarOutpass = ({ regNo: passedRegNo }) => {
     }
 
     // 2. Validate form fields
-    if (!form.reason || !form.fromDate || !form.leavingTime || !form.parentPermission) {
+    if (!form.reason || !form.fromDate || !form.leavingTime) {
       alert("❌ Please fill all required fields!");
       return;
     }
@@ -66,7 +66,7 @@ const DayscholarOutpass = ({ regNo: passedRegNo }) => {
       // 3. Send request to backend
       await axios.post("http://localhost:5000/api/dayscholarOutpass/create", {
         regNo,
-        ...form, // maps to "Parent Permission"
+        ...form, // ✅ only reason, fromDate, toDate, leavingTime
       });
 
       alert("✅ Day Scholar Outpass submitted!");
@@ -77,8 +77,8 @@ const DayscholarOutpass = ({ regNo: passedRegNo }) => {
         fromDate: "",
         toDate: "",
         leavingTime: "",
-        parentPermission: "",
       });
+
     } catch (err) {
       console.error("❌ Failed to submit outpass:", err);
       alert("❌ Failed to submit outpass. Check console for details.");
@@ -191,19 +191,6 @@ const DayscholarOutpass = ({ regNo: passedRegNo }) => {
                     onChange={(e) => setForm({ ...form, leavingTime: e.target.value })}
                   />
                 </div>
-              </div>
-
-              <div style={{ width: "95%" }}>
-                <label>PARENTS PERMISSION (Yes/No)</label>
-                <select
-                  style={inputStyle}
-                  value={form.parentPermission}
-                  onChange={(e) => setForm({ ...form, parentPermission: e.target.value })}
-                >
-                  <option value="">Select Permission</option>
-                  <option value="Yes">Yes</option>
-                  <option value="No">No</option>
-                </select>
               </div>
 
               {/* Submit button */}
