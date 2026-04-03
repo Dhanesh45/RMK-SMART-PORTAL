@@ -17,8 +17,12 @@ const OfficeStaffGenerate = () => {
       "http://localhost:5000/api/bonafide/generate/all",
     );
 
-    setStudents(res.data);
-  };
+   const filteredData = res.data.filter(
+    (item) => item.osstatus === 1
+  );
+
+  setStudents(filteredData);
+};
 
   useEffect(() => {
     getApplications();
@@ -124,17 +128,38 @@ const OfficeStaffGenerate = () => {
                 </td>
 
                 <td style={{ padding: "10px" }}>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    sx={{
-                      bgcolor: "#1E2E4F",
-                      borderRadius: "6px",
-                      width: "110px",
-                    }}
-                  >
-                    GENERATE
-                  </Button>
+                 <Button
+  variant="contained"
+  size="small"
+  sx={{
+    bgcolor: "#1E2E4F",
+    borderRadius: "6px",
+    width: "110px",
+  }}
+  onClick={async () => {
+  try {
+    await axios.post(
+      "http://localhost:5000/api/bonafide/generate/send-mail",
+      {
+        ap_id: student.ap_id,
+      }
+    );
+
+    alert("Mail Sent Successfully");
+
+    // ✅ REMOVE ROW INSTANTLY
+    setStudents((prev) =>
+      prev.filter((item) => item.ap_id !== student.ap_id)
+    );
+
+  } catch (err) {
+    console.log(err);
+    alert("Error sending mail");
+  }
+}}
+>
+  GENERATE
+</Button>
                 </td>
               </tr>
             ))}

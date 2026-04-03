@@ -22,6 +22,7 @@ const bonafideRoute = require("./route/BonafideRoute");
 const odRoute = require("./route/odRoute.js");
 const dayscholarODRoute = require("./route/dayscholarOdRoute");
 const facultyRoute = require("./route/facultyRoute");
+const officeStaffRoute = require("./route/officeStaffRoute");
 
 
 
@@ -56,6 +57,7 @@ app.use("/api/bonafide", bonafideRoute);
 app.use("/api/od", odRoute);
 app.use("/api/dayscholar-od", dayscholarODRoute);
 app.use("/api/faculty", facultyRoute);
+app.use("/api/officestaff", officeStaffRoute);
 
 app.use("/api/faculty", facultyRoute);
 // ✅ Database connection + sync
