@@ -21,7 +21,7 @@ const getStudentByRegNo = async (req, res) => {
 const createDayScholarOutpass = async (req, res) => {
   try {
     // Destructure all needed fields from the request body
-    const { regNo, reason, fromDate, toDate, leavingTime, parentPermission } =
+    const { regNo, reason, fromDate, toDate, leavingTime } =
       req.body;
 
     const student = await Student.findOne({ where: { regNo } });
@@ -60,8 +60,7 @@ const createDayScholarOutpass = async (req, res) => {
       fromDate: fromDate, // FIX: Maps from 'fromDate' (req.body) to 'date' (model property)
       toDate: toDate,
       leavingTime: leavingTime, // FIX: Maps from 'leavingTime' (req.body) to 'time' (model property)
-      parentPermission: parentPermission, // Maps to "Parent Permission" DB column
-
+      parentPermission: null, // or pending
       // 3. Auto-filled/Redundant student details (only include columns that exist in the dayscholars_outpass table)
       parentName: student.parentName, // This field exists in your DayscholarsOutpass model
       parentNumber: student.parentPhone, // This field exists in your DayscholarsOutpass model
@@ -96,10 +95,20 @@ const getOutpassesForCounsellor = async (req, res) => {
     if (status !== undefined) where.cstatus = Number(status);
 
     const outpasses = await DayscholarsOutpass.findAll({
-      where:{
+      where: {
         facultyId: Number(facultyId),
-        cstatus:0,
+        cstatus: 0,
       },
+      include: [
+        {
+          model: Student,
+          attributes: ["studentName", "regNo", "section", "year", "branch"],
+        },
+        {
+          model: Faculty,
+          attributes: ["faculty_name"],
+        },
+      ],
       order: [["dateOfApplication", "DESC"]],
     });
 
@@ -114,23 +123,45 @@ const getOutpassesForCounsellor = async (req, res) => {
 const updateCstatus = async (req, res) => {
   try {
     const { dayscholaroutpassId } = req.params;
-    const { action } = req.body;
+    const { action, updatedData } = req.body;
 
     if (!["approve", "reject"].includes(action))
       return res.status(400).json({ message: "Invalid action" });
 
     const outpass = await DayScholarOutpass.findByPk(dayscholaroutpassId);
-    if (!outpass) return res.status(404).json({ message: "Outpass not found" });
+    if (!outpass)
+      return res.status(404).json({ message: "Outpass not found" });
 
+    // ✅ Status update
     outpass.cstatus = action === "approve" ? 1 : -1;
+
+    // ✅ NEW: update parentPermission + remarks
+    if (updatedData) {
+      const validPermissions = [
+        "OBTAINED_OVER_PHONE",
+        "HAS_COME_IN_PERSON",
+        "NOT_PERMITTED",
+      ];
+
+      if (
+        updatedData.parentPermission &&
+        validPermissions.includes(updatedData.parentPermission)
+      ) {
+        outpass.parentPermission = updatedData.parentPermission;
+      }
+
+      outpass.remarks = updatedData.remarks || null;
+    }
+
     await outpass.save();
 
     return res.json({ message: `Outpass ${action}d`, outpass });
   } catch (err) {
     console.error("updateCstatus error:", err);
-    return res
-      .status(500)
-      .json({ message: "Server error", error: err.message });
+    return res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
   }
 };
 const getOutpassesForStudent = async (req, res) => {
