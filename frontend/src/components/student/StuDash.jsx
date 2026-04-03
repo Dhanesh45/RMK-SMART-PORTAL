@@ -14,7 +14,7 @@ const StuDash = () => {
   const location = useLocation();
   const regNo = location.state?.regNo || "";
   const rawAccommodation = location.state?.accommodation || "";
-  const accommodation = rawAccommodation.toLowerCase();
+ const accommodation = rawAccommodation.toLowerCase();
  
   return (
     <div style={{ width: "100%", height: "100vh" }}>

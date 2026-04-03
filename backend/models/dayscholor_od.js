@@ -40,6 +40,7 @@ const DayscholarOD = sequelize.define(
       allowNull: true,
       field: "Register number",
     },
+    
     purpose: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -84,6 +85,8 @@ const DayscholarOD = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+
+ 
     hstatus: {
       type: DataTypes.INTEGER,
       allowNull: true,
