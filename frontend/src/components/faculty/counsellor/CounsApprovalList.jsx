@@ -381,20 +381,25 @@ const CounsApprovalList = () => {
             </button>
 
             {selectedStudent.type === "DAYSCHOLAR" ? (
-              <DayScholarForm
-                data={selectedStudent.data}
-                setSelectedStudent={setSelectedStudent}
-                student={selectedStudent}
-                handleApprove={handleApprove}
-                handleReject={handleReject}
-                closePopup={closePopup}
-              />
-            ) : (
-              <HostellerForm
-                data={selectedStudent.data}
-                setSelectedStudent={setSelectedStudent}
-              />
-            )}
+  <DayScholarForm
+    data={selectedStudent.data}
+    setSelectedStudent={setSelectedStudent}
+    student={selectedStudent}
+    handleApprove={handleApprove}
+    handleReject={handleReject}
+    closePopup={closePopup}
+  />
+) : (
+  <CounsOutPass
+    data={selectedStudent.data}
+    student={selectedStudent}
+    handleApprove={handleApprove}
+    handleReject={handleReject}
+    validateStudentData={validateStudentData}
+    closePopup={closePopup}
+    setSelectedStudent={setSelectedStudent} 
+  />
+)}
             <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "20px" }}>
 
               <button

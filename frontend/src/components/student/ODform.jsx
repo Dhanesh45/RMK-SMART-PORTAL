@@ -366,23 +366,55 @@ const ODform = ({ regNo: passedRegNo }) => {
                 }}
               />
 
-              {/* PROOF UPLOAD — UNTOUCHED */}
-              <label
-                style={{
-                  fontSize: "2vh",
-                  display: "block",
-                  marginBottom: "1%",
-                }}
-              >
-                UPLOAD PROOF (IMAGE/PDF)
-              </label>
-              <input
-                type="file"
-                id="proofUpload"
-                accept="image/*,.pdf"
-                onChange={handleFileChange}
-                style={{ display: "none" }}
-              />
+              {/* Upload Proof */}
+          <label style={{ fontSize: "2vh", display: "block", marginBottom: "1%" }}>
+              UPLOAD PROOF (IMAGE/PDF)
+            </label>
+            <input
+              type="file"
+              id="proofUpload"
+              accept="image/*,.pdf"
+              onChange={handleFileChange}
+              style={{ display: "none" }}
+            />
+            <label
+              htmlFor="proofUpload"
+              style={{
+                display: "inline-block",
+                padding: "2% 4%",
+                backgroundColor: "#0d3b66",
+                color: "white",
+                borderRadius: "5vh",
+                cursor: "pointer",
+                fontWeight: "bold",
+                boxShadow: "0px 4px 8px rgba(0,0,0,0.2)",
+              }}
+            >
+              Upload Proof
+            </label>
+
+             {/* Inline Preview */}
+             {proof && (
+              <span>
+                {proof.type === "image" ? (
+                  <img
+                    src={proof.url}
+                    alt="Preview"
+                    style={{
+                      height: "10%",
+                      width: "auto",
+                      borderRadius: "2vh",
+                      border: "1px solid #ccc",
+                      verticalAlign: "middle",
+                    }}
+                  />
+                ) : (
+                  <span style={{ color: "green", fontWeight: "bold" }}>
+                    ✅ {proof.name}
+                  </span>
+                )}
+              </span>
+            )}
             </div>
           </div>
 

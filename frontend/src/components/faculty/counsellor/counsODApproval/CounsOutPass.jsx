@@ -7,18 +7,35 @@ const inputStyle = {
   border: "1px solid #ccc",
 };
 
-const CounsOutPass = () => {
+const CounsOutPass = ({
+  data,
+  student,
+  handleApprove,
+  handleReject,
+  validateStudentData,
+  closePopup,
+  setSelectedStudent
+}) => {
+  console.log("OUTPASS POPUP DATA 👉", data);
+  console.log("STUDENT DATA 👉", data?.Student);
   // const [permission, setPermission] = useState("");
 
   return (
-    <div style={{ height: "100vh", width: "100%",padding:"3% 3% 4% 3%" }}>
+    <div
+      style={{
+        height: "100%",
+        width: "100%",
+        padding: "3% 3% 4% 3%",
+        overflowY: "auto",   // ✅ ADD THIS
+      }}
+    >
 
 
       <div
         style={{
           width: "100%",
           height: "7%",
-          fontSize:"3vh",
+          fontSize: "3vh",
           textAlign: "center",
           fontWeight: "bold",
           marginBottom: "1%",
@@ -37,119 +54,304 @@ const CounsOutPass = () => {
         {/* Row 1 */}
         <div style={{ width: "95%" }}>
           <label>NAME</label>
-          <input type="text" style={inputStyle} />
+          <input type="text" style={inputStyle}
+            value={data?.studentName || ""} readOnly />
         </div>
         <div style={{ display: "flex", gap: "30px" }}>
           <div style={{ flex: 1 }}>
             <label>YEAR</label>
-            <input type="text" list="year-options" style={inputStyle} />
-            <datalist id="year-options">
-              <option value="1" />
-              <option value="2" />
-              <option value="3" />
-              <option value="4" />
-            </datalist>
+            <input
+              type="text"
+              style={inputStyle}
+              value={data?.year || data?.Student?.year || ""}
+              readOnly
+            />
           </div>
           <div style={{ flex: 1 }}>
             <label>SECTION</label>
-            <input type="text" style={inputStyle} />
+            <input
+              type="text"
+              style={inputStyle}
+              value={data?.student?.section || ""}
+              readOnly
+            />
           </div>
           <div style={{ flex: 1 }}>
             <label>GENDER</label>
-            <input type="text" list="gender-options" style={inputStyle} />
-            <datalist id="gender-options">
-              <option value="Male" />
-              <option value="Female" />
-              <option value="Prefer not to say" />
-            </datalist>
+            <input
+              type="text"
+              style={inputStyle}
+              value={data?.student?.gender || ""}
+              readOnly
+            />
           </div>
         </div>
 
         {/* Row 2 */}
         <div style={{ width: "95%" }}>
           <label>REGISTRATION NUMBER</label>
-          <input type="text" style={inputStyle} />
+          <input
+            type="text"
+            style={inputStyle}
+            value={data?.regNo || ""}
+            readOnly
+          />
         </div>
         <div>
           <label>COUNSELLOR</label>
-          <input type="text" list="counsellor-options" style={inputStyle} />
-          <datalist id="counsellor-options">
-            {Array.from({ length: 18 }, (_, i) => (
-              <option key={i} value={`Counsellor ${i + 1}`} />
-            ))}
-          </datalist>
+          <input
+            type="text"
+            style={inputStyle}
+            value={data?.student?.counsellor || ""}
+            readOnly
+          />
+
         </div>
 
         {/* Row 3 */}
         <div style={{ width: "95%" }}>
           <label>EMAIL ADDRESS</label>
-          <input type="email" style={inputStyle} />
+          <input
+            type="text"
+            style={inputStyle}
+            value={data?.student?.studentMail || ""}
+            readOnly
+          />
         </div>
         <div>
           <label>YEAR COORDINATOR</label>
-          <input type="text" list="coordinator-options" style={inputStyle} />
-          <datalist id="coordinator-options">
-            <option value="Dr. Smith" />
-            <option value="Prof. Johnson" />
-            <option value="Ms. Lee" />
-          </datalist>
+          <input type="text" list="coordinator-options" style={inputStyle}
+            value={data?.student?.yearCoordinator || ""} readOnly />
         </div>
 
         {/* Row 4 */}
         <div style={{ width: "95%" }}>
           <label>BRANCH</label>
-          <input type="text" style={inputStyle} />
+          <input
+            type="text"
+            style={inputStyle}
+            value={data?.branch || ""}
+            readOnly
+          />
         </div>
         <div style={{ display: "flex", gap: "30px" }}>
           <div style={{ flex: 1 }}>
             <label>NO.OF.DAYS</label>
-            <input type="text" style={inputStyle} />
+            <input
+              type="text"
+              style={inputStyle}
+              value={data?.noOfDays || ""}
+              readOnly
+            />
           </div>
           <div style={{ flex: 1 }}>
             <label>FROM DATE</label>
-            <input type="date" style={inputStyle} />
+            <input
+              type="date"
+              style={inputStyle}
+              value={data?.fromDate?.split("T")[0] || ""}
+              readOnly
+            />
           </div>
           <div style={{ flex: 1 }}>
             <label>TO DATE</label>
-            <input type="date" style={inputStyle} />
+            <input
+              type="date"
+              style={inputStyle}
+              value={data?.toDate?.split("T")[0] || ""}
+              readOnly
+            />
           </div>
         </div>
 
         {/* Row 5 */}
         <div style={{ width: "95%" }}>
           <label>NAME OF THE PARENT</label>
-          <input type="text" style={inputStyle} />
+          <input
+            type="text"
+            style={inputStyle}
+            value={data?.parentName || ""}
+            readOnly
+          />
         </div>
         <div style={{ display: "flex", gap: "30px" }}>
           <div style={{ flex: 1 }}>
             <label>ROOM NO</label>
-            <input type="text" style={inputStyle} />
+            <input
+              type="text"
+              style={inputStyle}
+              value={data?.roomNumber || ""}
+              readOnly
+            />
           </div>
           <div style={{ flex: 1 }}>
             <label>LEAVING DATE</label>
-            <input type="date" style={inputStyle} />
+            <input
+              type="date"
+              style={inputStyle}
+              value={data?.leavingDate?.split("T")[0] || ""}
+              readOnly
+            />
           </div>
           <div style={{ flex: 1 }}>
             <label>LEAVING TIME</label>
-            <input type="time" style={inputStyle} />
+            <input
+              type="time"
+              style={inputStyle}
+              value={data?.leavingTime || ""}
+              readOnly
+            />
           </div>
         </div>
 
         {/* Row 6 */}
         <div style={{ width: "95%" }}>
           <label>NATIVE</label>
-          <input type="text" style={inputStyle} />
+          <input
+            type="text"
+            style={inputStyle}
+            value={data?.student?.native || ""}   // ✅ CORRECT
+            readOnly
+          />
         </div>
         <div>
           <label>REASON FOR LEAVE</label>
-          <input type="text" style={inputStyle} />
+          <input
+            type="text"
+            style={inputStyle}
+            value={data?.reasonForLeave || ""}
+            readOnly
+          />
         </div>
 
         {/* Row 7 */}
         <div style={{ width: "95%" }}>
           <label>PARENT'S MOBILE NO</label>
-          <input type="text" style={inputStyle} />
+          <input
+            type="text"
+            style={inputStyle}
+            value={data?.parentPhone || ""}
+            readOnly
+          />
         </div>
+        {/* Row 8 */}
+        <input
+          type="text"
+          style={inputStyle}
+          value={data?.remarks || ""}
+          onChange={(e) =>
+            setSelectedStudent((prev) => ({
+              ...prev,
+              data: { ...prev.data, remarks: e.target.value },
+            }))
+          }
+        />
+        <div>
+          <label>PARENT PERMISSION</label>
+
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="parentPermission"
+                value="OBTAINED_OVER_PHONE"
+                checked={data?.parentsPermission === "OBTAINED_OVER_PHONE"}
+                onChange={(e) =>
+                  setSelectedStudent((prev) => ({
+                    ...prev,
+                    data: {
+                      ...prev.data,
+                      parentsPermission: e.target.value,
+                    },
+                  }))
+                }
+              />
+              Obtained Over Phone
+            </label>
+
+            <br />
+
+            <label>
+              <input
+                type="radio"
+                name="parentPermission"
+                value="HAS_COME_IN_PERSON"
+                checked={data?.parentsPermission === "HAS_COME_IN_PERSON"}
+                onChange={(e) =>
+                  setSelectedStudent((prev) => ({
+                    ...prev,
+                    data: {
+                      ...prev.data,
+                      parentsPermission: e.target.value,
+                    },
+                  }))
+                }
+              />
+              Has Come in Person
+            </label>
+
+            <br />
+
+            <label>
+              <input
+                type="radio"
+                name="parentPermission"
+                value="NOT_PERMITTED"
+                checked={data?.parentsPermission === "NOT_PERMITTED"}
+                onChange={(e) =>
+                  setSelectedStudent((prev) => ({
+                    ...prev,
+                    data: {
+                      ...prev.data,
+                      parentsPermission: e.target.value,
+                    },
+                  }))
+                }
+              />
+              Not Permitted
+            </label>
+          </div>
+        </div>
+
+      </div>
+      {/* APPROVE / REJECT BUTTONS */}
+      <div style={{ marginTop: "20px", textAlign: "right" }}>
+        <button
+          style={{
+            padding: "8px 15px",
+            backgroundColor: "#3b4b75",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            marginRight: "10px",
+            cursor: "pointer"
+          }}
+          onClick={() => {
+            if (validateStudentData(student)) {
+              handleApprove(student);
+              closePopup();
+            }
+          }}
+        >
+          APPROVE
+        </button>
+
+        <button
+          style={{
+            padding: "8px 15px",
+            backgroundColor: "#d9534f",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer"
+          }}
+          onClick={() => {
+            handleReject(student);
+            closePopup();
+          }}
+        >
+          REJECT
+        </button>
       </div>
     </div>
   );

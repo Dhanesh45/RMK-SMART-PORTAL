@@ -7,6 +7,7 @@ const {
   getODoutpassforCounsellor,
   updateCstatushosod,
   updateCstatusOdOut,
+  getFullODDetails,
 } = require("../controller/odController");
 
 /**
@@ -49,5 +50,12 @@ router.put("/approve/od/:od_id", updateCstatushosod);
  * body: { action: "approve" | "reject" }
  */
 router.put("/approve/outpass/:outpassId", updateCstatusOdOut);
+
+/**
+ * ===============================
+ * GET FULL OD DETAILS
+ * ===============================
+ */
+router.get("/details/:od_id", getFullODDetails);
 
 module.exports = router;

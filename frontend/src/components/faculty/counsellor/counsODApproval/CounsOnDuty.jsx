@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const CounsOnDuty = ({ isPopup = false }) => {
+const CounsOnDuty = ({ isPopup = false, data }) => {
   const [proof, setProof] = useState(null);
 
   const handleFileChange = (e) => {
@@ -52,58 +52,91 @@ const CounsOnDuty = ({ isPopup = false }) => {
         {/* Left Column */}
         <div style={{ flex: 1, minWidth: "45%" }}>
           <label style={{ fontSize: "2vh" }}>NAME OF THE STUDENT</label>
-          <input type="text" style={inputStyle} />
+          <input
+  type="text"
+  style={inputStyle}
+  value={data?.studentName || ""}
+   disabled
+/>
 
           <label style={{ fontSize: "2vh" }}>DEPARTMENT</label>
-          <input type="text" style={inputStyle} />
+          <input
+  type="text"
+  style={inputStyle}
+  value={data?.Outpass?.branch || data?.Student?.branch || ""}
+   disabled
+/>
 
           <label style={{ fontSize: "2vh" }}>REGISTER NUMBER</label>
-          <input type="text" style={inputStyle} />
+          <input
+  type="text"
+  style={inputStyle}
+  value={data?.regNo || ""}
+   disabled
+/>
 
           <label style={{ fontSize: "2vh" }}>PURPOSE OF OD</label>
-          <select style={inputStyle}>
-            <option value="">SELECT</option>
-            <option value="Competition">COMPETITION</option>
-            <option value="Workshop">WORKSHOP</option>
-            <option value="Others">OTHERS</option>
-          </select>
+          <input type="text" style={inputStyle} value={data?.purpose || ""}
+             disabled
+          />
 
           <label style={{ fontSize: "2vh" }}>NUMBER OF DAYS</label>
-          <input type="number" style={inputStyle} />
+          <input
+  type="number"
+  style={inputStyle}
+  value={data?.numberOfDays ?? ""}
+   disabled
+/>
 
           <label style={{ fontSize: "2vh" }}>NAME OF THE COLLEGE</label>
-          <input type="text" style={inputStyle} />
+          <input
+  type="text"
+  style={inputStyle}
+  value={data?.collegeName || ""}
+   disabled
+/>
 
           <label style={{ fontSize: "2vh" }}>NAME OF THE EVENT</label>
-          <input type="text" style={inputStyle} />
+          <input
+  type="text"
+  style={inputStyle}
+  value={data?.eventName || ""}
+   disabled
+/>
         </div>
 
         {/* Right Column */}
         <div style={{ flex: 1, minWidth: "45%" }}>
           <label style={{ fontSize: "2vh" }}>DATE OF COMPETITION</label>
-          <input type="date" style={inputStyle} />
+          <input
+  type="date"
+  style={inputStyle}
+  value={data?.date ? data.date.split("T")[0] : ""}
+   disabled
+/>
 
           <div style={{ display: "flex", gap: "4%", marginBottom: "3%", flexWrap: "wrap" }}>
             <div style={{ flex: 1, minWidth: "45%" }}>
               <label style={{ fontSize: "2vh" }}>FROM DATE</label>
-              <input type="date" style={{ ...inputStyle, padding: "4%" }} />
+              <input type="date" style={{ ...inputStyle, padding: "4%" }}
+              value={data?.fromDate ? data.fromDate.split("T")[0] : ""}  disabled />
             </div>
             <div style={{ flex: 1, minWidth: "45%" }}>
               <label style={{ fontSize: "2vh" }}>TO DATE</label>
-              <input type="date" style={{ ...inputStyle, padding: "4%" }} />
+              <input type="date" style={{ ...inputStyle, padding: "4%" }} 
+              value={data?.toDate ? data.toDate.split("T")[0] : ""} disabled/>
             </div>
           </div>
 
           <label style={{ fontSize: "2vh" }}>PLACE OF COMPETITION</label>
-          <input type="text" style={inputStyle} />
+          <input
+  type="text"
+  style={inputStyle}
+  value={data?.place || ""}
+   disabled
+/>  
 
-          <label style={{ fontSize: "2vh" }}>
-            NUMBER OF DAYS OD ALREADY AVAILED (TILL DATE IN CURRENT SEMESTER)
-          </label>
-          <input type="number" style={inputStyle} />
-
-          <label style={{ fontSize: "2vh" }}>COMMENTS BY COUNSELLOR</label>
-          <input type="text" style={inputStyle} />
+          
 
           {/* Upload Proof */}
           <label style={{ fontSize: "2vh", display: "block", marginBottom: "1%" }}>

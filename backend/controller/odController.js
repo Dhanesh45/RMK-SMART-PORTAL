@@ -100,18 +100,20 @@ const getHostellerODForCounsellor = async (req, res) => {
     if (!facultyId)
       return res.status(400).json({ message: "facultyId is required" });
 
-    const where = { facultyId: Number(facultyId) };
-    if (status !== undefined) where.cstatus = Number(status);
-
-    const ODhosteller = await ODForm.findAll({
-       where:{
+    const data = await ODForm.findAll({
+      where: {
         facultyId: Number(facultyId),
-        cstatus:0,
+        cstatus: 0,
       },
+      include: [
+        {
+          model: Outpass, // 🔥 THIS IS THE FIX (JOIN)
+        },
+      ],
       order: [["date", "DESC"]],
     });
 
-    return res.json({ ODhosteller });
+    return res.json({ data });
   } catch (err) {
     console.error("getHostellerODForCounsellor error:", err);
     return res
@@ -127,16 +129,30 @@ const getODoutpassforCounsellor = async (req, res) => {
     if (!facultyId)
       return res.status(400).json({ message: "facultyId is required" });
 
-    const where = { facultyId: Number(facultyId) };
     if (status !== undefined) where.cstatus = Number(status);
 
     const outpasswithod = await Outpass.findAll({
-      where:{
-        facultyId: Number(facultyId),
-        cstatus:0,
-      },
-     order: [["dateOfApplication", "DESC"]],
-    });
+  where: {
+    facultyId: Number(facultyId),
+    cstatus: 0,
+  },
+  include: [
+    {
+      model: Student,
+      attributes: [
+        "studentName",
+        "regNo",
+        "year",
+        "branch",
+        "section",
+        "gender",
+        "email",
+        "counsellor",
+      ],
+    },
+  ],
+  order: [["dateOfApplication", "DESC"]],
+});
 
     return res.json({ outpasswithod });
   } catch (err) {
@@ -225,8 +241,48 @@ const updateCstatusOdOut = async (req, res) => {
   }
 };
 
-module.exports = { createODWithOutpass, 
+const getFullODDetails = async (req, res) => {
+  try {
+    const { od_id } = req.params;
+
+    const od = await ODForm.findOne({
+      where: { od_id },
+      include: [
+  {
+    model: Outpass,
+    include: [
+      { model: require("../models/student") } // ✅ ADD THIS
+    ],
+  },
+  { model: require("../models/student") },
+],
+    });
+
+    if (!od) {
+      return res.status(404).json({ message: "OD not found" });
+    }
+
+    // 🔥 FIX: manually merge student data into Outpass
+    const response = {
+      ...od.toJSON(),
+      Outpass: {
+        ...od.Outpass?.toJSON(),
+        Student: od.Student || null,   // ✅ inject Student here
+      },
+    };
+
+    return res.json(response);
+
+  } catch (err) {
+    console.error("getFullODDetails error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+module.exports = { 
+  createODWithOutpass, 
   getHostellerODForCounsellor, 
   getODoutpassforCounsellor, 
   updateCstatushosod,
-   updateCstatusOdOut }; 
+  updateCstatusOdOut,
+  getFullODDetails // ✅ ADD THIS
+};

@@ -7,7 +7,7 @@ const CounsellorODApproval = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [activeForm, setActiveForm] = useState("");
   const [students, setStudents] = useState([]);
-
+  const [selectedStudent, setSelectedStudent] = useState(null);
   useEffect(() => {
     const fetchCounsellorOD = async () => {
       try {
@@ -21,19 +21,19 @@ const CounsellorODApproval = () => {
         const facultyId = facultyRes.data.f_id;
 
         // 🔹 fetch hosteller OD
-        const hostellerRes = await axios.get(
-          `http://localhost:5000/api/od/counsellor/${facultyId}`
-        );
+       const res = await axios.get(
+  `http://localhost:5000/api/od/counsellor/${facultyId}`
+);
 
-        const hostellerMapped = hostellerRes.data.ODhosteller.map(
-          (od, index) => ({
-            sno: index + 1,
-            nof: od.regNo,
-            name: od.studentName || "—",
-            od_id: od.od_id,
-            type: "HOSTELLER",
-          })
-        );
+        const mapped = res.data.data.map((item, index) => ({
+  sno: index + 1,
+  name: item.studentName,
+  nof: item.regNo,
+  od_id: item.od_id,
+  odData: item,
+  outpassData: item.Outpass,
+  type: "HOSTELLER",
+}));
 
         // 🔹 fetch dayscholar OD
         const dayscholarRes = await axios.get(
@@ -42,7 +42,7 @@ const CounsellorODApproval = () => {
 
         const dayscholarMapped = dayscholarRes.data.ODdayscholar.map(
           (od, index) => ({
-            sno: hostellerMapped.length + index + 1,
+            sno: mapped.length + index + 1,
             nof: od.regNo,
             name: od.studentName || "—",
             od_id: od.od_id,
@@ -50,7 +50,7 @@ const CounsellorODApproval = () => {
           })
         );
 
-        setStudents([...hostellerMapped, ...dayscholarMapped]);
+        setStudents([...mapped, ...dayscholarMapped]);
       } catch (err) {
         console.error("Error fetching counsellor OD list", err);
       }
@@ -127,12 +127,45 @@ const handleApproveAll = async () => {
                 <div style={cardCell}>{student.name}</div>
                 <div style={cardCell}>{student.nof}</div>
                 <div style={cardCell}>
-                  <button style={formBtn} onClick={() => { setShowPopup(true); setActiveForm("outpass"); }}>
+                  <button style={formBtn} onClick={async () => {
+  const res = await axios.get(
+    `http://localhost:5000/api/od/details/${student.od_id}`
+  );
+  console.log("ONDUTY API DATA 👉", res.data);
+
+  setSelectedStudent({
+  ...student,
+  odData: res.data,
+  outpassData: {
+    ...res.data.Outpass,
+    Student: res.data.Student, // ✅ ensure always available
+  },
+});
+
+  setShowPopup(true);
+  setActiveForm("outpass");
+}}>
                     OUTPASS
                   </button>
                 </div>
                 <div style={cardCell}>
-                  <button style={formBtn} onClick={() => { setShowPopup(true); setActiveForm("onduty"); }}>
+                  <button style={formBtn}onClick={async () => {
+  const res = await axios.get(
+    `http://localhost:5000/api/od/details/${student.od_id}`
+  );
+
+  setSelectedStudent({
+  ...student,
+  odData: res.data,
+  outpassData: {
+    ...res.data.Outpass,
+    Student: res.data.Student, // ✅ ensure always available
+  },
+});
+
+  setShowPopup(true);
+  setActiveForm("onduty");
+}}>
                     ONDUTY
                   </button>
                 </div>
@@ -161,8 +194,13 @@ const handleApproveAll = async () => {
         <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 9999 }}>
           <div style={{ backgroundColor: "white", borderRadius: "10px", width: "80%", height: "90%", padding: "1%", position: "relative" }}>
             <button onClick={() => setShowPopup(false)} style={{ position: "absolute", top: "10px", right: "20px" }}>✕</button>
-            {activeForm === "outpass" && <CounsOutPass isPopup />}
-            {activeForm === "onduty" && <CounsOnDuty isPopup />}
+            {activeForm === "outpass" && (
+  <CounsOutPass isPopup data={selectedStudent?.outpassData} />
+)}
+
+{activeForm === "onduty" && (
+  <CounsOnDuty isPopup data={selectedStudent?.odData} />
+)}
           </div>
           
         </div>
