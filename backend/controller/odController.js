@@ -165,32 +165,6 @@ const updateCstatushosod = async (req, res) => {
 
     // ✅ Update OD status (NO CHANGE)
     hostod.cstatus = newStatus;
-
-    // 🔥 AUTO FORWARD TO YEAR COORDINATOR (ONLY ON APPROVE)
-    if (action === "approve") {
-      const student = await Student.findByPk(hostod.student_id);
-
-      if (student && student.yearCoordinator) {
-        const ycId = Number(student.yearCoordinator);
-
-        // move OD to YC
-        hostod.facultyId = ycId;
-        hostod.ystatus = 0;
-
-        // move Outpass to YC
-        await Outpass.update(
-          {
-            facultyId: ycId,
-            ystatus: 0,
-          },
-          {
-            where: { outpassId: hostod.outpass_id },
-            transaction,
-          }
-        );
-      }
-    }
-
     await hostod.save({ transaction });
 
     // ✅ Sync Outpass status (NO CHANGE)
@@ -221,7 +195,6 @@ const updateCstatushosod = async (req, res) => {
     return res.json({
       message: `OD ${action}d successfully (Outpass synced + forwarded to Year Coordinator)`,
     });
-
   } catch (err) {
     await transaction.rollback();
     console.error("updateCstatushosod error:", err);
@@ -273,51 +246,53 @@ const getODOutpassForYearCoordinator = async (req, res) => {
 };
 // 🔟 FORWARD OD + OUTPASS TO YEAR COORDINATOR
 // 🔟 FORWARD OD + OUTPASS TO YEAR COORDINATOR
-// const forwardODToYearCoordinator = async (req, res) => {
-//   const transaction = await sequelize.transaction();
+const forwardODToYearCoordinator = async (req, res) => {
+  const transaction = await sequelize.transaction();
 
-//   try {
-//     const { od_id } = req.params;
-//     const { yearCoordinatorFacultyId } = req.body;
+  try {
+    const { od_id } = req.params;
+    const { yearCoordinatorFacultyId } = req.body;
 
-//     if (!yearCoordinatorFacultyId)
-//       return res.status(400).json({ message: "YC facultyId required" });
+    if (!yearCoordinatorFacultyId)
+      return res.status(400).json({ message: "YC facultyId required" });
 
-//     const od = await ODForm.findByPk(od_id, { transaction });
-//     if (!od) return res.status(404).json({ message: "OD not found" });
+    const od = await ODForm.findByPk(od_id, { transaction });
+    if (!od) return res.status(404).json({ message: "OD not found" });
 
-//     if (od.cstatus !== 1)
-//       return res.status(400).json({ message: "OD not approved by counsellor" });
+    if (od.cstatus !== 1)
+      return res.status(400).json({ message: "OD not approved by counsellor" });
 
-//     // ✅ MOVE OWNERSHIP TO YEAR COORDINATOR
-//     od.facultyId = Number(yearCoordinatorFacultyId);
-//     od.ystatus = 0;
-//     await od.save({ transaction });
+    // ✅ MOVE OWNERSHIP TO YEAR COORDINATOR
+    od.facultyId = Number(yearCoordinatorFacultyId);
+    od.ystatus = 0;
+    await od.save({ transaction });
 
-//     // ✅ VERY IMPORTANT: update outpass facultyId also
-//     await Outpass.update(
-//       {
-//         facultyId: Number(yearCoordinatorFacultyId),
-//         ystatus: 0
-//       },
-//       {
-//         where: { outpassId: od.outpass_id },
-//         transaction
-//       }
-//     );
+    // ✅ VERY IMPORTANT: update outpass facultyId also
+    await Outpass.update(
+      {
+        facultyId: Number(yearCoordinatorFacultyId),
+        ystatus: 0
+      },
+      {
+        where: { outpassId: od.outpass_id },
+        transaction
+      }
+    );
 
-//     await transaction.commit();
-//     res.json({ message: "OD & Outpass forwarded to Year Coordinator" });
+    await transaction.commit();
+    res.json({ message: "OD & Outpass forwarded to Year Coordinator" });
 
-//   } catch (err) {
-//     await transaction.rollback();
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
+  } catch (err) {
+    await transaction.rollback();
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 // 1️⃣1️⃣ YEAR COORDINATOR APPROVE / REJECT OD
-const updateYstatushosod = async (req, res) => {
+const updateYstatusOD = async (req, res) => {
+  const transaction = await sequelize.transaction();
+
   try {
     const { od_id } = req.params;
     const { action } = req.body;
@@ -326,95 +301,30 @@ const updateYstatushosod = async (req, res) => {
       return res.status(400).json({ message: "Invalid action" });
     }
 
-    const od = await ODForm.findByPk(od_id);
-    if (!od) {
-      return res.status(404).json({ message: "OD not found" });
-    }
+    const od = await ODForm.findByPk(od_id, { transaction });
+    if (!od) return res.status(404).json({ message: "OD not found" });
 
     const status = action === "approve" ? 1 : -1;
 
     od.ystatus = status;
-    await od.save();
+    await od.save({ transaction });
 
-    // ✅ Sync Outpass
     await Outpass.update(
       { ystatus: status },
-      { where: { outpassId: od.outpass_id } }
+      { where: { outpassId: od.outpass_id }, transaction }
     );
 
-    return res.json({
-      message: `OD ${action}d by Year Coordinator`,
-    });
+    await transaction.commit();
+    res.json({ message: `OD ${action}d by Year Coordinator` });
 
   } catch (err) {
-    console.error("updateYstatushosod error:", err);
+    await transaction.rollback();
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
 
-
-// const updateYstatusOD = async (req, res) => {
-//   const transaction = await sequelize.transaction();
-
-//   try {
-//     const { od_id } = req.params;
-//     const { action } = req.body;
-
-//     if (!["approve", "reject"].includes(action)) {
-//       return res.status(400).json({ message: "Invalid action" });
-//     }
-
-//     const od = await ODForm.findByPk(od_id, { transaction });
-//     if (!od) return res.status(404).json({ message: "OD not found" });
-
-//     const status = action === "approve" ? 1 : -1;
-
-//     od.ystatus = status;
-//     await od.save({ transaction });
-
-//     await Outpass.update(
-//       { ystatus: status },
-//       { where: { outpassId: od.outpass_id }, transaction }
-//     );
-
-//     await transaction.commit();
-//     res.json({ message: `OD ${action}d by Year Coordinator` });
-
-//   } catch (err) {
-//     await transaction.rollback();
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
-const updateYstatusOdOut = async (req, res) => {
-  try {
-    const { outpassId } = req.params;
-    const { action } = req.body;
-
-    if (!["approve", "reject"].includes(action)) {
-      return res.status(400).json({ message: "Invalid action" });
-    }
-
-    const outpass = await Outpass.findByPk(outpassId);
-    if (!outpass) {
-      return res.status(404).json({ message: "Outpass not found" });
-    }
-
-    const status = action === "approve" ? 1 : -1;
-
-    outpass.ystatus = status;
-    await outpass.save();
-
-    return res.json({
-      message: `Outpass ${action}d by Year Coordinator`,
-    });
-
-  } catch (err) {
-    console.error("updateYstatusOdOut error:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-};
 
 module.exports = { createODWithOutpass, 
   getHostellerODForCounsellor, 
@@ -423,8 +333,5 @@ module.exports = { createODWithOutpass,
 
   getODForYearCoordinator,
   getODOutpassForYearCoordinator,
-
-  getYearCoordinatorODs,
-  updateYstatushosod,
-  updateYstatusOdOut
-  };
+  forwardODToYearCoordinator,
+  updateYstatusOD };

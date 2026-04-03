@@ -6,13 +6,10 @@ const {
   getHostellerODForCounsellor,
   getODoutpassforCounsellor,
   updateCstatushosod,
-  updateCstatusOdOut,
-
-  // ✅ NEW YC FUNCTIONS
-  getYearCoordinatorODs,
-  updateYstatushosod,
-  updateYstatusOdOut,
-
+  getODForYearCoordinator,              // ✅ ADDED
+  getODOutpassForYearCoordinator,
+  forwardODToYearCoordinator,           // ✅ (optional but useful)
+  updateYstatusOD
 } = require("../controller/odController");
 
 /**
@@ -26,13 +23,15 @@ router.post("/", createODWithOutpass);
  * ===============================
  * COUNSELLOR FETCH HOSTELLER OD
  * ===============================
+ * /api/od/counsellor/:facultyId
  */
 router.get("/counsellor/:facultyId", getHostellerODForCounsellor);
 
 /**
  * ===============================
- * COUNSELLOR FETCH OUTPASS
+ * COUNSELLOR FETCH OD OUTPASS
  * ===============================
+ * /api/od/outpass/counsellor/:facultyId
  */
 router.get("/outpass/counsellor/:facultyId", getODoutpassforCounsellor);
 
@@ -52,21 +51,25 @@ router.put("/approve/od/:od_id", updateCstatushosod);
 
 /**
  * ===============================
- * 🔥 MOVE TO YEAR COORDINATOR (NEW)
+ * FORWARD TO YEAR COORDINATOR
  * ===============================
  */
-// router.put("/assign-yc/:od_id", assignYearCoordinatorOD);
+router.put("/forward/:od_id", forwardODToYearCoordinator);
 
 /**
  * ===============================
  * YEAR COORDINATOR FETCH OD
  * ===============================
+ * IMPORTANT: This is what your frontend expects
  */
-router.get("/year-coordinator/:facultyId", getYearCoordinatorODs);
+router.get(
+  "/year-coordinator/:facultyId",
+  getODForYearCoordinator
+);
 
 /**
  * ===============================
- * YEAR COORDINATOR APPROVE / REJECT OD
+ * YEAR COORDINATOR FETCH OUTPASS (OPTIONAL)
  * ===============================
  */
 router.get(
@@ -76,9 +79,12 @@ router.get(
 
 /**
  * ===============================
- * YEAR COORDINATOR APPROVE / REJECT OUTPASS
+ * YEAR COORDINATOR APPROVE / REJECT OD
  * ===============================
  */
-router.put("/year-coordinator/approve/outpass/:outpassId",updateYstatusOdOut );
+router.put(
+  "/year-coordinator/approve/od/:od_id",
+  updateYstatusOD
+);
 
 module.exports = router;

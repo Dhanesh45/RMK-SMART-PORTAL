@@ -121,7 +121,9 @@ const updateCstatus = async (req, res) => {
     if (!["approve", "reject"].includes(action))
       return res.status(400).json({ message: "Invalid action" });
 
-    const od = await DayscholarOD.findByPk(od_id);
+    const od = await DayscholarOD.findOne({
+  where: { od_id: od_id }
+});
     if (!od) return res.status(404).json({ message: "OD not found" });
 
     // ✅ Update counsellor status
@@ -178,45 +180,31 @@ const getDayscholarODForYearCoordinator = async (req, res) => {
 /**
  * ✅ Year Coordinator approve/reject
  */
+// 
 const updateYstatusDayscholarOD = async (req, res) => {
   try {
     const { od_id } = req.params;
     const { action } = req.body;
 
-    if (!["approve", "reject"].includes(action)) {
-      return res.status(400).json({ message: "Invalid action" });
-    }
-
-    const od = await DayscholarOD.findByPk(od_id);
-    if (!od) return res.status(404).json({ message: "OD not found" });
-
     const status = action === "approve" ? 1 : -1;
 
-    od.ystatus = status;
+    const result = await DayscholarOD.update(
+      { ystatus: status },
+      { where: { od_id: od_id } }
+    );
 
-    // 🔥 OPTIONAL: forward to HOD
-    if (action === "approve") {
-      const student = await Student.findByPk(od.student_id);
-
-      if (student && student.hod) {
-        od.facultyId = Number(student.hod);
-        od.hstatus = 0;
-      }
-    }
-
-    await od.save();
+    console.log("UPDATE RESULT:", result);
 
     res.json({
-      message: `Dayscholar OD ${action}d by Year Coordinator`,
-      od,
+      message: `Dayscholar OD ${action}d`,
+      result
     });
 
   } catch (err) {
-    console.error("updateYstatusDayscholarOD error:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
-
 module.exports = {
   getStudentForDayscholarOD,
   createDayscholarOD,
