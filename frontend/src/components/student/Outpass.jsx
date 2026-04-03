@@ -17,13 +17,13 @@ const approveBtn = {
   borderRadius: "20px",
   border: "none",
   cursor: "pointer",
-  
-  
+
+
 };
 
-const Outpass = ({regNo:passedRegNo}) => {
+const Outpass = ({ regNo: passedRegNo }) => {
   const location = useLocation();
-  const [regNo, setRegNo] = useState(passedRegNo||location.state?.regNo || "");
+  const [regNo, setRegNo] = useState(passedRegNo || location.state?.regNo || "");
   const [student, setStudent] = useState(null);
   const [form, setForm] = useState({
     roomNumber: "",
@@ -51,7 +51,7 @@ const Outpass = ({regNo:passedRegNo}) => {
     }
   }, []);
 
-  const handleSubmit = async () => {
+ const handleSubmit = async () => {
     try {
       await axios.post("http://localhost:5000/api/outpass", {
         regNo,
@@ -62,7 +62,6 @@ const Outpass = ({regNo:passedRegNo}) => {
       alert("❌ Failed to submit");
     }
   };
-
   return (
     <div
       style={{
@@ -226,7 +225,6 @@ const Outpass = ({regNo:passedRegNo}) => {
                 />
               </div>
 
-              
               <div style={{ display: "flex", gap: "30px" }}>
                 <div style={{ flex: 1 }}>
                   <label>LEAVING DATE</label>
@@ -272,15 +270,4 @@ const Outpass = ({regNo:passedRegNo}) => {
 
 export default Outpass;
 
-{/* <div style={{ width: "95%" }}>
-                <label>PARENTS PERMISSION (Write Yes / No / Any remark)</label>
-                <input
-                  type="text"
-                  placeholder="e.g., Yes, informed over call"
-                  style={inputStyle}
-                  onChange={(e) =>
-                    setForm({ ...form, parentsPermission: e.target.value })
-                  }
-                />
-              </div>
-               */}
+
