@@ -1,7 +1,7 @@
 const db = require("../models");
 
 const ApplicationForm = db.ApplicationForm;
-
+const nodemailer = require("nodemailer"); 
 const Student = db.Student;
 /* STUDENT GET */
 const getStudentByRegNo = async (req, res) => {
@@ -122,7 +122,9 @@ const approveApplication = async (req, res) => {
     const { id } = req.params;
 
     await ApplicationForm.update(
-      { hstatus: 1 },
+      { hstatus: 1 ,
+        hod_approved_date: new Date()
+      },
 
       {
         where: { ap_id: id },
@@ -306,6 +308,99 @@ const getGenerateApplications = async (req, res) => {
   }
 };
 
+const sendMailToStudent = async (req, res) => {
+  try {
+    const { ap_id } = req.body;
+
+    const application = await ApplicationForm.findOne({
+      where: { ap_id },
+      include: [{ model: Student, as: "student" ,
+      attributes: ["studentId", "student_name", "student_mail","reg_no"]
+      }],
+    });
+
+
+    if (!application) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+
+const studentEmail = application.student.dataValues.student_mail;
+
+console.log("EMAIL:", studentEmail);
+
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "rmksmartportal@gmail.com",
+    pass: "ymhn fuxp amac ifhg" 
+  }
+});
+
+if (!studentEmail) {
+  return res.status(400).json({ message: "Email missing" });
+}
+
+await transporter.sendMail({
+  from: "rmksmartportal@gmail.com",
+  to: studentEmail,
+  subject: "Bonafide Certificate Generated",
+  text: `Hello ${application.student.dataValues.student_name},
+
+Your certificate is ready.
+
+Regards,
+Office Staff`
+});
+
+await ApplicationForm.update(
+  { osstatus: 2 ,
+     generated_date: new Date()
+  },
+  { where: { ap_id } }
+);
+
+    res.json({ message: "Mail sent successfully" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error sending mail" });
+  }
+};
+
+const getOsHistory = async (req, res) => {
+  try {
+    const applications = await ApplicationForm.findAll({
+      where: {
+        osstatus: 2,
+      },
+      include: [
+        {
+          model: Student,
+          as: "student",
+          attributes: [
+            "studentId",
+            "student_name",
+            "reg_no",
+            "branch",
+            "year",
+          ],
+        },
+      ],
+    });
+
+    console.log("HISTORY DATA:", applications); // ✅ DEBUG
+    console.log("FULL RESPONSE:", res);
+console.log("DATA:", res.data);
+console.log("TYPE:", typeof res.data);
+
+    return res.json(applications ?? []);
+  } catch (err) {
+    console.error("HISTORY ERROR:", err); // 🔥 VERY IMPORTANT
+    return res.json([]); // NEVER send null
+  }
+};
+
 module.exports = {
   getStudentByRegNo,
   createBonafide,
@@ -319,6 +414,8 @@ module.exports = {
   getOfficeApplications,
   officeApprove,
   officeReject,
+  sendMailToStudent,
+   getOsHistory,
 
   getGenerateApplications,
 };

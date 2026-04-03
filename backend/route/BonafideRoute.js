@@ -15,7 +15,10 @@ const {
   getOfficeApplications,
   officeApprove,
   officeReject,
+  sendMailToStudent,
+   getOsHistory,
   getGenerateApplications,
+  
 } = require("../controller/BonafideController");
 
 /* HOD */
@@ -41,5 +44,9 @@ router.get("/generate/all", getGenerateApplications);
 router.post("/", createBonafide);
 
 router.get("/:regNo", getStudentByRegNo);
+
+router.post("/generate/send-mail", sendMailToStudent);
+
+router.get("/os-history", getOsHistory);  
 
 module.exports = router;
