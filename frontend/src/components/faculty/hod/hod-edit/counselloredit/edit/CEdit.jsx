@@ -1,53 +1,109 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import "./CEdit.css";
-import CView from "../../yearcodedit/view/YView";
-import CAdd from "../../../../yearcoordinator/yearcodedit/counselloredit/add/CAdd";
-
-const initialCounsellors = [
-  { id: 1, name: "John Doe", noOfStudents: 25, email: "john@example.com" },
-  { id: 2, name: "Jane Smith", noOfStudents: 30, email: "jane@example.com" },
-  { id: 3, name: "Emily Brown", noOfStudents: 28, email: "emily@example.com" },
-];
+import CView from "./CView.jsx";
+import CAdd from "./CAdd.jsx";
 
 const CEdit = ({ selectedView, setSelectedView }) => {
-  const [counsellors, setCounsellors] = useState(initialCounsellors);
+  const [counsellors, setCounsellors] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedCounsellor, setSelectedCounsellor] = useState(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
+
+  useEffect(() => {
+    fetchCounsellors();
+  }, []);
+
+  const fetchCounsellors = async () => {
+  try {
+    const email = localStorage.getItem("facultyEmail");
+    
+
+    const hodRes = await axios.get(
+      `http://localhost:5000/api/faculty/email/${email}`
+    );
+
+    const branch = hodRes.data.branch;
+
+   const res = await axios.get(
+  `http://localhost:5000/api/faculty/by-branch-role/${branch}/counsellor`
+);
+
+console.log("API RESPONSE:", res.data);
+
+    const formatted = res.data.map((c) => ({
+      id: c.f_id,
+      name: c.faculty_name || "",
+      email: c.mail || "",
+      branch: c.faculty_branch || "",   // ✅ VERY IMPORTANT
+      password: c.password || "",       // ✅ VERY IMPORTANT
+      noOfStudents: c.noOfStudents || 0,
+    }));
+
+    setCounsellors(formatted);
+  } catch (err) {
+    console.error("❌ Error fetching counsellors:", err);
+  }
+};
 
   const filtered = counsellors.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleDelete = (id) => {
-    setCounsellors(counsellors.filter((c) => c.id !== id));
+  const handleDelete = async (id) => {
+    await axios.delete(`http://localhost:5000/api/faculty/${id}`);
+    fetchCounsellors();
   };
 
-  const handleSave = (updated) => {
-    setCounsellors(counsellors.map((c) => (c.id === updated.id ? updated : c)));
-  };
+const handleSave = async (updatedCounsellor) => {
+  try {
+    await axios.put(
+      `http://localhost:5000/api/faculty/${updatedCounsellor.id}`,
+      {
+        name: updatedCounsellor.name,
+        branch: updatedCounsellor.branch,
+        email: updatedCounsellor.email,
+        password: updatedCounsellor.password,
+      }
+    );
 
-  const handleAdd = (newCounsellor) => {
-    const newId = counsellors.length + 1;
-    setCounsellors([...counsellors, { id: newId, ...newCounsellor }]);
-  };
+    // ✅ update UI table immediately
+    setCounsellors((prev) =>
+      prev.map((c) =>
+        c.id === updatedCounsellor.id ? updatedCounsellor : c
+      )
+    );
 
+    setSelectedCounsellor(null);
+  } catch (err) {
+    console.error("❌ Error updating counsellor:", err);
+  }
+};
+const handleAdd = async (newCounsellor) => {
+  await axios.post("http://localhost:5000/api/faculty/add", {
+    faculty_name: newCounsellor.name,
+    faculty_branch: newCounsellor.branch,
+    mail: newCounsellor.email,
+    password: newCounsellor.password, // ✅ exact entered password
+    role: "Counsellor",
+  });
+
+  fetchCounsellors();
+};
   return (
     <div className="cedit-page">
       <div className="nav-space"></div>
 
-      {/* Search and Add Section */}
       <div className="search-container">
         <select
-  onChange={(e) => setSelectedView(e.target.value)}
-  className="input"
-  value={selectedView}
->
-  <option value="student">Student</option>
-  <option value="counsellor">Counsellor</option>
-  <option value="yearcode">Year Code</option>
-</select>
-
+          onChange={(e) => setSelectedView(e.target.value)}
+          className="input"
+          value={selectedView}
+        >
+          <option value="student">Student</option>
+          <option value="counsellor">Counsellor</option>
+          <option value="yearcode">Year Code</option>
+        </select>
 
         <input
           type="text"
@@ -63,58 +119,53 @@ const CEdit = ({ selectedView, setSelectedView }) => {
 
       <h2 className="title">COUNSELLOR DETAILS</h2>
 
-      {/* Table Section */}
-      {filtered.length === 0 ? (
-        <p className="no-data">No data found</p>
-      ) : (
-        <div className="table">
-          <div className="table-wrapper">
-            <table className="student-table">
-              <thead>
-                <tr>
-                  <th>S.NO</th>
-                  <th>NAME</th>
-                  <th>NO. OF STUDENTS</th>
-                  <th>E-MAIL-ID</th>
-                  <th>CONTROL</th>
+      <div className="table">
+        <div className="table-wrapper">
+          <table className="student-table">
+            <thead>
+              <tr>
+                <th>S.NO</th>
+                <th>NAME</th>
+                <th>E-MAIL-ID</th>
+                <th>CONTROL</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((c, index) => (
+                <tr key={c.id}>
+                  <td>{index + 1}</td>
+                  <td>{c.name}</td>
+                  <td>{c.email}</td>
+                  <td>
+                    <button
+                      className="delete-btn"
+                      onClick={() => handleDelete(c.id)}
+                    >
+                      DELETE
+                    </button>
+                    <button
+  className="edit-btn"
+  onClick={() => {
+    console.log("SELECTED ROW:", c);
+    setSelectedCounsellor(c);
+  }}
+>
+  EDIT
+</button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {filtered.map((c, index) => (
-                  <tr key={c.id}>
-                    <td>{index + 1}</td>
-                    <td>{c.name}</td>
-                    <td>{c.noOfStudents}</td>
-                    <td>{c.email}</td>
-                    <td>
-                      <button
-                        className="delete-btn"
-                        onClick={() => handleDelete(c.id)}
-                      >
-                        DELETE
-                      </button>
-                      <button
-                        className="edit-btn"
-                        onClick={() => setSelectedCounsellor(c)}
-                      >
-                        EDIT
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
 
-      {/* Popup Modals */}
       {selectedCounsellor && (
         <CView
-          student={selectedCounsellor}
-          onClose={() => setSelectedCounsellor(null)}
-          onSave={handleSave}
-        />
+  coordinator={selectedCounsellor}
+  onClose={() => setSelectedCounsellor(null)}
+  onSave={handleSave}
+/>
       )}
 
       {isAddOpen && (

@@ -1,5 +1,18 @@
 const express = require("express");
-const { registerStudent, getAllStudents ,loginStudent } = require("../controller/studentController");
+const { 
+  registerStudent, 
+  getAllStudents, 
+  loginStudent,
+  getStudentsByCounsellor,
+  getStudentsByHod,
+  getStudentsByBranch,
+  getStudentsByYearCoordinator,
+  deleteStudentByYearCoordinator,
+  updateStudentByYearCoordinator,
+  deleteStudent,
+  updateStudent
+} = require("../controller/studentController");
+console.log("✅ studentRoute loaded");
 
 const router = express.Router();
 
@@ -12,4 +25,21 @@ router.get("/all", getAllStudents);
 //Dhanesh Work
 router.post("/login", loginStudent);
 
+router.get("/counsellor/:f_id", getStudentsByCounsellor);
+
+router.delete("/:id", deleteStudent);
+
+router.put("/:id", updateStudent);
+router.delete("/:studentId", deleteStudentByYearCoordinator);
+router.put("/:studentId", updateStudentByYearCoordinator);
+
+
+router.get(
+  "/year-coordinator/:f_id",
+  getStudentsByYearCoordinator
+);
+router.get("/hod/:f_id", getStudentsByHod);
+
+
+router.get("/branch/:branch", getStudentsByBranch);
 module.exports = router;

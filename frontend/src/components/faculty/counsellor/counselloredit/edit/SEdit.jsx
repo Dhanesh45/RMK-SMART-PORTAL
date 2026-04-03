@@ -1,47 +1,86 @@
 import React, { useState } from "react";
 import "./SEdit.css";
 import SView from "../view/SView";
-import SAdd from "../add/SAdd";
+import axios from "axios";
+import { useEffect } from "react";
 
-const initialStudents = [
-  {
-    id: 1,
-    name: "AKASH",
-    regNo: "111723203001",
-    email: "230329.it@rmkec.ac.in",
-  },
-  {
-    id: 2,
-    name: "HARISH",
-    regNo: "111723203002",
-    email: "harish269005@gmail.com",
-  },
-  { id: 3, name: "ABISHEK", regNo: "111723203003", email: "abishek@gmail.com" },
-  { id: 4, name: "ABINAYA", regNo: "111723203004", email: "abinaya@gmail.com" },
-];
+
 
 const SEdit = ({ selectedView, setSelectedView }) => {
-  const [students, setStudents] = useState(initialStudents);
+  const [students, setStudents] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [isAddOpen, setIsAddOpen] = useState(false);
+
+  useEffect(() => {
+  const fetchStudents = async () => {
+    try {
+      const facultyData = JSON.parse(localStorage.getItem("facultyData"));
+      const f_id = facultyData.id;
+
+      const res = await axios.get(
+        `http://localhost:5000/api/student/counsellor/${f_id}`
+      );
+
+      // Map backend → frontend format
+  const formatted = res.data.map((s) => ({
+  id: s.studentId,
+  name: s.studentName,
+  regNo: s.regNo,
+  email: s.studentMail,
+
+  year: s.year,
+  branch: s.branch,
+  section: s.section,
+
+  gender: s.gender,
+  accommodation: s.accommodation,
+  parentName: s.parentName,
+  parentPhone: s.parentPhone,
+  native: s.native,
+
+  counsellor: s.counsellor,
+  yearCoordinator: s.yearCoordinator,
+  hod: s.hod,
+}));
+
+      setStudents(formatted);
+    } catch (err) {
+      console.error(err);
+      alert("Error fetching students");
+    }
+  };
+
+  fetchStudents();
+}, []);
+
+
 
   const filtered = students.filter((s) =>
     s.regNo.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleDelete = (id) => {
+ const handleDelete = async (id) => {
+  try {
+    await axios.delete(`http://localhost:5000/api/student/${id}`);
     setStudents(students.filter((s) => s.id !== id));
-  };
+  } catch (err) {
+    alert("Delete failed");
+  }
+};
 
-  const handleSave = (updated) => {
+const handleSave = async (updated) => {
+  try {
+    await axios.put(
+      `http://localhost:5000/api/student/${updated.id}`,
+      updated // ✅ send full data
+    );
+
     setStudents(students.map((s) => (s.id === updated.id ? updated : s)));
-  };
+  } catch (err) {
+    alert("Update failed");
+  }
+};
 
-  const handleAdd = (newStudent) => {
-    const newId = students.length + 1;
-    setStudents([...students, { id: newId, ...newStudent }]);
-  };
 
   return (
     <div className="cedit-page">
@@ -57,9 +96,7 @@ const SEdit = ({ selectedView, setSelectedView }) => {
           onChange={(e) => setSearch(e.target.value)}
         />
 
-        <button className="edit-btn" onClick={() => setIsAddOpen(true)}>
-          ADD
-        </button>
+        
       </div>
 
       <h2 className="title">STUDENT DETAILS</h2>
@@ -116,12 +153,6 @@ const SEdit = ({ selectedView, setSelectedView }) => {
         />
       )}
 
-      {isAddOpen && (
-        <SAdd
-          onClose={() => setIsAddOpen(false)}
-          onAdd={handleAdd}
-        />
-      )}
     </div>
   );
 };

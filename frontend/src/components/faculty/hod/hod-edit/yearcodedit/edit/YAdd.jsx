@@ -7,6 +7,7 @@ const YAdd = ({ onClose, onAdd }) => {
     branch: "",
     year: "",
     email: "",
+    password: "",
   });
 
   const handleChange = (e) => {
@@ -65,6 +66,16 @@ const YAdd = ({ onClose, onAdd }) => {
                   <option value="MECH">MECH</option>
                   <option value="CIVIL">CIVIL</option>
                 </select>
+              </div>
+              <div className="form-field">
+                <label>Password</label>
+                <input
+                  type="text"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter Password"
+                />
               </div>
             </div>
 

@@ -72,7 +72,7 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
     if (!form.fees_detail_year || form.fees_detail_year === "Year") {
       newErrors.fees_detail_year = "Select year";
     }
-    if (student?.accommodation === "DAYSCHOLAR" && !form.boarding.trim()) {
+    if (student?.accommodation === "Dayscholar" && !form.boarding.trim()) {
       newErrors.boarding = "Boarding place required";
     }
     if (
@@ -90,16 +90,21 @@ const BonafideForm = ({ regNo: passedRegNo }) => {
   // ✅ Fetch student details by RegNo
   const fetchStudent = async (reg = regNo) => {
     try {
+      console.log("Fetching student:",reg);
       const res = await axios.get(`http://localhost:5000/api/bonafide/${reg}`);
+      console.log("Student data:",res.data);
       setStudent(res.data);
-    } catch {
+    } catch(err) {
+      console.error(err.response?.data || err);
       alert("❌ Student not found");
     }
   };
 
-  useEffect(() => {
-    if (regNo) fetchStudent(regNo);
-  }, []);
+ useEffect(() => {
+  if (regNo) {
+    fetchStudent(regNo);
+  }
+}, [regNo]);
 
   // ✅ Handle Submit
   const handleSubmit = async () => {

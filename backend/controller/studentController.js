@@ -155,3 +155,240 @@ exports.loginStudent = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+// ✅ Get students by counsellor
+exports.getStudentsByCounsellor = async (req, res) => {
+  try {
+    const { f_id } = req.params;
+
+    const students = await Student.findAll({
+      where: { counsellor: f_id },
+      attributes: [
+  "studentId",
+  "studentName",
+  "regNo",
+  "studentMail",
+  "year",
+  "branch",
+  "section",
+
+  "gender",
+  "accommodation",
+  "parentName",
+  "parentPhone",
+  "native",
+
+  "counsellor",
+  "yearCoordinator",
+  "hod"
+],
+    });
+
+    res.status(200).json(students);
+  } catch (error) {
+    console.error("❌ Error fetching counsellor students:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.deleteStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await Student.destroy({
+      where: { studentId: id },
+    });
+
+    res.status(200).json({ message: "Student deleted" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Delete failed" });
+  }
+};
+
+exports.updateStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await Student.update(
+  {
+    studentName: req.body.name,
+    regNo: req.body.regNo,
+    studentMail: req.body.email,
+    year: req.body.year,
+    branch: req.body.branch,
+    section: req.body.section,
+
+    gender: req.body.gender,
+    accommodation: req.body.accommodation,
+    parentName: req.body.parentName,
+    parentPhone: req.body.parentPhone,
+    native: req.body.native,
+
+    counsellor: req.body.counsellor,         // ✅ f_id
+    yearCoordinator: req.body.yearCoordinator,
+    hod: req.body.hod,
+  },
+  { where: { studentId: id } }
+);
+
+    res.status(200).json({ message: "Student updated" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Update failed" });
+  }
+};
+
+
+exports.getStudentsByYearCoordinator = async (req, res) => {
+  try {
+    const { f_id } = req.params;
+
+    const students = await Student.findAll({
+      where: { yearCoordinator: f_id },
+      attributes: [
+        "studentId",
+        "studentName",
+        "regNo",
+        "studentMail",
+        "year",
+        "branch",
+        "section",
+        "gender",
+        "accommodation",
+        "parentName",
+        "parentPhone",
+        "native",
+        "counsellor",
+        "yearCoordinator",
+        "hod",
+      ],
+    });
+
+    res.status(200).json(students);
+  } catch (error) {
+    console.error("❌ Error fetching year coordinator students:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.deleteStudentByYearCoordinator = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+
+    const deleted = await Student.destroy({
+      where: { studentId },
+    });
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    res.status(200).json({ message: "Student deleted successfully" });
+  } catch (error) {
+    console.error("❌ Delete student error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.updateStudentByYearCoordinator = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+
+    const student = await Student.findOne({
+      where: { studentId },
+    });
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    await student.update({
+      studentName: req.body.name,
+      regNo: req.body.regNo,
+      studentMail: req.body.email,
+      year: req.body.year,
+      branch: req.body.branch,
+      gender: req.body.gender,
+      counsellor: req.body.counsellor,
+      yearCoordinator: req.body.yearCoordinator,
+      hod: req.body.hod,
+      section: req.body.section,
+      accommodation: req.body.accommodation,
+      parentName: req.body.parentName,
+      parentPhone: req.body.parentPhone,
+      native: req.body.native,
+    });
+
+    res.status(200).json({
+      message: "Student updated successfully",
+    });
+  } catch (error) {
+    console.error("❌ Update student error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.getStudentsByHod = async (req, res) => {
+  try {
+    const { f_id } = req.params;
+
+    const students = await Student.findAll({
+      where: { hod: f_id },
+      attributes: [
+        "studentId",
+        "studentName",
+        "regNo",
+        "studentMail",
+        "year",
+        "branch",
+        "section",
+        "gender",
+        "accommodation",
+        "parentName",
+        "parentPhone",
+        "native",
+        "counsellor",
+        "yearCoordinator",
+        "hod",
+      ],
+    });
+
+    res.status(200).json(students);
+  } catch (error) {
+    console.error("❌ Error fetching HOD students:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.getStudentsByBranch = async (req, res) => {
+  try {
+    const { branch } = req.params;
+
+    const students = await Student.findAll({
+      where: {
+        branch: branch,   // ✅ CORRECT FIELD
+      },
+      attributes: [
+        "studentId",
+        "studentName",
+        "regNo",
+        "studentMail",
+        "year",
+        "branch",
+        "section",
+        "counsellor",
+        "yearCoordinator",
+        "hod",
+      ],
+    });
+
+    res.status(200).json(students);
+  } catch (err) {
+    console.error("❌ getStudentsByBranch FULL ERROR:", err);
+    res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
+  }
+};

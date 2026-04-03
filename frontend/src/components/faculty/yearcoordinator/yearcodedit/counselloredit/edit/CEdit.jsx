@@ -1,42 +1,119 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import "./CEdit.css";
 import CView from "../view/CView";
 import CAdd from "../add/CAdd";
 
-const initialCounsellors = [
-  { id: 1, name: "John Doe", noOfStudents: 25, email: "john@example.com" },
-  { id: 2, name: "Jane Smith", noOfStudents: 30, email: "jane@example.com" },
-  { id: 3, name: "Emily Brown", noOfStudents: 28, email: "emily@example.com" },
-];
-
 const CEdit = ({ selectedView, setSelectedView }) => {
-  const [counsellors, setCounsellors] = useState(initialCounsellors);
+  const [counsellors, setCounsellors] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedCounsellor, setSelectedCounsellor] = useState(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
+
+  useEffect(() => {
+    fetchCounsellors();
+  }, []);
+
+  const fetchCounsellors = async () => {
+    try {
+      const email = localStorage.getItem("facultyEmail");
+
+      if (!email) {
+        console.error("❌ facultyEmail missing in localStorage");
+        return;
+      }
+
+      // ✅ Get logged-in year coordinator
+      const facultyRes = await axios.get(
+        `http://localhost:5000/api/faculty/email/${email}`
+      );
+
+      const branch = facultyRes.data.branch;
+
+      if (!branch) {
+        console.error("❌ Branch not found");
+        return;
+      }
+
+      // ✅ Get all counsellors of same branch
+      const counsellorRes = await axios.get(
+        `http://localhost:5000/api/faculty/by-branch-role/${branch}/counsellor`
+      );
+
+      // ✅ Get students of branch for count
+      const studentRes = await axios.get(
+        `http://localhost:5000/api/student/branch/${branch}`
+      );
+
+      const students = studentRes.data;
+
+      const finalCounsellors = counsellorRes.data.map((c) => ({
+        id: c.f_id,
+        name: c.faculty_name,
+        email: c.mail,
+        branch: c.faculty_branch,
+        password: c.password || "",
+        noOfStudents: students.filter(
+          (s) => Number(s.counsellor) === Number(c.f_id)
+        ).length,
+      }));
+
+      setCounsellors(finalCounsellors);
+    } catch (error) {
+      console.error("❌ Error fetching counsellors:", error);
+    }
+  };
 
   const filtered = counsellors.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleDelete = (id) => {
-    setCounsellors(counsellors.filter((c) => c.id !== id));
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/faculty/${id}`);
+      fetchCounsellors();
+    } catch (error) {
+      console.error("❌ Delete failed:", error);
+    }
   };
 
-  const handleSave = (updated) => {
-    setCounsellors(counsellors.map((c) => (c.id === updated.id ? updated : c)));
+  const handleSave = async (updated) => {
+    try {
+      await axios.put(
+        `http://localhost:5000/api/faculty/${updated.id}`,
+        updated
+      );
+      fetchCounsellors();
+      setSelectedCounsellor(null);
+    } catch (error) {
+      console.error("❌ Update failed:", error);
+    }
   };
 
-  const handleAdd = (newCounsellor) => {
-    const newId = counsellors.length + 1;
-    setCounsellors([...counsellors, { id: newId, ...newCounsellor }]);
+  const handleAdd = async (newCounsellor) => {
+    try {
+      await axios.post("http://localhost:5000/api/faculty/add", {
+        faculty_name: newCounsellor.name,
+        faculty_branch: newCounsellor.branch,
+        mail: newCounsellor.email,
+        password: newCounsellor.password,
+        role: "Counsellor",
+      });
+
+      fetchCounsellors();
+      setIsAddOpen(false);
+    } catch (err) {
+      console.error(
+        "❌ Add counsellor error:",
+        err.response?.data || err.message
+      );
+    }
   };
 
   return (
     <div className="cedit-page">
       <div className="nav-space"></div>
 
-      {/* Search and Add Section */}
       <div className="search-container">
         <select
           onChange={(e) => setSelectedView(e.target.value)}
@@ -45,7 +122,6 @@ const CEdit = ({ selectedView, setSelectedView }) => {
         >
           <option value="counsellor">Counsellor</option>
           <option value="student">Student</option>
-          
         </select>
 
         <input
@@ -62,7 +138,6 @@ const CEdit = ({ selectedView, setSelectedView }) => {
 
       <h2 className="title">COUNSELLOR DETAILS</h2>
 
-      {/* Table Section */}
       {filtered.length === 0 ? (
         <p className="no-data">No data found</p>
       ) : (
@@ -107,7 +182,6 @@ const CEdit = ({ selectedView, setSelectedView }) => {
         </div>
       )}
 
-      {/* Popup Modals */}
       {selectedCounsellor && (
         <CView
           student={selectedCounsellor}

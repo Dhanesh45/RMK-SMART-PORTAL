@@ -1,8 +1,55 @@
 import React, { useState } from "react";
+import { useEffect } from "react";
+import axios from "axios";
 import "./SView.css";
 
 const SView = ({ student, onClose, onSave }) => {
-  const [formData, setFormData] = useState({ ...student });
+  const [counsellors, setCounsellors] = useState([]);
+const [yearCoordinators, setYearCoordinators] = useState([]);
+const [hods, setHods] = useState([]);
+  const [formData, setFormData] = useState({
+  name: student?.name || "",
+  regNo: student?.regNo || "",
+  email: student?.email || "",
+  year: student?.year || "",
+  gender: student?.gender || "",
+  branch: student?.branch || "",
+  counsellor: student?.counsellor || "",
+  yearCoordinator: student?.yearCoordinator || "",
+  hod: student?.hod || "",
+  section: student?.section || "",
+  password: "",
+  accommodation: student?.accommodation || "",
+  parentName: student?.parentName || "",
+  parentPhone: student?.parentPhone || "",
+  native: student?.native || "",
+});
+
+useEffect(() => {
+  if (!formData.branch) return;
+
+  axios
+    .get(`http://localhost:5000/api/faculty/by-branch-role/${formData.branch}/counsellor`)
+    .then((res) => setCounsellors(res.data));
+
+  axios
+    .get(`http://localhost:5000/api/faculty/by-branch-role/${formData.branch}/year_coordinator`)
+    .then((res) => setYearCoordinators(res.data));
+
+  axios
+    .get(`http://localhost:5000/api/faculty/by-branch-role/${formData.branch}/hod`)
+    .then((res) => setHods(res.data));
+
+}, [formData.branch]);
+
+useEffect(() => {
+  if (student) {
+    setFormData({
+      ...student,
+      password: "", // keep empty
+    });
+  }
+}, [student]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -15,6 +62,9 @@ const SView = ({ student, onClose, onSave }) => {
     onClose();
   };
 
+  console.log("formData:", formData);
+  console.log("student:", student);
+
   return (
     <div className="modal-overlay">
       
@@ -26,7 +76,7 @@ const SView = ({ student, onClose, onSave }) => {
         {/* Div 1: Student Information Title with close button */}
         <div className="modal-header">
           <div>
-          <h2 className="modal-title">STUDENT INFORMATION</h2>
+          <h2 className="modal-title">EDIT STUDENT DETAILS</h2>
           </div>
           
         </div>
@@ -49,47 +99,51 @@ const SView = ({ student, onClose, onSave }) => {
               <label>Year</label>
               <select name="year" value={formData.year} onChange={handleChange}>
                 <option value="">Select Year</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
+                <option value="I">I</option>
+                <option value="II">II</option>
+                <option value="III">III</option>
+                <option value="IV">IV</option>
               </select>
             </div>
 
             {/* Changed to checkbox as per request */}
             <div className="form-field">
-              <label>Gender</label>
-              <div className="checkbox-group">
-                <label>
-                  Male
-                  <input
-                    type="checkbox"
-                    name="gender"
-                    value="Male"
-                    checked={formData.gender === "Male"}
-                    onChange={handleChange}
-                  />
-                </label>
-                <label>
-                  Female
-                  <input
-                    type="checkbox"
-                    name="gender"
-                    value="Female"
-                    checked={formData.gender === "Female"}
-                    onChange={handleChange}
-                  />
-                </label>
-              </div>
-            </div>
+  <label>Gender</label>
+  <div className="checkbox-group">
+    <label>
+      <input
+        type="radio"
+        name="gender"
+        value="Male"
+        checked={formData.gender === "Male"}
+        onChange={handleChange}
+      />
+      Male
+    </label>
+    <label>
+      <input
+        type="radio"
+        name="gender"
+        value="Female"
+        checked={formData.gender === "Female"}
+        onChange={handleChange}
+      />
+      Female
+    </label>
+  </div>
+</div>
 
             <div className="form-field">
               <label>Branch</label>
-              <input
-                type="text"
-                name="branch"
-                value={formData.branch}
-                onChange={handleChange}
-              />
+              <select name="branch" value={formData.branch} onChange={handleChange}>
+  <option value="">Select Branch</option>
+  <option value="IT">IT</option>
+  <option value="CSE">CSE</option>
+  <option value="AIDS">AIDS</option>
+  <option value="ECE">ECE</option>
+  <option value="MECH">MECH</option>
+  <option value="CIVIL">CIVIL</option>
+</select>
             </div>
 
             <div className="form-field">
@@ -101,6 +155,45 @@ const SView = ({ student, onClose, onSave }) => {
                 onChange={handleChange}
               />
             </div>
+
+            <div className="form-field">
+<label>Password</label>
+<input
+  type="password"
+  name="password"
+  value={formData.password || ""}
+  onChange={handleChange}
+  placeholder="password"
+  readOnly
+/>
+<small style={{ color: "gray" }}>
+  Leave blank student will change the password
+</small>
+</div>
+
+<div className="form-field">
+<label>Accommodation</label>
+<select
+  name="accommodation"
+  value={(formData.accommodation || "").trim().toUpperCase()}
+  onChange={handleChange}
+>
+  <option value="">Select</option>
+  <option value="HOSTELLER">Hosteller</option>
+  <option value="DAYSCHOLAR">Dayscholar</option>
+</select>
+</div>
+
+<div className="form-field">
+  <label>Native</label>
+  <input
+    type="text"
+    name="native"
+    value={formData.native}
+    onChange={handleChange}
+  />
+</div>
+
           </div>
 
           {/* Right Fields Div */}
@@ -117,39 +210,85 @@ const SView = ({ student, onClose, onSave }) => {
 
             <div className="form-field">
               <label>Counsellor</label>
-              <select
-                name="counsellor"
-                value={formData.counsellor}
-                onChange={handleChange}
-              >
-                <option value="">Select Counsellor</option>
-                <option value="Mr. Ravi">Mr. Ravi</option>
-                <option value="Ms. Devi">Ms. Devi</option>
-              </select>
+             <select
+  name="counsellor"
+ value={Number(formData.counsellor)}
+  onChange={handleChange}
+>
+  <option value="">Select Counsellor</option>
+  {counsellors.map((f) => (
+    <option key={f.f_id} value={f.f_id}>
+      {f.faculty_name} - {f.mail}
+    </option>
+  ))}
+</select>
             </div>
 
             <div className="form-field">
               <label>Year Coordinator</label>
-              <select
-                name="yearCoordinator"
-                value={formData.yearCoordinator}
-                onChange={handleChange}
-              >
-                <option value="">Select Coordinator</option>
-                <option value="Mr. Kumar">Mr. Kumar</option>
-                <option value="Mrs. Priya">Mrs. Priya</option>
-              </select>
+             <select
+  name="yearCoordinator"
+ value={Number(formData.yearCoordinator)}
+  onChange={handleChange}
+>
+  <option value="">Select Coordinator</option>
+  {yearCoordinators.map((f) => (
+    <option key={f.f_id} value={f.f_id}>
+      {f.faculty_name} - {f.mail}
+    </option>
+  ))}
+</select>
             </div>
 
             <div className="form-field">
               <label>Section</label>
-              <input
-                type="text"
-                name="section"
-                value={formData.section}
-                onChange={handleChange}
-              />
+             <select name="section" value={formData.section} onChange={handleChange}>
+  <option value="">Select Section</option>
+  <option value="A">A</option>
+  <option value="B">B</option>
+  <option value="C">C</option>
+  <option value="D">D</option>
+  <option value="E">E</option>
+  <option value="F">F</option>
+</select>
             </div>
+
+            <div className="form-field">
+  <label>Parent Name</label>
+  <input
+    type="text"
+    name="parentName"
+    value={formData.parentName}
+    onChange={handleChange}
+  />
+</div>
+
+<div className="form-field">
+  <label>Parent Phone</label>
+  <input
+    type="text"
+    name="parentPhone"
+    value={formData.parentPhone}
+    onChange={handleChange}
+  />
+</div>
+
+<div className="form-field">
+  <label>HOD</label>
+  <select
+  name="hod"
+ value={Number(formData.hod)}
+  onChange={handleChange}
+>
+  <option value="">Select HOD</option>
+  {hods.map((f) => (
+    <option key={f.f_id} value={f.f_id}>
+      {f.faculty_name} - {f.mail}
+    </option>
+  ))}
+</select>
+</div>
+
             <div className="modal-actions">
               <button onClick={onClose} className="discard-btn">
                 Discard
