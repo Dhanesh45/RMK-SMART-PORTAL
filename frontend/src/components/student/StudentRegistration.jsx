@@ -1,584 +1,235 @@
-  import React, { useState, useEffect } from "react";
-  import loginimg from "../../assets/login.png";
-  import { useNavigate } from "react-router-dom";
-  import axios from "axios";
+// StudentRegistration.jsx
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-  const StudentRegistration = () => {
-    const navigate = useNavigate();
-    const [step, setStep] = useState(1);
-    const [errors, setErrors] = useState({});
+const StudentRegistration = () => {
+  const navigate = useNavigate();
+  const [step, setStep] = useState(1);
+  const [errors, setErrors] = useState({});
 
-    const [formData, setFormData] = useState({
-      student_mail: "",
-      password: "",
-      regNo: "",
-      year: "",
-      branch: "",
-      student_name: "",
-      gender: "",
-      accommodation: "",
-      parent_name: "",
-      parent_phone: "",
-      native: "",
-      counsellor: "",
-      year_coordinator: "",
-      hod: "",
-      section: "",
+  const [formData, setFormData] = useState({
+    student_mail: "",
+    password: "",
+    regNo: "",
+    year: "",
+    branch: "",
+    student_name: "",
+    gender: "",
+    accommodation: "",
+    parent_name: "",
+    parent_phone: "",
+    native: "",
+    counsellor: "",
+    year_coordinator: "",
+    hod: "",
+    section: "",
+  });
+
+  const [counsellors, setCounsellors] = useState([]);
+  const [yearCoordinators, setYearCoordinators] = useState([]);
+  const [hods, setHods] = useState([]);
+
+  const handleChange = (e) => {
+    setErrors({ ...errors, [e.target.name]: "" });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  useEffect(() => {
+    if (!formData.branch) return;
+
+    axios.get(`http://localhost:5000/api/faculty/by-branch-role/${formData.branch}/counsellor`)
+      .then(res => setCounsellors(res.data));
+
+    axios.get(`http://localhost:5000/api/faculty/by-branch-role/${formData.branch}/year_coordinator`)
+      .then(res => setYearCoordinators(res.data));
+
+    axios.get(`http://localhost:5000/api/faculty/by-branch-role/${formData.branch}/hod`)
+      .then(res => setHods(res.data));
+
+  }, [formData.branch]);
+
+  const validateStep1 = () => {
+    const newErrors = {};
+    const fields = [
+      "student_name","regNo","student_mail","password",
+      "gender","accommodation","parent_name","parent_phone",
+      "native","branch","year"
+    ];
+    fields.forEach(f => { if (!formData[f]) newErrors[f] = "Required"; });
+    setErrors(prev => ({ ...prev, ...newErrors }));
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateFields = () => {
+    const newErrors = {};
+    Object.keys(formData).forEach(f => {
+      if (!formData[f]) newErrors[f] = "Required";
     });
-    const [counsellors, setCounsellors] = useState([]);
-    const [yearCoordinators, setYearCoordinators] = useState([]);
-    const [hods, setHods] = useState([]);
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-    const handleChange = (e) => {
-      setErrors({ ...errors, [e.target.name]: "" });
-      setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+  const handleSubmit = async () => {
+    if (!validateFields()) return alert("Fill all fields");
 
-   useEffect(() => {
-  if (!formData.branch) return;
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/api/student/register",
+        formData
+      );
 
-  // Counsellors
-  axios
-    .get(`http://localhost:5000/api/faculty/by-branch-role/${formData.branch}/counsellor`)
-    .then((res) => {
-      console.log("Counsellors:", res.data); // ✅ log for debugging
-      setCounsellors(res.data);
-    });
-
-  // Year Coordinators
-  axios
-    .get(`http://localhost:5000/api/faculty/by-branch-role/${formData.branch}/year_coordinator`)
-    .then((res) => {
-      console.log("Year Coordinators:", res.data); // ✅ log for debugging
-      setYearCoordinators(res.data);
-    });
-
-  // HODs
-  axios
-    .get(`http://localhost:5000/api/faculty/by-branch-role/${formData.branch}/hod`)
-    .then((res) => {
-      console.log("HODs:", res.data); // ✅ log for debugging
-      setHods(res.data);
-    });
-}, [formData.branch]);
-
-
-    const validateFields = () => {
-      const newErrors = {};
-      const requiredFields = [
-        "student_name",
-        "regNo",
-        "student_mail",
-        "password",
-        "gender",
-        "accommodation",
-        "parent_name",
-        "parent_phone",
-        "native",
-        "branch",
-        "year",
-        "counsellor",
-        "year_coordinator",
-        "hod",
-        "section",
-      ];
-
-      requiredFields.forEach((f) => {
-        if (!formData[f]) newErrors[f] = "This field is required";
+      alert(res.data.message);
+      navigate("/StuDash", {
+        state: { accommodation: formData.accommodation, regNo: formData.regNo }
       });
 
-      setErrors(newErrors);
-      return Object.keys(newErrors).length === 0;
-    };
-    const validateStep1 = () => {
-      const newErrors = {};
+    } catch (err) {
+      alert(err.response?.data?.message || "Registration failed");
+    }
+  };
 
-      const step1Fields = [
-        "student_name",
-        "regNo",
-        "student_mail",
-        "password",
-        "gender",
-        "accommodation",
-        "parent_name",
-        "parent_phone",
-        "native",
-        "branch",
-        "year",
-      ];
+  return (
+    <div style={styles.page}>
+      
+      {/* MAIN CARD */}
+      <div style={styles.card}>
 
-      step1Fields.forEach((field) => {
-        if (!formData[field]) {
-          newErrors[field] = "This field is required";
-        }
-      });
+        {/* LEFT PANEL */}
+        <div style={styles.left}>
+          <div style={styles.glow}/>
+          <h2 style={styles.logo}>RMK SMART PORTAL</h2>
+        </div>
 
-      setErrors((prev) => ({ ...prev, ...newErrors }));
+        {/* RIGHT FORM */}
+        <div style={styles.right}>
 
-      return Object.keys(newErrors).length === 0;
-    };
+          <h1 style={styles.title}>STUDENT REGISTRATION</h1>
 
-    const handleSubmit = async () => {
-      if (!validateFields()) {
-        alert("Please fill all required fields.");
-        return;
-      }
+          {step === 1 && (
+            <>
+              <Input name="student_name" label="NAME" value={formData.student_name} onChange={handleChange} error={errors.student_name}/>
+              <Input name="regNo" label="REG NO" value={formData.regNo} onChange={handleChange} error={errors.regNo}/>
+              <Input name="student_mail" label="EMAIL" value={formData.student_mail} onChange={handleChange} error={errors.student_mail}/>
+              <Input type="password" name="password" label="PASSWORD" value={formData.password} onChange={handleChange} error={errors.password}/>
+              
+              <Select name="gender" label="GENDER" value={formData.gender} onChange={handleChange} options={["Male","Female","Other"]}/>
+              <Select name="accommodation" label="ACCOMMODATION" value={formData.accommodation} onChange={handleChange} options={["HOSTELLER","DAYSCHOLAR"]}/>
+              
+              <Input name="parent_name" label="PARENT NAME" value={formData.parent_name} onChange={handleChange}/>
+              <Input name="parent_phone" label="PARENT PHONE" value={formData.parent_phone} onChange={handleChange}/>
+              <Input name="native" label="NATIVE" value={formData.native} onChange={handleChange}/>
+              
+              <Select name="branch" label="BRANCH" value={formData.branch} onChange={handleChange} options={["IT","CSE","AIDS","ECE","MECH","CIVIL"]}/>
+              <Select name="year" label="YEAR" value={formData.year} onChange={handleChange} options={["I","II","III","IV"]}/>
 
-      try {
-        const res = await axios.post(
-          "http://localhost:5000/api/student/register",
-          formData,
-          { headers: { "Content-Type": "application/json" } }
-        );
+              <button style={styles.primaryBtn} onClick={() => validateStep1() && setStep(2)}>
+                NEXT
+              </button>
+            </>
+          )}
 
-        alert(res.data.message);
-        navigate("/StuDash", {
-          state: {
-            accommodation: formData.accommodation,
-            regNo: formData.regNo,
-          },
-        });
-      } catch (err) {
-        alert(err.response?.data?.message || "Registration failed");
-      }
-    };
+          {step === 2 && (
+            <>
+              <SelectDynamic name="counsellor" label="COUNSELLOR" list={counsellors} value={formData.counsellor} onChange={handleChange}/>
+              <SelectDynamic name="year_coordinator" label="YEAR COORDINATOR" list={yearCoordinators} value={formData.year_coordinator} onChange={handleChange}/>
+              <SelectDynamic name="hod" label="HOD" list={hods} value={formData.hod} onChange={handleChange}/>
+              <Select name="section" label="SECTION" value={formData.section} onChange={handleChange} options={["A","B","C","D","E","F"]}/>
 
-    return (
-      <div style={styles.page}>
-        <div style={styles.card}>
-          {/* LEFT IMAGE */}
-          <div style={styles.left}>
-            <img src={loginimg} alt="login" style={styles.image} />
-          </div>
+              <button style={styles.secondaryBtn} onClick={()=>setStep(1)}>BACK</button>
+              <button style={styles.primaryBtn} onClick={handleSubmit}>SUBMIT</button>
+            </>
+          )}
 
-          {/* RIGHT FORM */}
-          <div style={styles.right}>
-            <h2 style={styles.title}>STUDENT REGISTRATION</h2>
-            <p
-              style={{
-                textAlign: "center",
-                fontSize: "3vh",
-                paddingBottom: "5%",
-                fontWeight: "600",
-                color: "#1E2E4F",
-              }}
-            >
-              Complete your registration to access student services
-            </p>
-
-            {/* STEP 1 */}
-            {step === 1 && (
-              <>
-                <p
-                  style={{
-                    fontSize: "2.5vh",
-                    fontWeight: "600",
-                    color: "rgba(30, 46, 76, 1 )",
-                  }}
-                >
-                  NAME
-                </p>
-                <Input
-                  name="student_name"
-                  value={formData.student_name}
-                  onChange={handleChange}
-                  error={errors.student_name}
-                />
-                <p
-                  style={{
-                    fontSize: "2.5vh",
-                    fontWeight: "600",
-                    color: "rgba(30, 46, 76, 1 )",
-                  }}
-                >
-                  REGISTRATION NUMBER
-                </p>
-                <Input
-                  name="regNo"
-                  value={formData.regNo}
-                  onChange={(e) =>
-                    /^\d{0,12}$/.test(e.target.value) && handleChange(e)
-                  }
-                  error={errors.regNo}
-                />
-                <p
-                  style={{
-                    fontSize: "2.5vh",
-                    fontWeight: "600",
-                    color: "rgba(30, 46, 76, 1 )",
-                  }}
-                >
-                  E-MAIL
-                </p>
-                <Input
-                  name="student_mail"
-                  value={formData.student_mail}
-                  onChange={(e) => {
-                    const v = e.target.value; 
-                    if (
-                      /^[A-Za-z0-9._%+@-]*$(@rmkec\.ac\.in)?$/.test(v) ||
-                      v === ""
-                    )
-                      handleChange(e);
-                  }}
-                  error={errors.student_mail || "Must end with @rmkec.ac.in"}
-                />
-                <p
-                  style={{
-                    fontSize: "2.5vh",
-                    fontWeight: "600",
-                    color: "rgba(30, 46, 76, 1 )",
-                  }}
-                >
-                  PASSWORD
-                </p>
-                <Input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={(e) => e.target.value.length <= 8 && handleChange(e)}
-                  error={errors.password}
-                />
-                <p
-                  style={{
-                    fontSize: "2.5vh",
-                    fontWeight: "600",
-                    color: "rgba(30, 46, 76, 1 )",
-                  }}
-                >
-                  GENDER
-                </p>
-                <Select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleChange}
-                  options={["Male", "Female", "Other"]}
-                  error={errors.gender}
-                />
-                <p
-                  style={{
-                    fontSize: "2.5vh",
-                    fontWeight: "600",
-                    color: "rgba(30, 46, 76, 1 )",
-                  }}
-                >
-                  ACCOMODATION
-                </p>
-                <Select
-                  name="accommodation"
-                  value={formData.accommodation}
-                  onChange={handleChange}
-                  options={["HOSTELLER", "DAYSCHOLAR"]}
-                  error={errors.accommodation}
-                />
-                <p
-                  style={{
-                    fontSize: "2.5vh",
-                    fontWeight: "600",
-                    color: "rgba(30, 46, 76, 1 )",
-                  }}
-                >
-                  PARENT NAME
-                </p>
-                <Input
-                  name="parent_name"
-                  value={formData.parent_name}
-                  onChange={handleChange}
-                  error={errors.parent_name}
-                />
-                <p
-                  style={{
-                    fontSize: "2.5vh",
-                    fontWeight: "600",
-                    color: "rgba(30, 46, 76, 1 )",
-                  }}
-                >
-                  PARENT PHONE
-                </p>
-                <Input
-                  name="parent_phone"
-                  value={formData.parent_phone}
-                  onChange={(e) =>
-                    /^\d{0,10}$/.test(e.target.value) && handleChange(e)
-                  }
-                  error={errors.parent_phone}
-                />
-                <p
-                  style={{
-                    fontSize: "2.5vh",
-                    fontWeight: "600",
-                    color: "rgba(30, 46, 76, 1 )",
-                  }}
-                >
-                  NATIVE
-                </p>
-                <Input
-                  name="native"
-                  value={formData.native}
-                  onChange={handleChange}
-                  error={errors.native}
-                />
-
-                <p
-                  style={{
-                    fontSize: "2.5vh",
-                    fontWeight: "600",
-                    color: "rgba(30, 46, 76, 1 )",
-                  }}
-                >
-                  BRANCH
-                </p>
-                <Select
-                  name="branch"
-                  value={formData.branch}
-                  onChange={handleChange}
-                  options={["IT", "CSE", "AIDS", "ECE", "MECH", "CIVIL"]}
-                  error={errors.branch}
-                />
-
-                <p
-                  style={{
-                    fontSize: "2.5vh",
-                    fontWeight: "600",
-                    color: "rgba(30, 46, 76, 1 )",
-                  }}
-                >
-                  YEAR
-                </p>
-                <Select
-                  name="year"
-                  value={formData.year}
-                  onChange={handleChange}
-                  options={["I", "II", "III", "IV"]}
-                  error={errors.year}
-                />
-
-                <button
-                  style={styles.primaryBtn}
-                  onClick={() => {
-                    if (validateStep1()) {
-                      setStep(2);
-                    } else {
-                      alert("Please fill all required fields before proceeding.");
-                    }
-                  }}
-                >
-                  Next
-                </button>
-              </>
-            )}
-
-            {/* STEP 2 */}
-            {step === 2 && (
-              <>
-                <p
-                  style={{
-                    fontSize: "2.5vh",
-                    fontWeight: "600",
-                    color: "rgba(30, 46, 76, 1 )",
-                  }}
-                >
-                  COUNSELLOR
-                </p>
-                <Select
-    name="counsellor"
-    value={formData.counsellor}
-    onChange={handleChange}
-    options={counsellors.map(f => ({
-      label: `${f.faculty_name} - ${f.mail}`,
-      value: f.mail,
-    }))}
-    error={errors.counsellor}
-  />
-
-
-                <p
-                  style={{
-                    fontSize: "2.5vh",
-                    fontWeight: "600",
-                    color: "rgba(30, 46, 76, 1 )",
-                  }}
-                >
-                  YEAR COORDINATOR
-                </p>
-                <Select
-    name="year_coordinator"
-    value={formData.year_coordinator}
-    onChange={handleChange}
-    options={yearCoordinators.map(f => ({
-      label: `${f.faculty_name} - ${f.mail}`,
-      value: f.mail,
-    }))}
-    error={errors.year_coordinator}
-  />
-
-                <p
-                  style={{
-                    fontSize: "2.5vh",
-                    fontWeight: "600",
-                    color: "rgba(30, 46, 76, 1 )",
-                  }}
-                >
-                  HOD
-                </p>
-              <Select
-    name="hod"
-    value={formData.hod}
-    onChange={handleChange}
-    options={hods.map(f => ({
-      label: `${f.faculty_name} - ${f.mail}`,
-      value: f.mail,
-    }))}
-    error={errors.hod}
-  />
-
-                <p
-                  style={{
-                    fontSize: "2.5vh",
-                    fontWeight: "600",
-                    color: "rgba(30, 46, 76, 1 )",
-                  }}
-                >
-                  SECTION
-                </p>
-                <Select
-                  name="section"
-                  value={formData.section}
-                  onChange={handleChange}
-                  options={["A", "B", "C", "D", "E", "F"]}
-                  error={errors.section}
-                />
-
-                <button style={styles.secondaryBtn} onClick={() => setStep(1)}>
-                  Back
-                </button>
-                <button style={styles.primaryBtn} onClick={handleSubmit}>
-                  Submit
-                </button>
-              </>
-            )}
-          </div>
         </div>
       </div>
-    );
-  };
-
-  /* ================= STYLES ================= */
-
-  const styles = {
-    page: {
-      height: "100vh",
-      width: "100vw",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      background: "linear-gradient(180deg,#31487a,#8fb3e2)",
-    },
-    card: {
-      width: "90%",
-      height: "90%",
-      display: "flex",
-      borderRadius: "18px",
-      background: "#fff",
-      overflow: "hidden",
-      boxShadow: "0 20px 40px rgba(0,0,0,0.25)",
-    },
-    left: {
-      width: "50%",
-      background: "#eef5ff",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    image: {
-      width: "90%",
-      height: "90%",
-      borderRadius: "14px",
-    },
-    right: {
-      width: "50%",
-      padding: "3%",
-      overflowY: "auto",
-    },
-    title: {
-      textAlign: "center",
-      fontWeight: "800",
-      fontSize: "6vh",
-      color: "rgba(30, 46, 76, 1 )",
-      paddingBottom: "3%",
-    },
-    primaryBtn: {
-      width: "100%",
-      padding: "14px",
-      background: "#31487a",
-      color: "#fff",
-      fontSize: "16px",
-      fontWeight: "700",
-      borderRadius: "10px",
-      border: "none",
-      marginTop: "20px",
-      cursor: "pointer",
-    },
-    secondaryBtn: {
-      width: "100%",
-      padding: "12px",
-      background: "#ccc",
-      fontWeight: "600",
-      borderRadius: "10px",
-      border: "none",
-      marginTop: "10px",
-      cursor: "pointer",
-    },
-  };
-
-  const Input = ({ label, error, ...props }) => (
-    <div style={{ marginBottom: "18px" }}>
-      <label style={{ fontWeight: 600 }}>{label}</label>
-      <input
-        {...props}
-        style={{
-          width: "100%",
-          padding: "12px",
-          borderRadius: "8px",
-          border: "1px solid #ccc",
-          marginTop: "6px",
-        }}
-      />
-      {error && <small style={{ color: "red" }}>{error}</small>}
     </div>
   );
+};
 
-  const Select = ({ label, options, error, ...props }) => (
-    <div style={{ marginBottom: "18px" }}>
-      <label style={{ fontWeight: 600 }}>{label}</label>
+/* ---------- STYLES ---------- */
+const styles = {
+  page:{
+    display:"flex",justifyContent:"center",alignItems:"center",
+    minHeight:"100vh",
+    background:"linear-gradient(135deg,#1a3a4f,#1e4d5a,#1a5a5a)"
+  },
+  card:{
+    width:"85vw",height:"88vh",display:"flex",
+    borderRadius:"3vh",overflow:"hidden",
+    background:"rgba(255,255,255,0.97)",
+    boxShadow:"0 25px 60px rgba(0,0,0,0.25)"
+  },
+  left:{
+    width:"55%",background:"linear-gradient(160deg,#1a3a4f,#1a5a5a)",
+    display:"flex",justifyContent:"center",alignItems:"center",position:"relative"
+  },
+  glow:{
+    position:"absolute",width:"250px",height:"250px",borderRadius:"50%",
+    background:"radial-gradient(circle,rgba(123,224,203,0.3),transparent)"
+  },
+  logo:{color:"#7be0cb",fontWeight:"700",letterSpacing:"0.1em"},
+  right:{width:"60%",padding:"4vh 3vw",overflowY:"auto"},
+  title:{textAlign:"center",fontSize:"4vh",fontWeight:"800",color:"#1a3a4f"},
+  primaryBtn:{
+    width:"100%",padding:"12px",marginTop:"15px",
+    background:"#1a3a4f",color:"#fff",border:"none",
+    borderRadius:"3vh",cursor:"pointer"
+  },
+  secondaryBtn:{
+    width:"100%",padding:"12px",marginTop:"10px",
+    background:"#ccc",border:"none",borderRadius:"3vh"
+  }
+};
 
-      <select
-        {...props}
-        style={{
-          width: "100%",
-          padding: "12px",
-          borderRadius: "8px",
-          border: "1px solid #ccc",
-          marginTop: "6px",
-        }}
-      >
-        <option value="">Select</option>
+/* ---------- INPUT ---------- */
+const Input = ({ label, error, ...props }) => (
+  <div style={{marginBottom:"18px"}}>
+    <label style={{fontSize:"12px",color:"#6b8fa8",fontWeight:"600"}}>
+      {label}
+    </label>
+    <input {...props} style={{
+      width:"100%",padding:"12px 14px",marginTop:"6px",
+      borderRadius:"10px",border:"1.5px solid #e2eaf0"
+    }}/>
+    {error && <small style={{color:"red"}}>{error}</small>}
+  </div>
+);
 
-        {options.map((o, i) =>
-          typeof o === "string" ? (
-            <option key={i} value={o}>
-              {o}
-            </option>
-          ) : (
-            <option key={i} value={o.value}>
-              {o.label}
-            </option>
-          )
-        )}
-      </select>
+/* ---------- SELECT ---------- */
+const Select = ({ label, options, ...props }) => (
+  <div style={{marginBottom:"18px"}}>
+    <label style={{fontSize:"12px",color:"#6b8fa8",fontWeight:"600"}}>
+      {label}
+    </label>
+    <select {...props} style={{
+      width:"100%",padding:"12px 14px",marginTop:"6px",
+      borderRadius:"10px",border:"1.5px solid #e2eaf0"
+    }}>
+      <option value="">Select</option>
+      {options.map((o,i)=><option key={i}>{o}</option>)}
+    </select>
+  </div>
+);
 
-      {error && <small style={{ color: "red" }}>{error}</small>}
-    </div>
-  );
+/* ---------- DYNAMIC SELECT ---------- */
+const SelectDynamic = ({ label, list, ...props }) => (
+  <div style={{marginBottom:"18px"}}>
+    <label style={{fontSize:"12px",color:"#6b8fa8",fontWeight:"600"}}>
+      {label}
+    </label>
+    <select {...props} style={{
+      width:"100%",padding:"12px 14px",marginTop:"6px",
+      borderRadius:"10px",border:"1.5px solid #e2eaf0"
+    }}>
+      <option value="">Select</option>
+      {list.map((f,i)=>(
+        <option key={i} value={f.mail}>
+          {f.faculty_name} - {f.mail}
+        </option>
+      ))}
+    </select>
+  </div>
+);
 
-  export default StudentRegistration;
+export default StudentRegistration;

@@ -29,7 +29,7 @@ const styles = `
   }
 
   .sd-root * { box-sizing: border-box; margin: 0; padding: 0; }
-  .sd-root { font-family: 'DM Sans', sans-serif; background: var(--surface); min-height: 100vh; }
+  .sd-root { font-family: 'DM Sans', sans-serif; background: var(--surface); min-height: 90vh; }
 
   /* ── LAYOUT ── */
   .sd-body {
@@ -141,7 +141,7 @@ const styles = `
     background: var(--white);
     border-radius: var(--radius);
     box-shadow: var(--shadow-md);
-    padding: 24px;
+    padding: 30px;
   }
 
   .sd-card-title {
@@ -379,11 +379,10 @@ export default function Studentdash() {
   };
 
   const history = [
-    { id: 1, reason: "DEEPAVALI", from: "01/08/2025", to: "01/08/2025", days: 1 },
-    { id: 2, reason: "DEEPAVALI", from: "05/08/2025", to: "09/08/2025", days: 5 },
-    { id: 3, reason: "DEEPAVALI", from: "12/08/2025", to: "14/08/2025", days: 3 },
-    { id: 4, reason: "FESTIVAL", from: "20/08/2025", to: "21/08/2025", days: 2 },
-    { id: 5, reason: "TRIP", from: "25/08/2025", to: "27/08/2025", days: 3 },
+    
+   
+    { id: 1, reason: "FESTIVAL", from: "20/08/2025", to: "21/08/2025", days: 2 },
+    { id: 2, reason: "TRIP", from: "25/08/2025", to: "27/08/2025", days: 3 },
   ];
 
   const totalDays = history.reduce((s, h) => s + h.days, 0);
