@@ -5,8 +5,8 @@ const ODForm = require("../models/od_form");
 const Student = require("../models/student");
 const { Op } = require("sequelize");
 const Faculty = require("../models/faculty");
-// od with outpass
 
+// od with outpass
 const createODWithOutpass = async (req, res) => {
   const { od, outpass } = req.body;
 
@@ -21,7 +21,7 @@ const createODWithOutpass = async (req, res) => {
       await transaction.rollback();
       return res.status(404).json({ message: "Student not found" });
     }
-    /** 🔥 NEW: Find counsellor to assign facultyId */
+
     let facultyId = null;
     const counsellorValue = student.counsellor;
 
@@ -29,7 +29,7 @@ const createODWithOutpass = async (req, res) => {
       const trimmed = String(counsellorValue).trim();
 
       if (/^\d+$/.test(trimmed)) {
-        facultyId = parseInt(trimmed, 10); // stored faculty numeric ID
+        facultyId = parseInt(trimmed, 10);
       } else {
         const faculty = await Faculty.findOne({
           where: {
@@ -45,16 +45,17 @@ const createODWithOutpass = async (req, res) => {
         studentId: student.studentId,
         facultyId,
         studentName: student.studentName,
-      regNo: student.regNo,
+        regNo: student.regNo,
         year: student.year,
         branch: student.branch,
         parentName: student.parentName,
         parentPhone: student.parentPhone,
         dateOfApplication: new Date(),
         forOd: true,
+        parentsPermission: outpass.parentsPermission || "NOT_PERMITTED",
         cstatus: 0,
-      ystatus: 0,
-      hstatus: 0,
+        ystatus: 0,
+        hstatus: 0,
         ...outpass,
       },
       { transaction }
@@ -66,7 +67,7 @@ const createODWithOutpass = async (req, res) => {
         facultyId,
         outpass_id: createdOutpass.outpassId,
         studentName: student.studentName,
-      regNo: student.regNo,
+        regNo: student.regNo,
         purpose: od.purpose,
         numberOfDays: od.numberOfDays,
         fromDate: od.fromDate,
@@ -74,11 +75,10 @@ const createODWithOutpass = async (req, res) => {
         place: od.place,
         collegeName: od.collegeName,
         eventName: od.eventName,
-        date:od.date,
+        date: od.date,
         cstatus: 0,
-      ystatus: 0,
-      hstatus: 0,
-        
+        ystatus: 0,
+        hstatus: 0,
       },
       { transaction }
     );
@@ -91,11 +91,10 @@ const createODWithOutpass = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-// GOKUL WORK/
+
 const getHostellerODForCounsellor = async (req, res) => {
   try {
     const { facultyId } = req.params;
-    const { status } = req.query;
 
     if (!facultyId)
       return res.status(400).json({ message: "facultyId is required" });
@@ -107,20 +106,57 @@ const getHostellerODForCounsellor = async (req, res) => {
       },
       include: [
         {
-          model: Outpass, // 🔥 THIS IS THE FIX (JOIN)
+          model: Outpass,
+          include: [
+            {
+              model: Faculty,          // ✅ counsellor name via Outpass → Faculty
+              attributes: ["faculty_name"],
+            },
+            {
+              model: Student,
+              attributes: [
+                "studentName",
+                "regNo",
+                "year",
+                "branch",
+                "section",
+                "gender",
+                "studentMail",
+                "native",
+              ],
+              include: [
+                {
+                  model: Faculty,
+                  as: "YearCoordinator",  // ✅ year coordinator name via Student → Faculty
+                  attributes: ["faculty_name"],
+                },
+              ],
+            },
+          ],
         },
       ],
       order: [["date", "DESC"]],
     });
 
-    return res.json({ data });
+    // ✅ Resolve names
+    const result = data.map((od) => {
+      const plain = od.toJSON();
+      if (plain.Outpass) {
+        plain.Outpass.counsellorName =
+          plain.Outpass.Faculty?.faculty_name || "Not Assigned";
+        plain.Outpass.yearCoordinatorName =
+          plain.Outpass.Student?.YearCoordinator?.faculty_name || "Not Assigned";
+      }
+      return plain;
+    });
+
+    return res.json({ data: result });
   } catch (err) {
     console.error("getHostellerODForCounsellor error:", err);
-    return res
-      .status(500)
-      .json({ message: "Server error", error: err.message });
+    return res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 const getODoutpassforCounsellor = async (req, res) => {
   try {
     const { facultyId } = req.params;
@@ -129,46 +165,65 @@ const getODoutpassforCounsellor = async (req, res) => {
     if (!facultyId)
       return res.status(400).json({ message: "facultyId is required" });
 
+    // ✅ properly declared where object
+    const where = {
+      facultyId: Number(facultyId),
+      cstatus: 0,
+    };
     if (status !== undefined) where.cstatus = Number(status);
 
     const outpasswithod = await Outpass.findAll({
-  where: {
-    facultyId: Number(facultyId),
-    cstatus: 0,
-  },
-  include: [
-    {
-      model: Student,
-      attributes: [
-        "studentName",
-        "regNo",
-        "year",
-        "branch",
-        "section",
-        "gender",
-        "email",
-        "counsellor",
+      where,
+      include: [
+        {
+          model: Faculty,              // ✅ counsellor name directly from Outpass → Faculty
+          attributes: ["faculty_name"],
+        },
+        {
+          model: Student,
+          attributes: [
+            "studentName",
+            "regNo",
+            "year",
+            "branch",
+            "section",
+            "gender",
+            "studentMail",
+            "native",
+          ],
+          include: [
+            {
+              model: Faculty,
+              as: "YearCoordinator",   // ✅ year coordinator name via Student → Faculty
+              attributes: ["faculty_name"],
+            },
+          ],
+        },
       ],
-    },
-  ],
-  order: [["dateOfApplication", "DESC"]],
-});
+      order: [["dateOfApplication", "DESC"]],
+    });
 
-    return res.json({ outpasswithod });
+    // ✅ Resolve names
+    const result = outpasswithod.map((outpass) => {
+      const plain = outpass.toJSON();
+      plain.counsellorName = plain.Faculty?.faculty_name || "Not Assigned";
+      plain.yearCoordinatorName =
+        plain.Student?.YearCoordinator?.faculty_name || "Not Assigned";
+      return plain;
+    });
+
+    return res.json({ outpasswithod: result });
   } catch (err) {
     console.error("getODoutpassforCounsellor error:", err);
-    return res
-      .status(500)
-      .json({ message: "Server error", error: err.message });
+    return res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
-// get od and outpass for counsellor separate functions has been completed 
 const updateCstatushosod = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { od_id } = req.params;
-    const { action } = req.body;
+    const { action, remarks, parentsPermission } = req.body;
 
     if (!["approve", "reject"].includes(action))
       return res.status(400).json({ message: "Invalid action" });
@@ -179,14 +234,19 @@ const updateCstatushosod = async (req, res) => {
 
     const newStatus = action === "approve" ? 1 : -1;
 
-    // ✅ Update OD status
     hostod.cstatus = newStatus;
     await hostod.save({ transaction });
 
-    // ✅ Sync Outpass status automatically
     await Outpass.update(
-      { cstatus: newStatus },
-      { where: { outpassId: hostod.outpass_id }, transaction }
+      {
+        cstatus: newStatus,
+        remarks: remarks || null,
+        parentsPermission: parentsPermission || "NOT_PERMITTED",
+      },
+      {
+        where: { outpassId: hostod.outpass_id },
+        transaction,
+      }
     );
 
     await transaction.commit();
@@ -209,7 +269,6 @@ const updateCstatusOdOut = async (req, res) => {
     if (!["approve", "reject"].includes(action))
       return res.status(400).json({ message: "Invalid action" });
 
-    // ✅ Check linked OD
     const od = await ODForm.findOne({
       where: { outpass_id: outpassId },
     });
@@ -217,7 +276,6 @@ const updateCstatusOdOut = async (req, res) => {
     if (!od)
       return res.status(404).json({ message: "Linked OD not found" });
 
-    // ❌ Block outpass approval if OD not approved
     if (action === "approve" && od.cstatus !== 1) {
       return res.status(400).json({
         message: "Cannot approve outpass before OD approval",
@@ -248,41 +306,111 @@ const getFullODDetails = async (req, res) => {
     const od = await ODForm.findOne({
       where: { od_id },
       include: [
-  {
-    model: Outpass,
-    include: [
-      { model: require("../models/student") } // ✅ ADD THIS
-    ],
-  },
-  { model: require("../models/student") },
-],
+        {
+          model: Student,
+          attributes: [
+            "studentName",
+            "regNo",
+            "year",
+            "branch",
+            "section",
+            "gender",
+            "studentMail",
+            "native",
+          ],
+          include: [
+            {
+              model: Faculty,
+              as: "YearCoordinator",
+              attributes: ["faculty_name"],
+            },
+          ],
+        },
+        {
+          model: Outpass,
+          include: [
+            {
+              model: Faculty,
+              attributes: ["faculty_name"],
+            },
+          ],
+        },
+      ],
     });
 
     if (!od) {
       return res.status(404).json({ message: "OD not found" });
     }
 
-    // 🔥 FIX: manually merge student data into Outpass
+    const odJson = od.toJSON();
+    const studentJson = odJson.student || {};  
+    const outpassJson = odJson.Outpass || {};
+
+    const counsellorName =
+      outpassJson.Faculty?.faculty_name || "Not Assigned";
+    const yearCoordinatorName =
+      studentJson.YearCoordinator?.faculty_name || "Not Assigned";
+
     const response = {
-      ...od.toJSON(),
-      Outpass: {
-        ...od.Outpass?.toJSON(),
-        Student: od.Student || null,   // ✅ inject Student here
+      od_id: odJson.od_id,
+      student_id: odJson.student_id,
+      facultyId: odJson.facultyId,
+      outpass_id: odJson.outpass_id,
+      purpose: odJson.purpose,
+      numberOfDays: odJson.numberOfDays,
+      fromDate: odJson.fromDate,
+      toDate: odJson.toDate,
+      place: odJson.place,
+      collegeName: odJson.collegeName,
+      eventName: odJson.eventName,
+      date: odJson.date,
+      cstatus: odJson.cstatus,
+      ystatus: odJson.ystatus,
+      hstatus: odJson.hstatus,
+
+      outpassId: outpassJson.outpassId,
+      studentName: outpassJson.studentName,
+      regNo: outpassJson.regNo,
+      year: outpassJson.year,
+      branch: outpassJson.branch,
+      parentName: outpassJson.parentName,
+      parentPhone: outpassJson.parentPhone,
+      roomNumber: outpassJson.roomNumber,
+      noOfDays: outpassJson.noOfDays,
+      leavingDate: outpassJson.leavingDate,
+      leavingTime: outpassJson.leavingTime,
+      reasonForLeave: outpassJson.reasonForLeave,
+      parentsPermission: outpassJson.parentsPermission,
+      remarks: outpassJson.remarks,
+
+      student: {
+        studentName: studentJson.studentName,
+        regNo: studentJson.regNo,
+        year: studentJson.year,
+        branch: studentJson.branch,
+        section: studentJson.section,
+        gender: studentJson.gender,
+        studentMail: studentJson.studentMail,
+        native: studentJson.native,
+        counsellor: counsellorName,
+        yearCoordinator: yearCoordinatorName,
       },
     };
 
     return res.json(response);
-
   } catch (err) {
     console.error("getFullODDetails error:", err);
-    return res.status(500).json({ message: "Server error" });
+    return res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
   }
 };
-module.exports = { 
-  createODWithOutpass, 
-  getHostellerODForCounsellor, 
-  getODoutpassforCounsellor, 
+module.exports = {
+  createODWithOutpass,
+  getHostellerODForCounsellor,
+  getODoutpassforCounsellor,
   updateCstatushosod,
   updateCstatusOdOut,
-  getFullODDetails // ✅ ADD THIS
+  getFullODDetails,
 };

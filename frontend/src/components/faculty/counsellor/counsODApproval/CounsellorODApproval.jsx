@@ -8,34 +8,32 @@ const CounsellorODApproval = () => {
   const [activeForm, setActiveForm] = useState("");
   const [students, setStudents] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
+
   useEffect(() => {
     const fetchCounsellorOD = async () => {
       try {
         const email = localStorage.getItem("facultyEmail");
         if (!email) return;
 
-        // 🔹 get facultyId
         const facultyRes = await axios.get(
           `http://localhost:5000/api/faculty/email/${email}`
         );
         const facultyId = facultyRes.data.f_id;
 
-        // 🔹 fetch hosteller OD
-       const res = await axios.get(
-  `http://localhost:5000/api/od/counsellor/${facultyId}`
-);
+        const res = await axios.get(
+          `http://localhost:5000/api/od/counsellor/${facultyId}`
+        );
 
         const mapped = res.data.data.map((item, index) => ({
-  sno: index + 1,
-  name: item.studentName,
-  nof: item.regNo,
-  od_id: item.od_id,
-  odData: item,
-  outpassData: item.Outpass,
-  type: "HOSTELLER",
-}));
+          sno: index + 1,
+          name: item.studentName,
+          nof: item.regNo,
+          od_id: item.od_id,
+          odData: item,
+          outpassData: item.Outpass,
+          type: "HOSTELLER",
+        }));
 
-        // 🔹 fetch dayscholar OD
         const dayscholarRes = await axios.get(
           `http://localhost:5000/api/dayscholar-od/counsellor/${facultyId}`
         );
@@ -59,39 +57,77 @@ const CounsellorODApproval = () => {
     fetchCounsellorOD();
   }, []);
 
-  // 🔹 APPROVE
+  const validateStudentData = (student) => {
+    if (!student || !student.outpassData) {
+      alert("Invalid student data");
+      return false;
+    }
+
+    const { remarks, parentsPermission } = student.outpassData;
+
+    if (!remarks || remarks.trim() === "") {
+      alert("Please enter remarks before approving");
+      return false;
+    }
+
+    if (!parentsPermission || parentsPermission === "NOT_PERMITTED") {
+      alert("Please select parent permission before approving");
+      return false;
+    }
+
+    return true;
+  };
+
+  // ✅ KEY FIX: saves submitted remarks + parentsPermission into students array
+  const handleSubmitOutpass = (updatedStudent) => {
+    setStudents((prev) =>
+      prev.map((s) =>
+        s.od_id === updatedStudent.od_id
+          ? {
+              ...s,
+              outpassData: {
+                ...s.outpassData,
+                remarks: updatedStudent.outpassData.remarks,
+                parentsPermission: updatedStudent.outpassData.parentsPermission,
+              },
+            }
+          : s
+      )
+    );
+  };
+
   const handleApprove = async (student) => {
     const url =
       student.type === "HOSTELLER"
         ? `http://localhost:5000/api/od/approve/od/${student.od_id}`
         : `http://localhost:5000/api/dayscholar-od/cstatus/${student.od_id}`;
 
-    await axios.put(url, { action: "approve" });
+    await axios.put(url, {
+      action: "approve",
+      remarks: student.outpassData?.remarks,
+      parentsPermission: student.outpassData?.parentsPermission,
+    });
 
-    setStudents((prev) =>
-      prev.filter((s) => s.od_id !== student.od_id)
-    );
+    setStudents((prev) => prev.filter((s) => s.od_id !== student.od_id));
   };
-const handleApproveAll = async () => {
-  try {
-    await Promise.all(
-      students.map((student) => {
-        const url =
-          student.type === "HOSTELLER"
-        ? `http://localhost:5000/api/od/approve/od/${student.od_id}`
-        : `http://localhost:5000/api/dayscholar-od/cstatus/${student.od_id}`;
 
-        return axios.put(url, { action: "approve" });
-      })
-    );
+  const handleApproveAll = async () => {
+    try {
+      await Promise.all(
+        students.map((student) => {
+          const url =
+            student.type === "HOSTELLER"
+              ? `http://localhost:5000/api/od/approve/od/${student.od_id}`
+              : `http://localhost:5000/api/dayscholar-od/cstatus/${student.od_id}`;
+          return axios.put(url, { action: "approve" });
+        })
+      );
+      setStudents([]);
+    } catch (error) {
+      console.error("Approve all failed", error);
+    }
+  };
 
-    // clear all approved requests from UI
-    setStudents([]);
-  } catch (error) {
-    console.error("Approve all failed", error);
-  }
-};
-  // 🔹 REJECT
   const handleReject = async (student) => {
     const url =
       student.type === "HOSTELLER"
@@ -99,10 +135,7 @@ const handleApproveAll = async () => {
         : `http://localhost:5000/api/dayscholar-od/cstatus/${student.od_id}`;
 
     await axios.put(url, { action: "reject" });
-
-    setStudents((prev) =>
-      prev.filter((s) => s.od_id !== student.od_id)
-    );
+    setStudents((prev) => prev.filter((s) => s.od_id !== student.od_id));
   };
 
   return (
@@ -126,67 +159,80 @@ const handleApproveAll = async () => {
                 <div style={cardCell}>{student.sno}</div>
                 <div style={cardCell}>{student.name}</div>
                 <div style={cardCell}>{student.nof}</div>
+
+                {/* OUTPASS BUTTON */}
                 <div style={cardCell}>
                   <button style={formBtn} onClick={async () => {
-  const res = await axios.get(
-    `http://localhost:5000/api/od/details/${student.od_id}`
-  );
-  console.log("ONDUTY API DATA 👉", res.data);
+                    const res = await axios.get(
+                      `http://localhost:5000/api/od/details/${student.od_id}`
+                    );
+                    console.log("OUTPASS API DATA 👉", res.data);
 
-  setSelectedStudent({
-  ...student,
-  odData: res.data,
-  outpassData: {
-    ...res.data.Outpass,
-    Student: res.data.Student, // ✅ ensure always available
-  },
-});
+                    setSelectedStudent({
+                      ...student,
+                      odData: res.data,
+                      outpassData: {
+                        ...res.data,
+                        // ✅ preserve already submitted remarks + permission if exist
+                        remarks: student.outpassData?.remarks || res.data.remarks || "",
+                        parentsPermission: student.outpassData?.parentsPermission || res.data.parentsPermission || "NOT_PERMITTED",
+                        student: res.data.student,
+                      },
+                    });
 
-  setShowPopup(true);
-  setActiveForm("outpass");
-}}>
+                    setShowPopup(true);
+                    setActiveForm("outpass");
+                  }}>
                     OUTPASS
                   </button>
                 </div>
+
+                {/* ONDUTY BUTTON */}
                 <div style={cardCell}>
-                  <button style={formBtn}onClick={async () => {
-  const res = await axios.get(
-    `http://localhost:5000/api/od/details/${student.od_id}`
-  );
+                  <button style={formBtn} onClick={async () => {
+                    const res = await axios.get(
+                      `http://localhost:5000/api/od/details/${student.od_id}`
+                    );
+                    console.log("ONDUTY API DATA 👉", res.data);
 
-  setSelectedStudent({
-  ...student,
-  odData: res.data,
-  outpassData: {
-    ...res.data.Outpass,
-    Student: res.data.Student, // ✅ ensure always available
-  },
-});
+                    setSelectedStudent({
+                      ...student,
+                      odData: res.data,
+                      outpassData: {
+                        ...res.data,
+                        student: res.data.student,
+                      },
+                    });
 
-  setShowPopup(true);
-  setActiveForm("onduty");
-}}>
+                    setShowPopup(true);
+                    setActiveForm("onduty");
+                  }}>
                     ONDUTY
                   </button>
                 </div>
+
+                {/* APPROVE / REJECT */}
                 <div style={cardCell}>
-                  <button style={approveBtn} onClick={() => handleApprove(student)}>APPROVE</button>
+                  <button
+                    style={approveBtn}
+                    onClick={() => {
+                      // ✅ reads from students array which has saved remarks + permission
+                      if (validateStudentData(student)) {
+                        handleApprove(student);
+                      }
+                    }}
+                  >
+                    APPROVE
+                  </button>
                   <button style={rejectBtn} onClick={() => handleReject(student)}>REJECT</button>
                 </div>
               </div>
             ))}
           </div>
         </div>
-         <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            margin: "auto",
-            width: "90%",
-          }}
-        >
+
+        <div style={{ display: "flex", justifyContent: "space-between", margin: "auto", width: "90%" }}>
           <button style={bottomBtn}>Request Access</button>
-          <button style={bottomBtn} onClick={() => handleApproveAll()}>Approve All</button>
         </div>
       </div>
 
@@ -194,15 +240,25 @@ const handleApproveAll = async () => {
         <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", justifyContent: "center", alignItems: "center", zIndex: 9999 }}>
           <div style={{ backgroundColor: "white", borderRadius: "10px", width: "80%", height: "90%", padding: "1%", position: "relative" }}>
             <button onClick={() => setShowPopup(false)} style={{ position: "absolute", top: "10px", right: "20px" }}>✕</button>
-            {activeForm === "outpass" && (
-  <CounsOutPass isPopup data={selectedStudent?.outpassData} />
-)}
 
-{activeForm === "onduty" && (
-  <CounsOnDuty isPopup data={selectedStudent?.odData} />
-)}
+            {activeForm === "outpass" && (
+              <CounsOutPass
+                isPopup
+                data={selectedStudent?.outpassData}
+                student={selectedStudent}
+                handleApprove={handleApprove}
+                handleReject={handleReject}
+                closePopup={() => setShowPopup(false)}
+                setSelectedStudent={setSelectedStudent}
+                validateStudentData={validateStudentData}
+                handleSubmitOutpass={handleSubmitOutpass}  // ✅ NEW
+              />
+            )}
+
+            {activeForm === "onduty" && (
+              <CounsOnDuty isPopup data={selectedStudent?.odData} />
+            )}
           </div>
-          
         </div>
       )}
     </div>
@@ -223,4 +279,5 @@ const bottomBtn = {
   fontSize: "100%",
   fontWeight: "bold",
 };
+
 export default CounsellorODApproval;
