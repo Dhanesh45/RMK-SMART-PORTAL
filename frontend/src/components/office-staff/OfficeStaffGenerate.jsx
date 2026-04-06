@@ -87,7 +87,7 @@ const OfficeStaffGenerate = () => {
 
               <th style={{ padding: "12px" }}>View</th>
 
-              <th style={{ padding: "12px" }}>Generate</th>
+              <th style={{ padding: "12px" }}>Generated</th>
             </tr>
           </thead>
 
@@ -158,7 +158,7 @@ const OfficeStaffGenerate = () => {
   }
 }}
 >
-  GENERATE
+  Notify
 </Button>
                 </td>
               </tr>
