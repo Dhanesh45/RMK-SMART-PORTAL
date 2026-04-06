@@ -157,7 +157,7 @@ const HodBonafideApproval = () => {
 
         {/* Bottom Buttons */}
 
-        <div style={bottomBar}>
+        {/* <div style={bottomBar}>
           <button style={approveAllBtn} onClick={approveAll}>
             APPROVE ALL
           </button>
@@ -165,7 +165,7 @@ const HodBonafideApproval = () => {
           <button style={rejectAllBtn} onClick={rejectAll}>
             REJECT ALL
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Popup */}

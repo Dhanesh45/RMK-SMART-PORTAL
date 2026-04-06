@@ -1,6 +1,5 @@
 // StudentLogin.jsx
 import { useState } from "react";
-import loginimg from "../../assets/login.png";
 import { useNavigate } from "react-router-dom";
 import axios from "axios"; 
 
@@ -8,7 +7,6 @@ const StudentLogin = () => {
     const navigate = useNavigate();
     const [isChecked, setIsChecked] = useState(false);
     
-    // 🧹 Cleaned up formData to only contain required inputs
     const [formData, setFormData] = useState({
         student_mail: '',
         password: '',
@@ -33,144 +31,227 @@ const StudentLogin = () => {
 
         try {
             const response = await axios.post("http://localhost:5000/api/student/login", formData); 
-            
-            console.log("Login Success:", response.data);
-
-            // ✅ NEW: Extract regNo and accommodation from the server response
             const { regNo, accommodation } = response.data.studentData;
 
-            // ✅ Navigate and pass the fetched data via state
             navigate("/StuDash", { state:{ 
                 accommodation: accommodation, 
                 regNo: regNo 
             } });
-            console.log("executed")
 
         } catch (err) {
-            console.error("Login Failed:", err.response ? err.response.data : err.message);
-            const errorMessage = err.response && err.response.data && err.response.data.message
-                ? err.response.data.message
-                : "Login failed. Please try again.";
+            const errorMessage = err.response?.data?.message || "Login failed. Please try again.";
             setError(errorMessage);
         }
     };
 
-    return (
-        <div style={{ width: "100%", height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", backgroundImage: 'linear-gradient(to bottom, rgba(49, 72, 122, 1), rgba(143, 179, 226, 1))' }}>
-            <div style={{ width: "85%", height: "85%", backgroundColor: "white", borderRadius: "4vh", boxShadow: "2px 2px 5px rgba(0, 0, 0, 0.5 )", display: "flex", overflow: "hidden" }}>
+return (
+  <div style={{
+    width: "100%",
+    minHeight: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "linear-gradient(135deg, #1a3a4f, #1e4d5a, #1a5a5a)",
+    padding: "3vh"
+  }}>
 
-                {/* image part */}
-                <div style={{ width: "50%", height: "100%", display: "flex", justifyContent: "center", alignItems: "center", borderRight: "1px solid rgba(14,73,71,1)" }}>
-                    <img src={loginimg} alt="LoginImage" style={{ width: "100%", height: "100%" }} />
-                </div>
+    {/* 🔥 INPUT STYLES */}
+    <style>{`
+      .login-input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1.5px solid #e2eaf0;
+        border-radius: 10px;
+        font-size: 14px;
+        color: #1a3a4f;
+        outline: none;
+        transition: all 0.2s ease;
+        background: #ffffff;
+      }
 
-                {/* Form part */}
-                <div className="form-scroll" style={{ width: "50%", height: "100%", padding: "2% 0%", overflowY: "auto" }}>
-                    <h1 style={{ textAlign: "center", fontWeight: "800", fontSize: "6vh", color: "rgba(30, 46, 76, 1 )", paddingBottom: "3%" }}>STUDENT LOGIN</h1>
-                    <p style={{ textAlign: "center", fontSize: "3vh", paddingBottom: "1%", fontWeight: "600", color: "#1E2E4F" }}>
-                        Welcome to student details Login to access your account
-                    </p>
+      .login-input:focus {
+        border-color: #7be0cb;
+        box-shadow: 0 0 0 3px rgba(123,224,203,0.25);
+      }
 
-                    {/* 👈 NEW: Attach handleLogin to form onSubmit */}
-                    <form onSubmit={handleLogin} style={{ padding: "3% 5% 5% 5%" }}>
+      .login-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #6b8fa8;
+        margin-bottom: 5px;
+        letter-spacing: 0.05em;
+      }
+    `}</style>
 
-                        {/* Email */}
-                        <div style={{ paddingBottom: "4%" }}>
-                            <p style={{ fontSize: "3vh", fontWeight: "600", paddingBottom: "0.8%", color: "rgba(30, 46, 76, 1 )" }}>EMAIL</p>
-                            <input
-                                type="email"
-                                name="student_mail" // 👈 name must match API payload
-                                value={formData.student_mail}
-                                onChange={handleChange} // 👈 Add handler
-                                style={{ width: "97%", padding: "1.25%", borderRadius: "0.7vh", border: "1px solid rgba(30, 46, 76, 1 )", fontSize: "3vh", fontWeight: "500" }}
-                            />
-                        </div>
+    {/* 🔥 MAIN CARD (BIGGER) */}
+    <div style={{
+      width: "80vw",
+     
+      height: "85vh",
+      background: "rgba(255,255,255,0.97)",
+      borderRadius: "3vh",
+      boxShadow: "0 25px 60px rgba(0,0,0,0.25)",
+      display: "flex",
+      overflow: "hidden"
+    }}>
 
-                        {/* Password */}
-                        <div style={{ paddingBottom: "1%" }}>
-                            <p style={{ fontSize: "3vh", fontWeight: "600", paddingBottom: "0.8%", color: "rgba(30, 46, 76, 1 )" }}>PASSWORD</p>
-                            <input
-                                type={isChecked ? "text" : "password"}
-                                name="password" // 👈 name must match API payload
-                                value={formData.password}
-                                onChange={handleChange} // 👈 Add handler
-                                style={{ width: "97%", padding: "1.25%", borderRadius: "0.7vh", border: "1px solid rgba(30, 46, 76, 1 )", fontSize: "3vh", fontWeight: "500" }}
-                            />
-                        </div>
+      {/* LEFT PANEL */}
+      <div style={{
+        width: "50%",
+        background: "linear-gradient(160deg, #1a3a4f, #1a5a5a)",
+        position: "relative",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center"
+      }}>
+        <div style={{
+          position: "absolute",
+          width: "250px",
+          height: "250px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(123,224,203,0.3), transparent)",
+        }} />
 
-                        {/* Show password & forgot */}
-                        <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: "5%" }}>
-                            <label style={{ display: "flex", alignItems: "center", cursor: "pointer", userSelect: "none" }}>
-                                <input type="checkbox" checked={isChecked} onChange={() => setIsChecked(!isChecked)} style={{ display: "none" }} />
-                                <span style={{ width: "24px", height: "24px", display: "inline-block", borderRadius: "0.6vh", backgroundColor: isChecked ? "#1E2E4F" : "#fff", border: "2px solid rgba(17,73,71,1)", position: "relative", transition: "all 0.2s ease-in-out" }}>
-                                    {isChecked && (
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ width: "16px", height: "16px", position: "absolute", top: "2px", left: "4px" }}>
-                                            <polyline points="20 6 9 17 4 12" />
-                                        </svg>
-                                    )}
-                                </span>
-                                <p style={{ fontWeight: "650", paddingLeft: "10px", color: "#1E2E4F", marginBottom: "0" }}>
-                                    SHOW PASSWORD
-                                </p>
-                            </label>
+        <h2 style={{
+          color: "#7be0cb",
+          fontSize: "3vh",
+          fontWeight: "700",
+          letterSpacing: "0.1em"
+        }}>
+          RMK SMART PORTAL
+        </h2>
+      </div>
 
-                            <a href="#" style={{ color: "rgba(30, 46, 76, 0.7)", fontWeight: "600" }}>Forget Password?</a>
-                        </div>
+      {/* RIGHT FORM */}
+      <div style={{
+        width: "55%",
+        padding: "5vh 3.5vw",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center"
+      }}>
 
-                        {/* 👈 NEW: Error message display */}
-                        {error && (
-                            <p style={{ color: "red", textAlign: "center", fontWeight: "600", paddingBottom: "2%" }}>
-                                {error}
-                            </p>
-                        )}
+        <h1 style={{
+          textAlign: "center",
+          fontSize: "4vh",
+          fontWeight: "800",
+          color: "#1a3a4f",
+          marginBottom: "3vh"
+        }}>
+          STUDENT LOGIN
+        </h1>
 
-                        {/* Login button */}
-                        <div style={{ textAlign: "center"}} className="flex justify-center items-center flex-col">
-                            {/* 👈 IMPORTANT: Button is type="submit" and inside the form */}
-                            <button
-                                type="submit" 
-                                style={{ padding: "2% 30%", borderRadius: "4vh", fontSize: "3vh", fontWeight: "600", color: "white", backgroundColor: "rgba(30, 46, 76, 1 )" }}
-                            >
-                                LOGIN
-                            </button>
-                            <span 
-                                onClick={() => navigate("/StudentRegistration")} // ⬅️ Correctly wrapped in an arrow function
-                                style={{ 
-                                    color: "rgba(30, 46, 76, 0.7)", 
-                                    fontWeight: "600",
-                                    cursor: "pointer", // 💡 Add cursor style to visually indicate it's clickable
-                                }}
-                            >
-                                New User? How about register first!!
-                            </span>
-                        </div>
-                        
-                    </form>
-                </div>
-            </div>
+        <form onSubmit={handleLogin}>
 
-            <style>
-          {`
-            .form-scroll::-webkit-scrollbar {
-              width: 8px;
-            }
-  
-            .form-scroll::-webkit-scrollbar-track {
-              background: #f0f0f0;
-            }
-  
-            .form-scroll::-webkit-scrollbar-thumb {
-              background-color: rgba(30, 46, 76, 0.5 );
-              border-radius: 1vh;
-            }
-  
-            .form-scroll::-webkit-scrollbar-thumb:hover {
-              background-color: rgba(17, 73, 71, 1);
-            }
-          `}
-        </style>
-        </div>
-    );
+          {/* EMAIL */}
+          <div style={{ marginBottom: "2.5vh" }}>
+            <p className="login-label">EMAIL</p>
+            <input
+              type="email"
+              name="student_mail"
+              value={formData.student_mail}
+              onChange={handleChange}
+              className="login-input"
+            />
+          </div>
+
+          {/* PASSWORD */}
+          <div style={{ marginBottom: "2vh" }}>
+            <p className="login-label">PASSWORD</p>
+            <input
+              type={isChecked ? "text" : "password"}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="login-input"
+            />
+          </div>
+
+          {/* OPTIONS */}
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginBottom: "2vh"
+          }}>
+            <label  style={{
+              textAlign: "center",
+              marginTop: "2vh",
+              cursor: "pointer",
+              color: "#1a3a4f",
+              fontWeight: "600"
+            }}>
+              <input
+                type="checkbox"
+                checked={isChecked}
+                onChange={() => setIsChecked(!isChecked)}
+                
+              /> Show Password
+            </label>
+
+            <span  style={{
+              textAlign: "center",
+              marginTop: "2vh",
+              cursor: "pointer",
+              color: "#1a3a4f",
+              fontWeight: "600"
+            }}>
+              Forgot?
+            </span>
+          </div>
+
+          {/* ERROR */}
+          {error && (
+            <p style={{ color: "red", textAlign: "center" }}>
+              {error}
+            </p>
+          )}
+
+          {/* LOGIN BUTTON */}
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              padding: "1.4vh",
+              borderRadius: "3vh",
+              border: "none",
+              background: "#1a3a4f",
+              color: "#fff",
+              fontWeight: "700",
+              letterSpacing: "0.05em",
+              cursor: "pointer",
+              transition: "0.3s"
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = "#7be0cb"
+              e.currentTarget.style.color = "#1a3a4f"
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = "#1a3a4f"
+              e.currentTarget.style.color = "#fff"
+            }}
+          >
+            LOGIN
+          </button>
+
+          {/* REGISTER */}
+          <p
+            onClick={() => navigate("/StudentRegistration")}
+            style={{
+              textAlign: "center",
+              marginTop: "2vh",
+              cursor: "pointer",
+              color: "#1a3a4f",
+              fontWeight: "600"
+            }}
+          >
+            New user? Register here
+          </p>
+
+        </form>
+      </div>
+    </div>
+  </div>
+)
 };
 
 export default StudentLogin;
