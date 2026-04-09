@@ -12,9 +12,21 @@ const getStudentForDayscholarOD = async (req, res) => {
 
     const student = await Student.findOne({ where: { regNo } });
 
-    if (!student) return res.status(404).json({ message: "Student not found" });
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
 
-    res.status(200).json(student);
+    // ✅ Get latest OD
+    const od = await DayscholarOD.findOne({
+      where: { regNo },
+      order: [["od_id", "DESC"]],
+    });
+
+    res.status(200).json({
+      ...student.toJSON(),
+      odAvailed: od?.odAvailed ?? 0, // ✅ FIX
+    });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch student" });
@@ -132,9 +144,34 @@ const updateCstatus = async (req, res) => {
       .json({ message: "Server error", error: err.message });
   }
 };
+/**
+ * ✅ Get single Dayscholar OD by od_id
+ */
+const getDayscholarODById = async (req, res) => {
+  try {
+    const { od_id } = req.params;
+
+    const od = await DayscholarOD.findOne({
+      where: { od_id },
+    });
+
+    if (!od) {
+      return res.status(404).json({ message: "OD not found" });
+    }
+
+    return res.status(200).json(od);
+  } catch (err) {
+    console.error("getDayscholarODById error:", err);
+    return res.status(500).json({
+      message: "Server error",
+      error: err.message,
+    });
+  }
+};
 module.exports = {
   getStudentForDayscholarOD,
   createDayscholarOD,
   getdayscholarODForCounsellor,
   updateCstatus,
+    getDayscholarODById, 
 };

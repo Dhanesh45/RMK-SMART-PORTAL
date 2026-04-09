@@ -21,6 +21,22 @@ const DayscholarOD = sequelize.define(
         key: "student_id",
       },
     },
+
+     // ✅ NEW FIELD 1
+    counsellorComments: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      field: "counsellor_comments",
+    },
+
+    // ✅ NEW FIELD 2
+    odAvailed: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0,
+      field: "od_availed",
+    },
+
     facultyId: {
           type: DataTypes.INTEGER,
           allowNull: true,

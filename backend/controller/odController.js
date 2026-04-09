@@ -76,6 +76,9 @@ const createODWithOutpass = async (req, res) => {
         collegeName: od.collegeName,
         eventName: od.eventName,
         date: od.date,
+          // ✅ NEW FIELDS
+    odAvailed: od.odAvailed || 0,
+    counsellorComments: null,
         cstatus: 0,
         ystatus: 0,
         hstatus: 0,
@@ -235,6 +238,7 @@ const updateCstatushosod = async (req, res) => {
     const newStatus = action === "approve" ? 1 : -1;
 
     hostod.cstatus = newStatus;
+    hostod.counsellorComments = remarks; 
     await hostod.save({ transaction });
 
     await Outpass.update(
@@ -354,6 +358,9 @@ const getFullODDetails = async (req, res) => {
     const response = {
       od_id: odJson.od_id,
       student_id: odJson.student_id,
+       // ✅ ADD THESE
+  odAvailed: odJson.odAvailed,
+  counsellorComments: odJson.counsellorComments,
       facultyId: odJson.facultyId,
       outpass_id: odJson.outpass_id,
       purpose: odJson.purpose,
@@ -367,7 +374,6 @@ const getFullODDetails = async (req, res) => {
       cstatus: odJson.cstatus,
       ystatus: odJson.ystatus,
       hstatus: odJson.hstatus,
-
       outpassId: outpassJson.outpassId,
       studentName: outpassJson.studentName,
       regNo: outpassJson.regNo,
@@ -382,7 +388,6 @@ const getFullODDetails = async (req, res) => {
       reasonForLeave: outpassJson.reasonForLeave,
       parentsPermission: outpassJson.parentsPermission,
       remarks: outpassJson.remarks,
-
       student: {
         studentName: studentJson.studentName,
         regNo: studentJson.regNo,

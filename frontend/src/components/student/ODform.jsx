@@ -19,7 +19,8 @@ const ODform = ({ regNo: passedRegNo }) => {
     fromDate: "",
     toDate: "",
     place: "",
-    date:""
+    date:"",
+    odAvailed: "",
   });
   const [student, setStudent] = useState(null);
   const [outpassData, setOutpassData] = useState(null);
@@ -236,6 +237,23 @@ const ODform = ({ regNo: passedRegNo }) => {
                 }}
               />
 
+              <label style={{ fontSize: "2vh" }}>
+  ALREADY OD AVAILED
+</label>
+<input
+  type="number"
+  value={odData.odAvailed}
+  onChange={(e) =>
+    setOdData({ ...odData, odAvailed: e.target.value })
+  }
+  style={{
+    width: "100%",
+    padding: "2%",
+    marginBottom: "3%",
+    borderRadius: "1vh",
+    border: "1px solid #ccc",
+  }}
+/>
               <label style={{ fontSize: "2vh" }}>
                 NAME OF THE COLLEGE
               </label>

@@ -16,22 +16,32 @@ const DayscholarOD = ({ regNo: passedRegNo }) => {
     place: "",
     collegeName: "",
     eventName: "",
-    date:""
+    date:"",
+    odAvailed: 0
   });
 
   const [proof, setProof] = useState(null);
 
   // ✅ fetch student
-  const fetchStudent = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:5000/api/dayscholar-od/${regNo}`
-      );
-      setStudent(res.data);
-    } catch {
-      alert("❌ Student not found");
-    }
-  };
+const fetchStudent = async () => {
+  try {
+    const res = await axios.get(
+      `http://localhost:5000/api/dayscholar-od/${regNo}`
+    );
+
+    console.log("API DATA 👉", res.data); // ✅ debug
+
+    setStudent(res.data);
+
+    setForm((prev) => ({
+      ...prev,
+      odAvailed: res.data?.odAvailed ?? 0
+    }));
+
+  } catch {
+    alert("❌ Student not found");
+  }
+};
 
   useEffect(() => {
     if (regNo) fetchStudent();
@@ -285,31 +295,23 @@ const DayscholarOD = ({ regNo: passedRegNo }) => {
             />
 
             <label style={{ fontSize: "2vh" }}>
-              NUMBER OF DAYS OD ALREADY AVAILED (TILL DATE IN CURRENT SEMESTER)
+              ALREADY OD AVAILED
             </label>
-            <input
-              type="number"
-              style={{
-                width: "100%",
-                padding: "2%",
-                marginBottom: "3%",
-                borderRadius: "1vh",
-                border: "1px solid #ccc",
-              }}
-            />
+           <input
+  type="number"
+  style={{
+    width: "100%",
+    padding: "2%",
+    marginBottom: "3%",
+    borderRadius: "1vh",
+    border: "1px solid #ccc",
+  }}
+value={form.odAvailed}
+onChange={(e) =>
+  setForm({ ...form, odAvailed: Number(e.target.value) })
+}
+/>
 
-            <label style={{ fontSize: "2vh" }}>COMMENTS BY COUNSELLOR</label>
-            <input
-              type="text"
-              style={{
-                width: "100%",
-                padding: "2%",
-                marginBottom: "3%",
-                borderRadius: "1vh",
-                border: "1px solid #ccc",
-              }}
-              disabled
-            />
 
           {/* Upload Proof */}
           <label style={{ fontSize: "2vh", display: "block", marginBottom: "1%" }}>

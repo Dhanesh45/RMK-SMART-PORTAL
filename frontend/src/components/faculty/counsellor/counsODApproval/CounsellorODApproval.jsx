@@ -38,15 +38,16 @@ const CounsellorODApproval = () => {
           `http://localhost:5000/api/dayscholar-od/counsellor/${facultyId}`
         );
 
-        const dayscholarMapped = dayscholarRes.data.ODdayscholar.map(
-          (od, index) => ({
-            sno: mapped.length + index + 1,
-            nof: od.regNo,
-            name: od.studentName || "—",
-            od_id: od.od_id,
-            type: "DAYSCHOLAR",
-          })
-        );
+       const dayscholarMapped = dayscholarRes.data.ODdayscholar.map(
+  (od, index) => ({
+    sno: mapped.length + index + 1,
+    nof: od.regNo,
+    name: od.studentName || "—",
+    od_id: od.od_id,
+    odData: od,   // ✅ ADD THIS LINE
+    type: "DAYSCHOLAR",
+  })
+);
 
         setStudents([...mapped, ...dayscholarMapped]);
       } catch (err) {
@@ -58,12 +59,15 @@ const CounsellorODApproval = () => {
   }, []);
 
   const validateStudentData = (student) => {
-    if (!student || !student.outpassData) {
-      alert("Invalid student data");
-      return false;
-    }
 
-    const { remarks, parentsPermission } = student.outpassData;
+  if (!student) {
+    alert("Invalid student data");
+    return false;
+  }
+
+  // ✅ HOSTELLER validation
+  if (student.type === "HOSTELLER") {
+    const { remarks, parentsPermission } = student.outpassData || {};
 
     if (!remarks || remarks.trim() === "") {
       alert("Please enter remarks before approving");
@@ -74,9 +78,20 @@ const CounsellorODApproval = () => {
       alert("Please select parent permission before approving");
       return false;
     }
+  }
 
-    return true;
-  };
+  // ✅ DAYSCHOLAR validation (optional)
+  if (student.type === "DAYSCHOLAR") {
+    const { counsellorComments } = student.odData || {};
+
+    if (!counsellorComments || counsellorComments.trim() === "") {
+      alert("Please enter counsellor comments before approving");
+      return false;
+    }
+  }
+
+  return true;
+};
 
   // ✅ KEY FIX: saves submitted remarks + parentsPermission into students array
   const handleSubmitOutpass = (updatedStudent) => {
@@ -95,6 +110,29 @@ const CounsellorODApproval = () => {
       )
     );
   };
+
+  const handleSubmitOD = (updatedOD) => {
+  setStudents((prev) =>
+    prev.map((s) =>
+      s.od_id === updatedOD.od_id
+        ? {
+            ...s,
+            odData: {
+              ...s.odData,
+              counsellorComments: updatedOD.counsellorComments, // ✅ save comment
+            },
+          }
+        : s
+    )
+  );
+  setSelectedStudent((prev) => ({
+    ...prev,
+    odData: {
+      ...prev.odData,
+      counsellorComments: updatedOD.counsellorComments,
+    },
+  }));
+};
 
   const handleApprove = async (student) => {
     const url =
@@ -161,54 +199,87 @@ const CounsellorODApproval = () => {
                 <div style={cardCell}>{student.nof}</div>
 
                 {/* OUTPASS BUTTON */}
-                <div style={cardCell}>
-                  <button style={formBtn} onClick={async () => {
-                    const res = await axios.get(
-                      `http://localhost:5000/api/od/details/${student.od_id}`
-                    );
-                    console.log("OUTPASS API DATA 👉", res.data);
+                {/* OUTPASS BUTTON */}
+{/* OUTPASS BUTTON */}
+<div style={cardCell}>
+  {student.type === "HOSTELLER" ? (
+    <button
+      style={formBtn}
+      onClick={async () => {
+        const res = await axios.get(
+          `http://localhost:5000/api/od/details/${student.od_id}`
+        );
 
-                    setSelectedStudent({
-                      ...student,
-                      odData: res.data,
-                      outpassData: {
-                        ...res.data,
-                        // ✅ preserve already submitted remarks + permission if exist
-                        remarks: student.outpassData?.remarks || res.data.remarks || "",
-                        parentsPermission: student.outpassData?.parentsPermission || res.data.parentsPermission || "NOT_PERMITTED",
-                        student: res.data.student,
-                      },
-                    });
+        setSelectedStudent({
+          ...student,
+          odData: res.data,
+          outpassData: {
+            ...res.data,
+            remarks:
+              student.outpassData?.remarks ||
+              res.data.remarks ||
+              "",
+            parentsPermission:
+              student.outpassData?.parentsPermission ||
+              res.data.parentsPermission ||
+              "NOT_PERMITTED",
+            student: res.data.student,
+          },
+        });
 
-                    setShowPopup(true);
-                    setActiveForm("outpass");
-                  }}>
-                    OUTPASS
-                  </button>
-                </div>
+        setShowPopup(true);
+        setActiveForm("outpass");
+      }}
+    >
+      OUTPASS
+    </button>
+  ) : (
+    <div style={{ height: "30px", }} />   // ✅ EMPTY SPACE (IMPORTANT)
+  )}
+</div>
 
                 {/* ONDUTY BUTTON */}
                 <div style={cardCell}>
-                  <button style={formBtn} onClick={async () => {
-                    const res = await axios.get(
-                      `http://localhost:5000/api/od/details/${student.od_id}`
-                    );
-                    console.log("ONDUTY API DATA 👉", res.data);
+                  <button
+  style={formBtn}
+  onClick={async () => {
 
-                    setSelectedStudent({
-                      ...student,
-                      odData: res.data,
-                      outpassData: {
-                        ...res.data,
-                        student: res.data.student,
-                      },
-                    });
+    let res;
 
-                    setShowPopup(true);
-                    setActiveForm("onduty");
-                  }}>
-                    ONDUTY
-                  </button>
+    if (student.type === "HOSTELLER") {
+      res = await axios.get(
+        `http://localhost:5000/api/od/details/${student.od_id}`
+      );
+    } else {
+      // ✅ FIX: correct API for dayscholar
+      res = await axios.get(
+        `http://localhost:5000/api/dayscholar-od/od/${student.od_id}`
+      );
+    }
+
+    console.log("ONDUTY API DATA 👉", res.data);
+
+    setSelectedStudent({
+      ...student,
+      odData: {
+        ...res.data,
+        counsellorComments:
+          student.odData?.counsellorComments ||
+          res.data.counsellorComments ||
+          "",
+      },
+      outpassData: {
+        ...res.data,
+        student: res.data.student,
+      },
+    });
+
+    setShowPopup(true);
+    setActiveForm("onduty");
+  }}
+>
+  ONDUTY
+</button>
                 </div>
 
                 {/* APPROVE / REJECT */}
@@ -256,7 +327,12 @@ const CounsellorODApproval = () => {
             )}
 
             {activeForm === "onduty" && (
-              <CounsOnDuty isPopup data={selectedStudent?.odData} />
+              <CounsOnDuty
+  isPopup
+  data={selectedStudent?.odData}
+  closePopup={() => setShowPopup(false)}
+  handleSubmitOD={handleSubmitOD}   // ✅ ADD THIS
+/>
             )}
           </div>
         </div>

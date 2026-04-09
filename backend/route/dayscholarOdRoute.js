@@ -5,10 +5,13 @@ const {
   createDayscholarOD,
   getdayscholarODForCounsellor,
   updateCstatus,
+   getDayscholarODById,
 } = require("../controller/dayscholarOdController");
 
-router.get("/:regNo", getStudentForDayscholarOD);
-router.post("/", createDayscholarOD);
 router.get("/counsellor/:facultyId", getdayscholarODForCounsellor);
+router.get("/od/:od_id", getDayscholarODById); // ✅ MUST be before /:regNo
+router.get("/:regNo", getStudentForDayscholarOD);
+
+router.post("/", createDayscholarOD);
 router.put("/cstatus/:od_id", updateCstatus);
 module.exports = router;
