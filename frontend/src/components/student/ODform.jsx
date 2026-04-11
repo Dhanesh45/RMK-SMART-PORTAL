@@ -20,7 +20,6 @@ const ODform = ({ regNo: passedRegNo }) => {
     toDate: "",
     place: "",
     date:"",
-    odAvailed: "",
   });
   const [student, setStudent] = useState(null);
   const [outpassData, setOutpassData] = useState(null);
@@ -33,8 +32,9 @@ const ODform = ({ regNo: passedRegNo }) => {
   const validateDates = (from, to) => new Date(from) <= new Date(to);
 
   const validateOD = () => {
-    for (let key in odData) {
-      if (!odData[key]) {
+    const { name, department, regNo: rn, ...fieldsToValidate } = odData;
+for (let key in fieldsToValidate) {
+  if (!fieldsToValidate[key]) {
         alert("❌ Please fill all OD fields");
         return false;
       }
@@ -70,14 +70,13 @@ const ODform = ({ regNo: passedRegNo }) => {
     }
   };
 
-  const fetchStudent = async (reg = regNo) => {
+const fetchStudent = async (reg = regNo) => {
   try {
-    const res = await axios.get(
-      `http://localhost:5000/api/outpass/${reg}`
-    );
+    const res = await axios.get(`http://localhost:5000/api/outpass/${reg}`);
+
+
 
     setStudent(res.data);
-    // ✅ COPY into form state
     setOdData((prev) => ({
       ...prev,
       name: res.data.studentName || "",
@@ -237,23 +236,7 @@ const ODform = ({ regNo: passedRegNo }) => {
                 }}
               />
 
-              <label style={{ fontSize: "2vh" }}>
-  ALREADY OD AVAILED
-</label>
-<input
-  type="number"
-  value={odData.odAvailed}
-  onChange={(e) =>
-    setOdData({ ...odData, odAvailed: e.target.value })
-  }
-  style={{
-    width: "100%",
-    padding: "2%",
-    marginBottom: "3%",
-    borderRadius: "1vh",
-    border: "1px solid #ccc",
-  }}
-/>
+              
               <label style={{ fontSize: "2vh" }}>
                 NAME OF THE COLLEGE
               </label>

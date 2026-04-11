@@ -61,6 +61,13 @@ const createODWithOutpass = async (req, res) => {
       { transaction }
     );
 
+    const odAvailed = await ODForm.count({
+  where: {
+    student_id: student.studentId,
+    cstatus: { [Op.gte]: 0 },
+  },
+});
+
     await ODForm.create(
       {
         student_id: student.studentId,
@@ -77,7 +84,7 @@ const createODWithOutpass = async (req, res) => {
         eventName: od.eventName,
         date: od.date,
           // ✅ NEW FIELDS
-    odAvailed: od.odAvailed || 0,
+    odAvailed: odAvailed + 1,
     counsellorComments: null,
         cstatus: 0,
         ystatus: 0,
@@ -345,12 +352,12 @@ const getFullODDetails = async (req, res) => {
     const outpassJson = odJson.Outpass || {};
 
     // ✅ Count approved ODs for this student
-    const odAvailed = await ODForm.count({
-      where: {
-        student_id: odJson.student_id,
-        cstatus: 1,  // approved only
-      },
-    });
+   const odAvailed = await ODForm.count({
+  where: {
+    student_id: odJson.student_id,
+    cstatus: { [Op.gte]: 0 },  // ✅ pending + approved
+  },
+});
 
     const counsellorName =
       outpassJson.Faculty?.faculty_name || "Not Assigned";
