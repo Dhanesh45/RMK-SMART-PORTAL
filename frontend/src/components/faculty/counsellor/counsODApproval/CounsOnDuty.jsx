@@ -3,20 +3,22 @@ import React, { useState, useEffect } from "react";
 const CounsOnDuty = ({
   isPopup = false,
   data,
-  handleSubmitOD, 
-  closePopup        // ✅ to close popup
+  student,              // ✅ ADD this prop
+  handleSubmitOD,
+  closePopup,
 }) => {
   const [proof, setProof] = useState(null);
- const [remarks, setRemarks] = useState("");
+  const [remarks, setRemarks] = useState("");
 
+  // ✅ preserve saved comments on reopen
+  // AFTER
 useEffect(() => {
   setRemarks(data?.counsellorComments || "");
-}, [data]);
+}, [data?.counsellorComments]);  // ✅ watch the specific field
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     if (file.type.startsWith("image/")) {
       setProof({ type: "image", url: URL.createObjectURL(file), name: file.name });
     } else if (file.type === "application/pdf") {
@@ -41,89 +43,49 @@ useEffect(() => {
         overflowY: "auto",
       }}
     >
-      <h2
-        style={{
-          textAlign: "center",
-          fontSize: "3vh",
-          fontWeight: "bold",
-          margin: 0,
-        }}
-      >
+      <h2 style={{ textAlign: "center", fontSize: "3vh", fontWeight: "bold", margin: 0 }}>
         STUDENTS OD FORM
       </h2>
 
-      <div
-        style={{
-          display: "flex",
-          gap: "5%",
-          flexWrap: "wrap",
-        }}
-      >
+      <div style={{ display: "flex", gap: "5%", flexWrap: "wrap" }}>
+
         {/* Left Column */}
         <div style={{ flex: 1, minWidth: "45%" }}>
           <label style={{ fontSize: "2vh" }}>NAME OF THE STUDENT</label>
-          <input
-            type="text"
-            style={inputStyle}
-            value={data?.studentName || ""}
-            disabled
-          />
+          <input type="text" style={inputStyle}
+            value={data?.studentName || ""} disabled />
 
           <label style={{ fontSize: "2vh" }}>DEPARTMENT</label>
-          <input
-            type="text"
-            style={inputStyle}
-            value={data?.branch || ""}
-            disabled
-          />
+          <input type="text" style={inputStyle}
+            value={data?.branch || ""}   // ✅ flat response
+            disabled />
 
           <label style={{ fontSize: "2vh" }}>REGISTER NUMBER</label>
-          <input
-            type="text"
-            style={inputStyle}
-            value={data?.regNo || ""}
-            disabled
-          />
+          <input type="text" style={inputStyle}
+            value={data?.regNo || ""} disabled />
 
           <label style={{ fontSize: "2vh" }}>PURPOSE OF OD</label>
-          <input type="text" style={inputStyle} value={data?.purpose || ""}
-            disabled
-          />
+          <input type="text" style={inputStyle}
+            value={data?.purpose || ""} disabled />
 
           <label style={{ fontSize: "2vh" }}>NUMBER OF DAYS</label>
-          <input
-            type="number"
-            style={inputStyle}
-            value={data?.numberOfDays ?? ""}
-            disabled
-          />
+          <input type="number" style={inputStyle}
+            value={data?.numberOfDays ?? ""} disabled />
 
           <label style={{ fontSize: "2vh" }}>NAME OF THE COLLEGE</label>
-          <input
-            type="text"
-            style={inputStyle}
-            value={data?.collegeName || ""}
-            disabled
-          />
+          <input type="text" style={inputStyle}
+            value={data?.collegeName || ""} disabled />
 
           <label style={{ fontSize: "2vh" }}>NAME OF THE EVENT</label>
-          <input
-            type="text"
-            style={inputStyle}
-            value={data?.eventName || ""}
-            disabled
-          />
+          <input type="text" style={inputStyle}
+            value={data?.eventName || ""} disabled />
         </div>
 
         {/* Right Column */}
         <div style={{ flex: 1, minWidth: "45%" }}>
           <label style={{ fontSize: "2vh" }}>DATE OF COMPETITION</label>
-          <input
-            type="date"
-            style={inputStyle}
-            value={data?.date ? data.date.split("T")[0] : ""}
-            disabled
-          />
+          <input type="date" style={inputStyle}
+            value={data?.date ? data.date.split("T")[0] : ""} disabled />
 
           <div style={{ display: "flex", gap: "4%", marginBottom: "3%", flexWrap: "wrap" }}>
             <div style={{ flex: 1, minWidth: "45%" }}>
@@ -139,117 +101,88 @@ useEffect(() => {
           </div>
 
           <label style={{ fontSize: "2vh" }}>PLACE OF COMPETITION</label>
-          <input
-            type="text"
-            style={inputStyle}
-            value={data?.place || ""}
-            disabled
-          />
+          <input type="text" style={inputStyle}
+            value={data?.place || ""} disabled />
 
+          {/* ✅ OD AVAILED — count from DB */}
           <label style={{ fontSize: "2vh" }}>ALREADY OD AVAILED</label>
-          <input
-            type="number"
-            style={inputStyle}
-            value={data?.odAvailed || ""}
-            disabled
-          />
+          <input type="number" style={inputStyle}
+            value={data?.odAvailed ?? 0} disabled />
 
+          {/* ✅ COUNSELLOR COMMENTS — editable */}
           <label style={{ fontSize: "2vh" }}>COUNSELLOR COMMENTS</label>
           <textarea
-            style={{ ...inputStyle, height: "6%" }}
+            style={{ ...inputStyle, height: "80px", resize: "none" }}
             value={remarks}
             onChange={(e) => setRemarks(e.target.value)}
+            placeholder="Enter comments..."
           />
-
 
           {/* Upload Proof */}
           <label style={{ fontSize: "2vh", display: "block", marginBottom: "1%" }}>
             UPLOAD PROOF (IMAGE/PDF)
           </label>
-          <input
-            type="file"
-            id="proofUpload"
-            accept="image/*,.pdf"
-            onChange={handleFileChange}
-            style={{ display: "none" }}
-          />
-          <label
-            htmlFor="proofUpload"
+          <input type="file" id="proofUpload" accept="image/*,.pdf"
+            onChange={handleFileChange} style={{ display: "none" }} />
+          <label htmlFor="proofUpload"
             style={{
-              display: "inline-block",
-              padding: "2% 4%",
-              backgroundColor: "#0d3b66",
-              color: "white",
-              borderRadius: "5vh",
-              cursor: "pointer",
-              fontWeight: "bold",
-              boxShadow: "0px 4px 8px rgba(0,0,0,0.2)",
-            }}
-          >
+              display: "inline-block", padding: "2% 4%",
+              backgroundColor: "#0d3b66", color: "white",
+              borderRadius: "5vh", cursor: "pointer",
+              fontWeight: "bold", boxShadow: "0px 4px 8px rgba(0,0,0,0.2)",
+            }}>
             Upload Proof
           </label>
 
-          {/* Inline Preview */}
           {proof && (
             <span>
               {proof.type === "image" ? (
-                <img
-                  src={proof.url}
-                  alt="Preview"
-                  style={{
-                    height: "10%",
-                    width: "auto",
-                    borderRadius: "2vh",
-                    border: "1px solid #ccc",
-                    verticalAlign: "middle",
-                  }}
-                />
+                <img src={proof.url} alt="Preview"
+                  style={{ height: "10%", width: "auto", borderRadius: "2vh",
+                    border: "1px solid #ccc", verticalAlign: "middle" }} />
               ) : (
                 <span style={{ color: "green", fontWeight: "bold" }}>✅ {proof.name}</span>
               )}
             </span>
           )}
-
-          
         </div>
-        
       </div>
+
+      {/* ✅ SUBMIT BUTTON */}
       <div style={{ marginTop: "20px", textAlign: "right" }}>
-  <button
-    style={{
-      padding: "8px 20px",
-      backgroundColor: "#3b4b75",
-      color: "white",
-      border: "none",
-      borderRadius: "5px",
-      cursor: "pointer",
-      fontWeight: "bold",
-    }}
-    onClick={() => {
-      // ✅ Step 1: Validate
-      if (!remarks || remarks.trim() === "") {
-        alert("Please enter remarks");
-        return;
-      }
+        <button
+          style={{
+            padding: "8px 20px", backgroundColor: "#3b4b75",
+            color: "white", border: "none", borderRadius: "5px",
+            cursor: "pointer", fontWeight: "bold",
+          }}
+          onClick={() => {
+            // ✅ Step 1: Validate
+            if (!remarks || remarks.trim() === "") {
+              alert("Please enter counsellor comments");
+              return;
+            }
 
-      // ✅ Step 2: Save (same pattern)
-      handleSubmitOD({
-        ...data,
-        counsellorComments: remarks,   // ✅ IMPORTANT FIELD
-      });
+            // ✅ Step 2: Save into students array via handleSubmitOD
+            handleSubmitOD({
+              ...student,                    // ✅ full student object
+              odData: {
+                ...student?.odData,
+                counsellorComments: remarks, // ✅ save comments
+              },
+            });
 
-      // ✅ Step 3: Close popup
-      closePopup();
-    }}
-  >
-    SUBMIT
-  </button>
-</div>
+            // ✅ Step 3: Close popup
+            closePopup();
+          }}
+        >
+          SUBMIT
+        </button>
+      </div>
     </div>
   );
 };
 
-// Common Input Style
 const inputStyle = {
   width: "100%",
   padding: "2%",

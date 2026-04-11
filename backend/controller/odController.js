@@ -313,14 +313,8 @@ const getFullODDetails = async (req, res) => {
         {
           model: Student,
           attributes: [
-            "studentName",
-            "regNo",
-            "year",
-            "branch",
-            "section",
-            "gender",
-            "studentMail",
-            "native",
+            "studentName", "regNo", "year", "branch",
+            "section", "gender", "studentMail", "native",
           ],
           include: [
             {
@@ -347,8 +341,16 @@ const getFullODDetails = async (req, res) => {
     }
 
     const odJson = od.toJSON();
-    const studentJson = odJson.student || {};  
+    const studentJson = odJson.student || {};
     const outpassJson = odJson.Outpass || {};
+
+    // ✅ Count approved ODs for this student
+    const odAvailed = await ODForm.count({
+      where: {
+        student_id: odJson.student_id,
+        cstatus: 1,  // approved only
+      },
+    });
 
     const counsellorName =
       outpassJson.Faculty?.faculty_name || "Not Assigned";
@@ -358,9 +360,6 @@ const getFullODDetails = async (req, res) => {
     const response = {
       od_id: odJson.od_id,
       student_id: odJson.student_id,
-       // ✅ ADD THESE
-  odAvailed: odJson.odAvailed,
-  counsellorComments: odJson.counsellorComments,
       facultyId: odJson.facultyId,
       outpass_id: odJson.outpass_id,
       purpose: odJson.purpose,
@@ -374,11 +373,14 @@ const getFullODDetails = async (req, res) => {
       cstatus: odJson.cstatus,
       ystatus: odJson.ystatus,
       hstatus: odJson.hstatus,
+      counsellorComments: odJson.counsellorComments || "",  // ✅ NEW
+      odAvailed,                                            // ✅ NEW - count from DB
+
       outpassId: outpassJson.outpassId,
       studentName: outpassJson.studentName,
       regNo: outpassJson.regNo,
       year: outpassJson.year,
-      branch: outpassJson.branch,
+      branch: outpassJson.branch,       // ✅ department comes from here
       parentName: outpassJson.parentName,
       parentPhone: outpassJson.parentPhone,
       roomNumber: outpassJson.roomNumber,
@@ -388,6 +390,7 @@ const getFullODDetails = async (req, res) => {
       reasonForLeave: outpassJson.reasonForLeave,
       parentsPermission: outpassJson.parentsPermission,
       remarks: outpassJson.remarks,
+
       student: {
         studentName: studentJson.studentName,
         regNo: studentJson.regNo,
@@ -405,10 +408,7 @@ const getFullODDetails = async (req, res) => {
     return res.json(response);
   } catch (err) {
     console.error("getFullODDetails error:", err);
-    return res.status(500).json({
-      message: "Server error",
-      error: err.message,
-    });
+    return res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 module.exports = {

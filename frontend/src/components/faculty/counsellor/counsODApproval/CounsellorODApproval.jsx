@@ -94,46 +94,40 @@ const CounsellorODApproval = () => {
 };
 
   // ✅ KEY FIX: saves submitted remarks + parentsPermission into students array
-  const handleSubmitOutpass = (updatedStudent) => {
-    setStudents((prev) =>
-      prev.map((s) =>
-        s.od_id === updatedStudent.od_id
-          ? {
-              ...s,
-              outpassData: {
-                ...s.outpassData,
-                remarks: updatedStudent.outpassData.remarks,
-                parentsPermission: updatedStudent.outpassData.parentsPermission,
-              },
-            }
-          : s
-      )
-    );
-  };
-
-  const handleSubmitOD = (updatedOD) => {
+  // ✅ already exists
+const handleSubmitOutpass = (updatedStudent) => {
   setStudents((prev) =>
     prev.map((s) =>
-      s.od_id === updatedOD.od_id
+      s.od_id === updatedStudent.od_id
         ? {
             ...s,
-            odData: {
-              ...s.odData,
-              counsellorComments: updatedOD.counsellorComments, // ✅ save comment
+            outpassData: {
+              ...s.outpassData,
+              remarks: updatedStudent.outpassData.remarks,
+              parentsPermission: updatedStudent.outpassData.parentsPermission,
             },
           }
         : s
     )
   );
-  setSelectedStudent((prev) => ({
-    ...prev,
-    odData: {
-      ...prev.odData,
-      counsellorComments: updatedOD.counsellorComments,
-    },
-  }));
 };
 
+// ✅ ADD THIS RIGHT BELOW handleSubmitOutpass
+const handleSubmitOD = (updatedStudent) => {
+  setStudents((prev) =>
+    prev.map((s) =>
+      s.od_id === updatedStudent.od_id
+        ? {
+            ...s,
+            odData: {
+              ...s.odData,
+              counsellorComments: updatedStudent.odData.counsellorComments,
+            },
+          }
+        : s
+    )
+  );
+};
   const handleApprove = async (student) => {
     const url =
       student.type === "HOSTELLER"
@@ -144,6 +138,7 @@ const CounsellorODApproval = () => {
       action: "approve",
       remarks: student.outpassData?.remarks,
       parentsPermission: student.outpassData?.parentsPermission,
+      counsellorComments: student.odData?.counsellorComments,
     });
 
     setStudents((prev) => prev.filter((s) => s.od_id !== student.od_id));
@@ -322,18 +317,20 @@ const CounsellorODApproval = () => {
                 closePopup={() => setShowPopup(false)}
                 setSelectedStudent={setSelectedStudent}
                 validateStudentData={validateStudentData}
-                handleSubmitOutpass={handleSubmitOutpass}  // ✅ NEW
+                handleSubmitOutpass={handleSubmitOutpass} 
               />
             )}
 
-            {activeForm === "onduty" && (
-              <CounsOnDuty
-  isPopup
-  data={selectedStudent?.odData}
-  closePopup={() => setShowPopup(false)}
-  handleSubmitOD={handleSubmitOD}   // ✅ ADD THIS
-/>
-            )}
+            
+{activeForm === "onduty" && (
+  <CounsOnDuty
+    isPopup
+    data={selectedStudent?.odData}
+    student={selectedStudent}
+    handleSubmitOD={handleSubmitOD}
+    closePopup={() => setShowPopup(false)}
+  />
+)}
           </div>
         </div>
       )}

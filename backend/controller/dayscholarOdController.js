@@ -3,9 +3,7 @@ const Student = require("../models/student");
 const Faculty = require("../models/faculty");
 const { Op } = require("sequelize");
 
-/**
- * ✅ Get student details by register number
- */
+// ✅ Get student details by register number
 const getStudentForDayscholarOD = async (req, res) => {
   try {
     const { regNo } = req.params;
@@ -16,15 +14,17 @@ const getStudentForDayscholarOD = async (req, res) => {
       return res.status(404).json({ message: "Student not found" });
     }
 
-    // ✅ Get latest OD
-    const od = await DayscholarOD.findOne({
-      where: { regNo },
-      order: [["od_id", "DESC"]],
-    });
+    // ✅ Count approved ODs for this student
+    const odAvailed = await DayscholarOD.count({
+  where: {
+    student_id: student.studentId,
+    cstatus: { [Op.gte]: 0 },  // ✅ 0=pending, 1=approved (skips -1 rejected)
+  },
+});
 
     res.status(200).json({
       ...student.toJSON(),
-      odAvailed: od?.odAvailed ?? 0, // ✅ FIX
+      odAvailed,  // ✅ count from DB not from column
     });
 
   } catch (err) {
@@ -33,9 +33,7 @@ const getStudentForDayscholarOD = async (req, res) => {
   }
 };
 
-/**
- * ✅ Create Dayscholar OD (NO OUTPASS)
- */
+// ✅ Create Dayscholar OD
 const createDayscholarOD = async (req, res) => {
   try {
     const {
@@ -51,17 +49,23 @@ const createDayscholarOD = async (req, res) => {
     } = req.body;
 
     const student = await Student.findOne({ where: { regNo } });
-
     if (!student) return res.status(404).json({ message: "Student not found" });
- /** 🔥 NEW: Find counsellor to assign facultyId */
+
+    // ✅ Count existing ODs for this student
+    const odAvailed = await DayscholarOD.count({
+      where: {
+        student_id: student.studentId,
+        cstatus: { [Op.gte]: 0 },  // pending + approved only
+      },
+    });
+
     let facultyId = null;
     const counsellorValue = student.counsellor;
 
     if (counsellorValue) {
       const trimmed = String(counsellorValue).trim();
-
       if (/^\d+$/.test(trimmed)) {
-        facultyId = parseInt(trimmed, 10); // stored faculty numeric ID
+        facultyId = parseInt(trimmed, 10);
       } else {
         const faculty = await Faculty.findOne({
           where: {
@@ -71,23 +75,26 @@ const createDayscholarOD = async (req, res) => {
         if (faculty) facultyId = faculty.f_id;
       }
     }
+
     await DayscholarOD.create({
-      student_id: student.studentId,
-      facultyId,
-      studentName: student.studentName,
-      regNo: student.regNo,
-      purpose,
-      numberOfDays,
-      fromDate,
-      toDate,
-      place,
-      collegeName,
-      eventName,
-      date,
-      cstatus: 0,
-      ystatus: 0,
-      hstatus: 0,
-    });
+  student_id: student.studentId,
+  facultyId,
+  studentName: student.studentName,
+  regNo: student.regNo,
+  purpose,
+  numberOfDays,
+  fromDate,
+  toDate,
+  place,
+  collegeName,
+  eventName,
+  date,
+  counsellorComments: null,
+  cstatus: 0,
+  ystatus: 0,
+  hstatus: 0,
+  odAvailed: odAvailed + 1,  // ✅ camelCase, not od_availed
+});
 
     res.status(201).json({ message: "✅ Dayscholar OD submitted" });
   } catch (err) {
@@ -95,21 +102,19 @@ const createDayscholarOD = async (req, res) => {
     res.status(500).json({ error: "Failed to submit OD" });
   }
 };
+
+// ✅ Get dayscholar ODs for counsellor
 const getdayscholarODForCounsellor = async (req, res) => {
   try {
     const { facultyId } = req.params;
-    const { status } = req.query;
 
     if (!facultyId)
       return res.status(400).json({ message: "facultyId is required" });
 
-    const where = { facultyId: Number(facultyId) };
-    if (status !== undefined) where.cstatus = Number(status);
-
     const ODdayscholar = await DayscholarOD.findAll({
-       where:{
+      where: {
         facultyId: Number(facultyId),
-        cstatus:0,
+        cstatus: 0,
       },
       order: [["date", "DESC"]],
     });
@@ -117,36 +122,40 @@ const getdayscholarODForCounsellor = async (req, res) => {
     return res.json({ ODdayscholar });
   } catch (err) {
     console.error("getdayscholarODForCounsellor error:", err);
-    return res
-      .status(500)
-      .json({ message: "Server error", error: err.message });
+    return res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
+// ✅ FIXED — save counsellorComments + approve/reject
 const updateCstatus = async (req, res) => {
   try {
-    const {  od_id } = req.params;
-    const { action } = req.body;
+    const { od_id } = req.params;
+    const { action, counsellorComments } = req.body;  // ✅ NEW
 
     if (!["approve", "reject"].includes(action))
       return res.status(400).json({ message: "Invalid action" });
 
     const ODdayscholars = await DayscholarOD.findByPk(od_id);
-    if (!ODdayscholars) return res.status(404).json({ message: "OD not found" });
+    if (!ODdayscholars)
+      return res.status(404).json({ message: "OD not found" });
 
     ODdayscholars.cstatus = action === "approve" ? 1 : -1;
+
+    // ✅ Save counsellor comments to DB
+    if (counsellorComments) {
+      ODdayscholars.counsellorComments = counsellorComments;
+    }
+
     await ODdayscholars.save();
 
     return res.json({ message: `OD ${action}d`, ODdayscholars });
   } catch (err) {
     console.error("updateCstatus error:", err);
-    return res
-      .status(500)
-      .json({ message: "Server error", error: err.message });
+    return res.status(500).json({ message: "Server error", error: err.message });
   }
 };
-/**
- * ✅ Get single Dayscholar OD by od_id
- */
+
+// ✅ FIXED — Get single Dayscholar OD by od_id with odAvailed count
 const getDayscholarODById = async (req, res) => {
   try {
     const { od_id } = req.params;
@@ -159,7 +168,27 @@ const getDayscholarODById = async (req, res) => {
       return res.status(404).json({ message: "OD not found" });
     }
 
-    return res.status(200).json(od);
+    const odJson = od.toJSON();
+
+    const odAvailed = await DayscholarOD.count({
+      where: {
+        student_id: odJson.student_id,
+        cstatus: { [Op.gte]: 0 },
+      },
+    });
+
+    // ✅ ADD THIS — fetch student to get branch
+    const student = await Student.findOne({
+      where: { studentId: odJson.student_id },
+    });
+
+    return res.status(200).json({
+      ...odJson,
+      odAvailed,
+      branch: student?.branch || "",               // ✅ ADD THIS
+      counsellorComments: odJson.counsellorComments || "",
+    });
+
   } catch (err) {
     console.error("getDayscholarODById error:", err);
     return res.status(500).json({
@@ -168,10 +197,11 @@ const getDayscholarODById = async (req, res) => {
     });
   }
 };
+
 module.exports = {
   getStudentForDayscholarOD,
   createDayscholarOD,
   getdayscholarODForCounsellor,
   updateCstatus,
-    getDayscholarODById, 
+  getDayscholarODById,
 };

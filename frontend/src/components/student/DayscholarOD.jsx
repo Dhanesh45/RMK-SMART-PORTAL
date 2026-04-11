@@ -294,23 +294,7 @@ const fetchStudent = async () => {
             }
             />
 
-            <label style={{ fontSize: "2vh" }}>
-              ALREADY OD AVAILED
-            </label>
-           <input
-  type="number"
-  style={{
-    width: "100%",
-    padding: "2%",
-    marginBottom: "3%",
-    borderRadius: "1vh",
-    border: "1px solid #ccc",
-  }}
-value={form.odAvailed}
-onChange={(e) =>
-  setForm({ ...form, odAvailed: Number(e.target.value) })
-}
-/>
+            
 
 
           {/* Upload Proof */}
