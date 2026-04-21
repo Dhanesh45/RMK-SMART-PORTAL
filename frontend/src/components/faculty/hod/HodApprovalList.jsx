@@ -1,27 +1,111 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 // Main Component
 const HodApprovalList = () => {
-  const studentsData = [
-    { sno: 1, reg: 111723203001, name: "Akash", couns: "Bonafide" },
-    { sno: 2, reg: 111723203003, name: "Leo", couns: "Fee Receipt" },
-    { sno: 3, reg: 111723203004, name: "Dhinesh", couns: "Bonafide" },
-    { sno: 4, reg: 111723203005, name: "Mukesh", couns: "Fee Receipt" },
-    { sno: 5, reg: 111723203006, name: "Arul", couns: "Fee Receipt" },
-    { sno: 6, reg: 111723203007, name: "Nair", couns: "Bonafide" },
-    { sno: 7, reg: 111723203008, name: "John", couns: "Bonafide" },
-  ];
-
-  const [filterType, setFilterType] = useState("");
-  const [filterReg, setFilterReg] = useState("");
   const [showPopup, setShowPopup] = useState(false);
+    const [students, setStudents] = useState([]);
+    const [filterType, setFilterType] = useState("");
+const [filterReg, setFilterReg] = useState("");
+    const [selectedStudent, setSelectedStudent] = useState(null);
+  useEffect(() => {
+    const fetchOutpasses = async () => {
+      try {
+        const email = localStorage.getItem("facultyEmail");
+        if (!email) {
+          console.error("Faculty email not found");
+          return;
+        }
 
-  const filteredStudents = studentsData.filter(
-    (student) =>
-      (filterType === "" || student.couns === filterType) &&
-      (filterReg === "" ||
-        student.reg.toString().includes(filterReg.toString()))
+        /* 🔹 1. GET FACULTY ID */
+        const facultyRes = await axios.get(
+          `http://localhost:5000/api/faculty/email/${email}`
+        );
+
+        const facultyId = facultyRes.data.f_id;
+        console.log("Faculty response:", facultyRes.data);
+      
+        if (!facultyId) {
+          console.error("Faculty ID not found");
+          return;
+        }
+
+        /* 🔹 2. HOSTELLER OUTPASSES */
+        const hostellerRes = await axios.get(
+          `http://localhost:5000/api/outpass/hod/${facultyId}`
+        );
+        
+
+
+        const hostellerMapped = hostellerRes.data.outpasses.map((op, index) => ({
+          sno: index + 1,
+          outpassId: op.outpassId,
+          name: op.studentName,
+          reg: op.regNo,
+          couns: op.counsellorName,
+          type: "HOSTELLER",
+          fullData: op,
+        }));
+
+        /* 🔹 3. DAY SCHOLAR OUTPASSES */
+        const dayScholarRes = await axios.get(
+          `http://localhost:5000/api/dayscholarOutpass/hod/${facultyId}`
+        );
+
+        const dayScholarMapped = dayScholarRes.data.outpasses.map((op, index) => ({
+          sno: hostellerMapped.length + index + 1,
+          outpassId: op.dayscholaroutpassId,
+          name: op.studentName,
+          reg: op.regNo,
+          couns: op.counsellorName || "N/A",
+          type: "DAYSCHOLAR",
+          fullData: op,
+        }));
+
+        /* 🔹 4. MERGE */
+        setStudents([...hostellerMapped, ...dayScholarMapped]);
+
+      } catch (err) {
+        console.error("Error fetching hod coordinator outpasses", err);
+      }
+    };
+
+    fetchOutpasses();
+  }, []);
+
+ 
+  /* ===========================
+     APPROVE / REJECT
+  =========================== */
+ const handleApprove = async (student) => {
+  const url =
+    student.type === "HOSTELLER"
+      ? `http://localhost:5000/api/outpass/hod/update/${student.outpassId}`
+      : `http://localhost:5000/api/dayscholarOutpass/hod/update/${student.outpassId}`;
+
+  await axios.put(url, { action: "approve" });
+
+  setStudents((prev) =>
+    prev.filter((s) => s.outpassId !== student.outpassId)
   );
+};
+const handleReject = async (student) => {
+  const url =
+    student.type === "HOSTELLER"
+      ? `http://localhost:5000/api/outpass/hod/update/${student.outpassId}`
+      : `http://localhost:5000/api/dayscholarOutpass/hod/update/${student.outpassId}`;
+
+  await axios.put(url, { action: "reject" });
+
+  setStudents((prev) =>
+    prev.filter((s) => s.outpassId !== student.outpassId)
+  );
+};
+const filteredStudents = students.filter((student) => {
+  return (
+    (filterType === "" || student.type === filterType) &&
+    (filterReg === "" || student.reg.includes(filterReg))
+  );
+});
 
   return (
     <div
@@ -133,13 +217,15 @@ const HodApprovalList = () => {
                   <td style={cellStyle}>{student.reg}</td>
                   {/* <td style={cellStyle}>{student.couns}</td> */}
                   <td style={cellStyle}>
-                    <button style={formBtn} onClick={() => setShowPopup(true)}>
+                    <button style={formBtn} onClick={() =>{
+                       setSelectedStudent(student.fullData);
+                        setShowPopup(true);}}>
                       VIEW FORM
                     </button>
                   </td>
                   <td style={cellStyle}>
-                    <button style={approveBtn}>APPROVE</button>
-                    <button style={rejectBtn}>REJECT</button>
+                    <button style={approveBtn}   onClick={() => handleApprove(student)}>APPROVE</button>
+                    <button style={rejectBtn} onClick={() => handleReject(student)}>REJECT</button>
                   </td>
                 </tr>
               ))}
@@ -176,7 +262,7 @@ const HodApprovalList = () => {
       </div>
 
       {/* Popup */}
-      {showPopup && (
+      {showPopup && selectedStudent &&(
         <div
           style={{
             position: "fixed",

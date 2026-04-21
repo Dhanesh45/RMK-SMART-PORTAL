@@ -1,23 +1,110 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import HododView from "./HodOdView";
 import HodOutpassView from "./HodOutpassView";
 
 const HodOdAppList = () => {
   const [showPopup, setShowPopup] = useState(false); // Control popup
   const [activeForm, setActiveForm] = useState(""); // "outpass" or "onduty"
+  const [records, setRecords] = useState([]);
+  const [selectedData, setSelectedData] = useState(null);
+ useEffect(() => {
+    const fetchhOD = async () => {
+      try {
+        const email = localStorage.getItem("facultyEmail");
+        if (!email) return;
 
-  const students = [
-    { sno: 1, nof: 20, name: "Nandhini" },
-    { sno: 2, nof: 20, name: "Shobana" },
-    { sno: 3, nof: 20, name: "Saravanan" },
-    { sno: 4, nof: 20, name: "Vijayaraj" },
-    { sno: 5, nof: 20, name: "Akila" },
-    { sno: 6, nof: 20, name: "Rajitha" },
-    { sno: 7, nof: 20, name: "Akila" },
-    { sno: 8, nof: 20, name: "Rajitha" },
-    { sno: 9, nof: 20, name: "Akila" },
-    { sno: 10, nof: 20, name: "Rajitha" },
-  ];
+        const facultyRes = await axios.get(
+          `http://localhost:5000/api/faculty/email/${email}`
+        );
+        const facultyId = facultyRes.data.f_id;
+
+        const [hostellerRes, dayscholarRes] = await Promise.all([
+          axios.get(
+            `http://localhost:5000/api/od/hod/${facultyId}`
+          ),
+          axios.get(
+            `http://localhost:5000/api/dayscholar-od/hod/${facultyId}`
+          ),
+        ]);
+
+        const hostellerMapped = (hostellerRes.data?.ods || []).map(
+          (od, index) => ({
+            sno: index + 1,
+            od_id: od.od_id,
+            studentName: od.studentName,
+            regNo: od.regNo,
+            type: "HOSTELLER",
+            odData: od,
+          })
+        );
+
+        const dayscholarMapped = (dayscholarRes.data?.ods || []).map(
+          (od, index) => ({
+            sno: hostellerMapped.length + index + 1,
+            od_id: od.od_id,
+            studentName: od.studentName,
+            regNo: od.regNo,
+            type: "DAYSCHOLAR",
+            odData: od,
+          })
+        );
+
+        setRecords([...hostellerMapped, ...dayscholarMapped]);
+      } catch (err) {
+        console.error("Fetch error", err);
+      }
+    };
+
+    fetchhOD();
+  }, []);
+
+const handleApprove = async (item) => {
+  try {
+    const url =
+      item.type === "HOSTELLER"
+        ? `http://localhost:5000/api/od/hod/approve/od/${item.od_id}`
+        : `http://localhost:5000/api/dayscholar-od/hstatus/${item.od_id}`;
+
+    await axios.put(url, { action: "approve" });
+
+    setRecords((prev) => prev.filter((r) => r.od_id !== item.od_id));
+  } catch (err) {
+    console.error(err);
+  }
+};
+const handleReject = async (item) => {
+  try {
+    const url =
+      item.type === "HOSTELLER"
+        ? `http://localhost:5000/api/od/hod/approve/od/${item.od_id}`
+        : `http://localhost:5000/api/dayscholar-od/hstatus/${item.od_id}`;
+
+    await axios.put(url, { action: "reject" });
+
+    setRecords((prev) => prev.filter((r) => r.od_id !== item.od_id));
+  } catch (err) {
+    console.error(err);
+  }
+};
+  const handleApproveAll = async () => {
+  try {
+    await Promise.all(
+      records.map((item) => {
+        const url =
+          item.type === "HOSTELLER"
+            ? `http://localhost:5000/api/od/hod/approve/od/${item.od_id}`
+            : `http://localhost:5000/api/dayscholar-od/hstatus/${item.od_id}`;
+
+        return axios.put(url, { action: "approve" });
+      })
+    );
+
+    setRecords([]);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   return (
     <div
@@ -92,9 +179,9 @@ const HodOdAppList = () => {
 
           {/* Table Body */}
           <div style={{ flex: 1, overflowY: "auto" }}>
-            {students.map((student) => (
+            {records.map((student) => (
               <div
-                key={student.sno}
+                key={student.od_id}
                 style={{
                   display: "grid",
                   gridTemplateColumns: "8% 18% 20% 20% 17% 17%",
@@ -107,8 +194,8 @@ const HodOdAppList = () => {
                 }}
               >
                 <div style={cardCell}>{student.sno}</div>
-                <div style={cardCell}>{student.name}</div>
-                <div style={cardCell}>{student.nof}</div>
+                <div style={cardCell}>{student.studentName}</div>
+                <div style={cardCell}>{student.regNo}</div>
                 <div style={cardCell}>
                   <button
                     style={formBtn}
@@ -132,8 +219,8 @@ const HodOdAppList = () => {
                   </button>
                 </div>
                 <div style={cardCell}>
-                  <button style={approveBtn}>APPROVE</button>
-                  <button style={rejectBtn}>REJECT</button>
+                  <button style={approveBtn} onClick={() => handleApprove(student)}>APPROVE</button>
+                  <button style={rejectBtn} onClick={() => handleReject(student)}>REJECT</button>
                 </div>
               </div>
             ))}
@@ -149,7 +236,9 @@ const HodOdAppList = () => {
             width: "90%",
           }}
         >
-          <button style={bottomBtn}>Approve All</button>
+          <button style={bottomBtn} onClick={handleApproveAll}>
+            Approve All
+          </button>
         </div>
       </div>
 

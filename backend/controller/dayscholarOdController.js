@@ -185,31 +185,101 @@ const updateYstatusDayscholarOD = async (req, res) => {
   try {
     const { od_id } = req.params;
     const { action } = req.body;
+ if (!["approve", "reject"].includes(action))
+      return res.status(400).json({ message: "Invalid action" });
 
-    const status = action === "approve" ? 1 : -1;
+ const od = await DayscholarOD.findOne({
+  where: { od_id: od_id }
+});
 
-    const result = await DayscholarOD.update(
-      { ystatus: status },
-      { where: { od_id: od_id } }
-    );
+ if (!od) return res.status(404).json({ message: "OD not found" }); 
 
-    console.log("UPDATE RESULT:", result);
+    // ✅ Update year coordinator status
+    od.ystatus = action === "approve" ? 1 : -1;
+// 🔥 AUTO FORWARD TO HOD
+    if (action === "approve") {
+      const student = await Student.findByPk(od.student_id);
+
+    if (student && student.hod) {
+        od.facultyId = Number(student.hod); // ✅ move to hod
+        od.hstatus = 0; // pending for hod
+      } else {
+        console.warn(`Student ${od.student_id} has no hod`);
+      }
+    }
+
+    await od.save();
 
     res.json({
       message: `Dayscholar OD ${action}d`,
-      result
+      od,
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("updateYstatusDayscholarOD error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};  
+
+
+//gokul wrk(down)
+const getDayscholarODForHOD = async (req, res) => {
+  try {
+    const { facultyId } = req.params;
+
+    const ods = await DayscholarOD.findAll({
+      where: {
+        facultyId: Number(facultyId), // ✅ important
+        cstatus: 1,
+        ystatus: 1,
+        hstatus: 0,
+      },
+      order: [["date", "DESC"]],
+    });
+
+    res.json({ ods });
+  } catch (err) {
+    console.error("getDayscholarODForYearCoordinator error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
+
+const updateHstatusDayscholarOD = async (req, res) => {
+  try {
+    const { od_id } = req.params;
+    const { action } = req.body;
+ if (!["approve", "reject"].includes(action))
+      return res.status(400).json({ message: "Invalid action" });
+
+ const od = await DayscholarOD.findOne({
+  where: { od_id: od_id }
+});
+
+ if (!od) return res.status(404).json({ message: "OD not found" }); 
+
+    // ✅ Update HOD status
+    od.hstatus = action === "approve" ? 1 : -1;
+
+   
+    await od.save();
+
+    res.json({
+      message: `Dayscholar OD ${action}d`,
+      od,
+    });
+
+  } catch (err) {
+    console.error("updateYstatusDayscholarOD error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};  
 module.exports = {
   getStudentForDayscholarOD,
   createDayscholarOD,
   getdayscholarODForCounsellor,
-  updateCstatus,
+  getDayscholarODForHOD,
+  updateCstatus,  
+  updateHstatusDayscholarOD,
   getDayscholarODForYearCoordinator,
   updateYstatusDayscholarOD,
 };

@@ -7,7 +7,8 @@ const {
   getStudentForDayscholarOD,
   createDayscholarOD,
   getdayscholarODForCounsellor,
- 
+ getDayscholarODForHOD,
+ updateHstatusDayscholarOD,
   getDayscholarODForYearCoordinator,
   updateYstatusDayscholarOD,
   updateCstatus,
@@ -38,5 +39,12 @@ router.post("/", createDayscholarOD);
 
 // ⚠️ KEEP THIS LAST (dynamic route)
 router.get("/:regNo", getStudentForDayscholarOD);
+
+// ✅ Get OD for HOD  
+
+router.get("/hod/:facultyId", getDayscholarODForHOD);
+
+  // ✅ Update HOD status
+router.put("/hstatus/:od_id", updateHstatusDayscholarOD);
 
 module.exports = router;
