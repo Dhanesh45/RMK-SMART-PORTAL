@@ -1,12 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const CounsOnDuty = ({ isPopup = false }) => {
+const CounsOnDuty = ({ isPopup = false, data = {}, student, handleSubmitOD, closePopup }) => {
+  const [counsellorComments, setCounsellorComments] = useState(
+    student?.odData?.counsellorComments || data?.counsellorComments || ""
+  );
   const [proof, setProof] = useState(null);
+
+  // ✅ Sync back to parent students array on EVERY keystroke
+  // so even if popup is closed without SUBMIT, comment is saved
+  useEffect(() => {
+    if (!student || !handleSubmitOD) return;
+    handleSubmitOD({
+      ...student,
+      odData: {
+        ...student.odData,
+        counsellorComments,
+      },
+    });
+  }, [counsellorComments]); // ✅ fires whenever comment changes
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     if (file.type.startsWith("image/")) {
       setProof({ type: "image", url: URL.createObjectURL(file), name: file.name });
     } else if (file.type === "application/pdf") {
@@ -14,6 +29,21 @@ const CounsOnDuty = ({ isPopup = false }) => {
     } else {
       setProof(null);
     }
+  };
+
+  const handleSubmit = () => {
+    if (!counsellorComments || counsellorComments.trim() === "") {
+      alert("Please enter counsellor comments");
+      return;
+    }
+    handleSubmitOD({
+      ...student,
+      odData: {
+        ...student.odData,
+        counsellorComments,
+      },
+    });
+    closePopup();
   };
 
   return (
@@ -31,79 +61,83 @@ const CounsOnDuty = ({ isPopup = false }) => {
         overflowY: "auto",
       }}
     >
-      <h2
-        style={{
-          textAlign: "center",
-          fontSize: "3vh",
-          fontWeight: "bold",
-          margin: 0,
-        }}
-      >
+      <h2 style={{ textAlign: "center", fontSize: "3vh", fontWeight: "bold", margin: 0 }}>
         STUDENTS OD FORM
       </h2>
 
-      <div
-        style={{
-          display: "flex",
-          gap: "5%",
-          flexWrap: "wrap",
-        }}
-      >
+      <div style={{ display: "flex", gap: "5%", flexWrap: "wrap" }}>
         {/* Left Column */}
         <div style={{ flex: 1, minWidth: "45%" }}>
           <label style={{ fontSize: "2vh" }}>NAME OF THE STUDENT</label>
-          <input type="text" style={inputStyle} />
+          <input type="text" style={inputStyle} value={data?.studentName || ""} readOnly />
 
           <label style={{ fontSize: "2vh" }}>DEPARTMENT</label>
-          <input type="text" style={inputStyle} />
+          <input type="text" style={inputStyle} value={data?.branch || ""} readOnly />
 
           <label style={{ fontSize: "2vh" }}>REGISTER NUMBER</label>
-          <input type="text" style={inputStyle} />
+          <input type="text" style={inputStyle} value={data?.regNo || ""} readOnly />
 
           <label style={{ fontSize: "2vh" }}>PURPOSE OF OD</label>
-          <select style={inputStyle}>
-            <option value="">SELECT</option>
-            <option value="Competition">COMPETITION</option>
-            <option value="Workshop">WORKSHOP</option>
-            <option value="Others">OTHERS</option>
-          </select>
+          <input type="text" style={inputStyle} value={data?.purpose || ""} readOnly />
 
           <label style={{ fontSize: "2vh" }}>NUMBER OF DAYS</label>
-          <input type="number" style={inputStyle} />
+          <input type="number" style={inputStyle} value={data?.numberOfDays || ""} readOnly />
 
           <label style={{ fontSize: "2vh" }}>NAME OF THE COLLEGE</label>
-          <input type="text" style={inputStyle} />
+          <input type="text" style={inputStyle} value={data?.collegeName || ""} readOnly />
 
           <label style={{ fontSize: "2vh" }}>NAME OF THE EVENT</label>
-          <input type="text" style={inputStyle} />
+          <input type="text" style={inputStyle} value={data?.eventName || ""} readOnly />
         </div>
 
         {/* Right Column */}
         <div style={{ flex: 1, minWidth: "45%" }}>
           <label style={{ fontSize: "2vh" }}>DATE OF COMPETITION</label>
-          <input type="date" style={inputStyle} />
+          <input
+            type="date"
+            style={inputStyle}
+            value={data?.date ? data.date.split("T")[0] : ""}
+            readOnly
+          />
 
           <div style={{ display: "flex", gap: "4%", marginBottom: "3%", flexWrap: "wrap" }}>
             <div style={{ flex: 1, minWidth: "45%" }}>
               <label style={{ fontSize: "2vh" }}>FROM DATE</label>
-              <input type="date" style={{ ...inputStyle, padding: "4%" }} />
+              <input
+                type="date"
+                style={{ ...inputStyle, padding: "4%" }}
+                value={data?.fromDate ? data.fromDate.split("T")[0] : ""}
+                readOnly
+              />
             </div>
             <div style={{ flex: 1, minWidth: "45%" }}>
               <label style={{ fontSize: "2vh" }}>TO DATE</label>
-              <input type="date" style={{ ...inputStyle, padding: "4%" }} />
+              <input
+                type="date"
+                style={{ ...inputStyle, padding: "4%" }}
+                value={data?.toDate ? data.toDate.split("T")[0] : ""}
+                readOnly
+              />
             </div>
           </div>
 
           <label style={{ fontSize: "2vh" }}>PLACE OF COMPETITION</label>
-          <input type="text" style={inputStyle} />
+          <input type="text" style={inputStyle} value={data?.place || ""} readOnly />
 
           <label style={{ fontSize: "2vh" }}>
             NUMBER OF DAYS OD ALREADY AVAILED (TILL DATE IN CURRENT SEMESTER)
           </label>
-          <input type="number" style={inputStyle} />
+          <input type="number" style={inputStyle} value={data?.odAvailed ?? ""} readOnly />
 
+          {/* ✅ Editable counsellor comments — syncs on every keystroke */}
           <label style={{ fontSize: "2vh" }}>COMMENTS BY COUNSELLOR</label>
-          <input type="text" style={inputStyle} />
+          <input
+            type="text"
+            style={inputStyle}
+            value={counsellorComments}
+            onChange={(e) => setCounsellorComments(e.target.value)}
+            placeholder="Enter your comments..."
+          />
 
           {/* Upload Proof */}
           <label style={{ fontSize: "2vh", display: "block", marginBottom: "1%" }}>
@@ -132,9 +166,8 @@ const CounsOnDuty = ({ isPopup = false }) => {
             Upload Proof
           </label>
 
-          {/* Inline Preview */}
           {proof && (
-            <span>
+            <span style={{ marginLeft: "10px" }}>
               {proof.type === "image" ? (
                 <img
                   src={proof.url}
@@ -154,11 +187,28 @@ const CounsOnDuty = ({ isPopup = false }) => {
           )}
         </div>
       </div>
+
+      {/* ✅ Submit button */}
+      <div style={{ marginTop: "20px", textAlign: "right" }}>
+        <button
+          style={{
+            padding: "8px 20px",
+            backgroundColor: "#3b4b75",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+            fontWeight: "bold",
+          }}
+          onClick={handleSubmit}
+        >
+          SUBMIT
+        </button>
+      </div>
     </div>
   );
 };
 
-// Common Input Style
 const inputStyle = {
   width: "100%",
   padding: "2%",

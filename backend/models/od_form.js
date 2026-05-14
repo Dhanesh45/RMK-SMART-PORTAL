@@ -4,7 +4,6 @@ const Student = require("./student");
 const Outpass = require("./outpass");
 const Faculty = require("./faculty");
 
-
 const ODForm = sequelize.define(
   "OD_Form",
   {
@@ -22,14 +21,14 @@ const ODForm = sequelize.define(
       },
     },
     facultyId: {
-          type: DataTypes.INTEGER,
-          allowNull: true,
-          references: {
-            model: Faculty,
-            key: "f_id",
-          },
-          field: "Faculty id",
-        },
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: Faculty,
+        key: "f_id",
+      },
+      field: "Faculty id",
+    },
     outpass_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -96,6 +95,19 @@ const ODForm = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+    // ✅ FROM OLD
+    counsellorComments: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      field: "counsellor_comments",
+    },
+    // ✅ FROM OLD
+    odAvailed: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0,
+      field: "od_availed",
+    },
   },
   {
     tableName: "od_form",
@@ -103,14 +115,11 @@ const ODForm = sequelize.define(
   }
 );
 
-// Associations
 Student.hasMany(ODForm, { foreignKey: "student_id" });
 ODForm.belongsTo(Student, { foreignKey: "student_id" });
-
 Outpass.hasOne(ODForm, { foreignKey: "outpass_id" });
 ODForm.belongsTo(Outpass, { foreignKey: "outpass_id" });
 Faculty.hasMany(ODForm, { foreignKey: "facultyId" });
 ODForm.belongsTo(Faculty, { foreignKey: "facultyId" });
-
 
 module.exports = ODForm;
