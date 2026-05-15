@@ -8,6 +8,10 @@ const {
   updateCstatushosod,
   getODForYearCoordinator,
   getODOutpassForYearCoordinator,
+getODForHOD,
+updateHstatusOD,
+getODOutpassForHOD,          // ✅ (optional but useful)
+  updateYstatusOD
   forwardODToYearCoordinator,
   updateYstatusOD,
   getFullODDetails,
@@ -34,10 +38,32 @@ router.get("/year-coordinator/:facultyId", getODForYearCoordinator);
 // ✅ Year Coordinator fetch Outpass for OD
 router.get("/year-coordinator/outpass/:facultyId", getODOutpassForYearCoordinator);
 
+
+/**
+ * ===============================
+ * YEAR COORDINATOR APPROVE / REJECT OD
+ * ===============================
+ */
+router.put(
+  "/year-coordinator/approve/od/:od_id",
+  updateYstatusOD
+);
+//HOD routes
+
 // ✅ Year Coordinator approve/reject OD
 router.put("/year-coordinator/approve/od/:od_id", updateYstatusOD);
 
 // ✅ FROM OLD — Get full OD details (ONDUTY + OUTPASS popup)
 router.get("/details/:od_id", getFullODDetails);
 
+router.put(
+  "/hod/approve/od/:od_id",
+  updateHstatusOD
+);
+
+
+router.get(
+  "/hod/:facultyId",
+  getODForHOD
+);
 module.exports = router;

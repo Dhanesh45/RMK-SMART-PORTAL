@@ -10,7 +10,10 @@ const {
   getOutpassesForYearCoordinator,
   assignYearCoordinator,
   updateYstatus,
+  updateHstatus,
   getYearCoordinatorOutpasses,
+  getHODhoutpasses
+  
 } = require("../controller/outpassController");
 
 /* -----------------------------------------
@@ -33,27 +36,17 @@ router.get("/counsellor/:facultyId", getOutpassesForCounsellor);
 // 5️⃣ Counsellor approves / rejects
 router.put("/counsellor/update/:outpassId", updateCstatus);
 
-// 6️⃣ Forward outpass to Year Coordinator
-router.put(
-  "/counsellor/forward/:outpassId",
-  assignYearCoordinator
-);
+
 
 /* -----------------------------------------
    YEAR COORDINATOR ROUTES ✅
 --------------------------------------------*/
 
-// 7️⃣ Year Coordinator sees ALL pending YC outpasses (optional, no faculty filter)
-router.get("/year-coordinator", getOutpassesForYearCoordinator);
 
 // 8️⃣ Year Coordinator sees THEIR pending outpasses (filtered by facultyId)
 router.get("/year-coordinator/:facultyId", getYearCoordinatorOutpasses);
 
-// 9️⃣ Assign Year Coordinator (optional)
-router.post(
-  "/year-coordinator/assign/:outpassId",
-  assignYearCoordinator
-);
+
 
 // 🔟 Year Coordinator approves / rejects
 router.put("/year-coordinator/update/:outpassId", updateYstatus);
@@ -62,5 +55,9 @@ router.put("/year-coordinator/update/:outpassId", updateYstatus);
 // 1️⃣ Get student details using regNo
 //    NOTE: placed LAST so it does not swallow more specific routes like /year-coordinator
 router.get("/:regNo", getStudentByRegNo);
+
+//hod routes
+router.get("/hod/:facultyId", getHODhoutpasses);
+router.put("/hod/update/:outpassId", updateHstatus);
 
 module.exports = router;

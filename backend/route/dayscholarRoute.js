@@ -17,4 +17,8 @@ router.post(
   "/year-coordinator/assign/:outpassId",
   dayscholarController.assignYearCoordinator
 );
+
+//for hod
+router.get("/hod/:facultyId", dayscholarController.getHODdayoutpasses);
+router.put("/hod/update/:dayscholaroutpassId", dayscholarController.updateHstatus);
 module.exports = router;
