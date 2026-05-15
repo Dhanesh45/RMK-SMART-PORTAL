@@ -6,55 +6,37 @@ const {
   getHostellerODForCounsellor,
   getODoutpassforCounsellor,
   updateCstatushosod,
-  getODForYearCoordinator,              // ✅ ADDED
+  getODForYearCoordinator,
   getODOutpassForYearCoordinator,
 getODForHOD,
 updateHstatusOD,
 getODOutpassForHOD,          // ✅ (optional but useful)
   updateYstatusOD
+  forwardODToYearCoordinator,
+  updateYstatusOD,
+  getFullODDetails,
 } = require("../controller/odController");
 
-/**
- * ===============================
- * CREATE OD + OUTPASS (HOSTELLER)
- * ===============================
- */
+// ✅ Create OD + Outpass
 router.post("/", createODWithOutpass);
 
-/**
- * ===============================
- * COUNSELLOR FETCH HOSTELLER OD
- * ===============================
- * /api/od/counsellor/:facultyId
- */
+// ✅ Counsellor fetch hosteller OD
 router.get("/counsellor/:facultyId", getHostellerODForCounsellor);
 
-/**
- * ===============================
- * COUNSELLOR FETCH OD OUTPASS
- * ===============================
- * /api/od/outpass/counsellor/:facultyId
- */
+// ✅ Counsellor fetch OD outpass
 router.get("/outpass/counsellor/:facultyId", getODoutpassforCounsellor);
 
-/**
- * ===============================
- * COUNSELLOR APPROVE / REJECT OD
- * ===============================
- */
+// ✅ Counsellor approve/reject OD
 router.put("/approve/od/:od_id", updateCstatushosod);
 
+// ✅ Forward to Year Coordinator
+router.put("/forward/:od_id", forwardODToYearCoordinator);
 
-/**
- * ===============================
- * YEAR COORDINATOR FETCH OD
- * ===============================
- * IMPORTANT: This is what your frontend expects
- */
-router.get(
-  "/year-coordinator/:facultyId",
-  getODForYearCoordinator
-);
+// ✅ Year Coordinator fetch OD
+router.get("/year-coordinator/:facultyId", getODForYearCoordinator);
+
+// ✅ Year Coordinator fetch Outpass for OD
+router.get("/year-coordinator/outpass/:facultyId", getODOutpassForYearCoordinator);
 
 
 /**
@@ -68,6 +50,11 @@ router.put(
 );
 //HOD routes
 
+// ✅ Year Coordinator approve/reject OD
+router.put("/year-coordinator/approve/od/:od_id", updateYstatusOD);
+
+// ✅ FROM OLD — Get full OD details (ONDUTY + OUTPASS popup)
+router.get("/details/:od_id", getFullODDetails);
 
 router.put(
   "/hod/approve/od/:od_id",

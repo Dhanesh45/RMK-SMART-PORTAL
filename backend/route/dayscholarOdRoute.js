@@ -1,5 +1,3 @@
-// dayscholarODRoute.js
-
 const express = require("express");
 const router = express.Router();
 
@@ -9,35 +7,31 @@ const {
   getdayscholarODForCounsellor,
  getDayscholarODForHOD,
  updateHstatusDayscholarOD,
+  getDayscholarODById,
   getDayscholarODForYearCoordinator,
   updateYstatusDayscholarOD,
   updateCstatus,
 } = require("../controller/dayscholarOdController");
 
+// ✅ Year Coordinator — get pending ODs
+router.get("/year-coordinator/:facultyId", getDayscholarODForYearCoordinator);
 
-
-// ✅ Get OD for Year Coordinator
-router.get(
-  "/year-coordinator/:facultyId",
-  getDayscholarODForYearCoordinator
-);
-
-// ✅ Update Year Coordinator status
+// ✅ Year Coordinator — approve/reject
 router.put("/ystatus/:od_id", updateYstatusDayscholarOD);
 
-// ✅ Get OD for Counsellor
-router.get(
-  "/counsellor/:facultyId",
-  getdayscholarODForCounsellor
-);
+// ✅ Counsellor — get pending ODs
+router.get("/counsellor/:facultyId", getdayscholarODForCounsellor);
 
-// ✅ Update Counsellor status
+// ✅ Counsellor — approve/reject
 router.put("/cstatus/:od_id", updateCstatus);
+
+// ✅ FROM OLD — Get single OD by od_id (ONDUTY button) — MUST be before /:regNo
+router.get("/od/:od_id", getDayscholarODById);
 
 // ✅ Create new OD
 router.post("/", createDayscholarOD);
 
-// ⚠️ KEEP THIS LAST (dynamic route)
+// ⚠️ KEEP LAST — dynamic catch-all
 router.get("/:regNo", getStudentForDayscholarOD);
 
 // ✅ Get OD for HOD  

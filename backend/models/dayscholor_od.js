@@ -4,7 +4,6 @@ const Student = require("./student");
 const Outpass = require("./outpass");
 const Faculty = require("./faculty");
 
-
 const DayscholarOD = sequelize.define(
   "dayscholor_od",
   {
@@ -21,16 +20,29 @@ const DayscholarOD = sequelize.define(
         key: "student_id",
       },
     },
+    // ✅ FROM OLD
+    counsellorComments: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      field: "counsellor_comments",
+    },
+    // ✅ FROM OLD
+    odAvailed: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0,
+      field: "od_availed",
+    },
     facultyId: {
-          type: DataTypes.INTEGER,
-          allowNull: true,
-          references: {
-            model: Faculty,
-            key: "f_id",
-          },
-          field: "Faculty id",
-        },
-        studentName: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: Faculty,
+        key: "f_id",
+      },
+      field: "Faculty id",
+    },
+    studentName: {
       type: DataTypes.STRING(100),
       allowNull: true,
       field: "Student name",
@@ -40,7 +52,6 @@ const DayscholarOD = sequelize.define(
       allowNull: true,
       field: "Register number",
     },
-    
     purpose: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -85,8 +96,6 @@ const DayscholarOD = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-
- 
     hstatus: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -98,10 +107,8 @@ const DayscholarOD = sequelize.define(
   }
 );
 
-// Associations
 Student.hasMany(DayscholarOD, { foreignKey: "student_id" });
 DayscholarOD.belongsTo(Student, { foreignKey: "student_id" });
-
 Faculty.hasMany(DayscholarOD, { foreignKey: "facultyId" });
 DayscholarOD.belongsTo(Faculty, { foreignKey: "facultyId" });
 
