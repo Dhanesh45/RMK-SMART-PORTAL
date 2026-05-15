@@ -11,8 +11,6 @@ const {
 getODForHOD,
 updateHstatusOD,
 getODOutpassForHOD,          // ✅ (optional but useful)
-  updateYstatusOD
-  forwardODToYearCoordinator,
   updateYstatusOD,
   getFullODDetails,
 } = require("../controller/odController");
@@ -29,8 +27,6 @@ router.get("/outpass/counsellor/:facultyId", getODoutpassforCounsellor);
 // ✅ Counsellor approve/reject OD
 router.put("/approve/od/:od_id", updateCstatushosod);
 
-// ✅ Forward to Year Coordinator
-router.put("/forward/:od_id", forwardODToYearCoordinator);
 
 // ✅ Year Coordinator fetch OD
 router.get("/year-coordinator/:facultyId", getODForYearCoordinator);

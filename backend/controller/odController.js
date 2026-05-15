@@ -384,11 +384,6 @@ const updateHstatusOD = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-module.exports = { createODWithOutpass, 
-  getHostellerODForCounsellor, 
-  getODoutpassforCounsellor, 
-  updateCstatushosod,
-
 // ✅ FROM OLD — Get full OD details (used by ONDUTY + OUTPASS popup)
 const getFullODDetails = async (req, res) => {
   try {
@@ -503,11 +498,9 @@ module.exports = {
   updateCstatushosod,
   getODForYearCoordinator,
   getODOutpassForYearCoordinator,
-getODForHOD,
-getODOutpassForHOD,
-updateHstatusOD,  
-  updateYstatusOD,
-  forwardODToYearCoordinator,
+  getODForHOD,
+  getODOutpassForHOD,
+  updateHstatusOD,  
   updateYstatusOD,
   getFullODDetails,
 };
