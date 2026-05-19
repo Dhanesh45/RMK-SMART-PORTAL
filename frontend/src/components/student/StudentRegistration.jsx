@@ -97,9 +97,9 @@ const StudentRegistration = () => {
         * { box-sizing: border-box; }
 
         .rmk-reg-card {
-          width: min(1200px, 96vw);
-          height: 88vh;
-          max-height: 860px;
+          width: 85vw;
+          min-height: 600px;
+          height: 85vh;
           display: flex;
           border-radius: 20px;
           overflow: hidden;
@@ -109,7 +109,7 @@ const StudentRegistration = () => {
 
         /* ── LEFT PANEL ── */
         .rmk-reg-left {
-          width: 48%;
+          width: 52%;
           position: relative;
           display: flex;
           flex-direction: column;
@@ -128,7 +128,7 @@ const StudentRegistration = () => {
           background-image: url('/college.jpg');
           background-size: cover;
           background-position: center top;
-          filter: brightness(0.55);
+          filter: brightness(1);
           border-radius: 18px;
         }
 
@@ -137,9 +137,9 @@ const StudentRegistration = () => {
           inset: 0;
           background: linear-gradient(
             to bottom,
-            rgba(20,40,55,0.15) 0%,
-            rgba(20,40,55,0.60) 55%,
-            rgba(20,40,55,0.88) 100%
+            rgba(20, 40, 55, 0.15) 0%,
+            rgba(20, 40, 55, 0.6) 55%,
+            rgba(20, 40, 55, 0.88) 100%
           );
           border-radius: 18px;
         }
@@ -167,7 +167,7 @@ const StudentRegistration = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 18px;
+          font-size: 22px;
           font-weight: 900;
           color: #1a2e3a;
           letter-spacing: -1px;
@@ -179,7 +179,7 @@ const StudentRegistration = () => {
         }
 
         .rmk-reg-welcome {
-          font-size: 13px;
+          font-size: 15px;
           font-weight: 700;
           color: #7be0cb;
           letter-spacing: 0.05em;
@@ -188,7 +188,7 @@ const StudentRegistration = () => {
         }
 
         .rmk-reg-portal-title {
-          font-size: 32px;
+          font-size: 38px;
           font-weight: 900;
           color: #ffffff;
           line-height: 1.05;
@@ -197,7 +197,7 @@ const StudentRegistration = () => {
         }
 
         .rmk-reg-tagline {
-          font-size: 13px;
+          font-size: 13.5px;
           color: rgba(255,255,255,0.75);
           line-height: 1.6;
           margin: 0 0 24px 0;
@@ -238,13 +238,14 @@ const StudentRegistration = () => {
 
         /* ── RIGHT PANEL ── */
         .rmk-reg-right {
-          width: 52%;
+          width: 48%;
           background: #f4f6f8;
           display: flex;
           flex-direction: column;
           padding: 36px 44px;
           position: relative;
           overflow-y: auto;
+          overflow-x: hidden;
         }
 
         /* Dot grid top-right */
@@ -562,7 +563,7 @@ const StudentRegistration = () => {
 
           <p className="rmk-reg-login-link">
             Already registered?{" "}
-            <span onClick={() => navigate("/")}>Login here</span>
+            <span onClick={() => navigate("/StudentLogin")}>Login here</span>
           </p>
 
         </div>
