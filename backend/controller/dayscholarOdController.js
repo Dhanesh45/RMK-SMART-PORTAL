@@ -235,11 +235,7 @@ const updateYstatusDayscholarOD = async (req, res) => {
 });
 
  if (!od) return res.status(404).json({ message: "OD not found" }); 
-    const result = await DayscholarOD.update(
-      { ystatus: status },
-      { where: { od_id } }
-    );
-
+ 
     // ✅ Update year coordinator status
     od.ystatus = action === "approve" ? 1 : -1;
 // 🔥 AUTO FORWARD TO HOD
@@ -261,7 +257,6 @@ const updateYstatusDayscholarOD = async (req, res) => {
       od,
     });
 
-    res.json({ message: `Dayscholar OD ${action}d`, result });
   } catch (err) {
     console.error("updateYstatusDayscholarOD error:", err);
     res.status(500).json({ message: "Server error" });
